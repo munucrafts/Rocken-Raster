@@ -1,0 +1,14 @@
+# Directories
+.vs/
+bin/
+bin-int/
+.vscode/
+
+# Files
+*.vcxproj
+*.vcxproj.user
+*.vcxproj.filters
+*.sln
+
+# Exclude
+!vendor/bin
