@@ -16,8 +16,10 @@ public:
 	virtual void OnUIRender() override
 	{
 		ImGui::Begin("Stats");
-		ImGui::TextColored(ImVec4(0, 1, 0, 1), "FPS: %.0f", FPS);
-		ImGui::TextColored(ImVec4(0, 1, 0, 1), "MS: %.2f", MS);
+
+		ImVec4 textCol = FPS < 20.0f ? ImVec4(1.0f, 0.0f, 0.0f, 1.0f) : FPS < 40.0f ? ImVec4(1.0f, 1.0f, 0.0f, 1.0f) : ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+		ImGui::TextColored(textCol, "FPS: %.0f", FPS);
+		ImGui::TextColored(textCol, "MS: %.2f", MS);
 		ImGui::End();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
