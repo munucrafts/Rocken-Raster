@@ -1,29 +1,42 @@
-#include "Walnut/Application.h"
-#include "Walnut/EntryPoint.h"
-//#include "Renderer.h"
+#include <Walnut/Application.h>
+#include <Walnut/EntryPoint.h>
 #include <Walnut/Timer.h>
+#include <Walnut/Image.h>
 
+#include "Renderer.h"
 
 class Rastero : public Walnut::Layer
 {
 private:
-
+	Renderer renderer;
+	float MS;
+	float FPS;
 
 public:
 	virtual void OnUIRender() override
 	{
+		ImGui::Begin("Stats");
+		ImGui::TextColored(ImVec4(0, 1, 0, 1), "FPS: %.0f", FPS);
+		ImGui::TextColored(ImVec4(0, 1, 0, 1), "MS: %.2f", MS);
+		ImGui::End();
+
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		ImGui::Begin("Viewport Window");
 
-		//width = ImGui::GetContentRegionAvail().x;
-		//height = ImGui::GetContentRegionAvail().y;
+		ImVec2 screenSize = ImGui::GetContentRegionAvail();
 
-		//std::shared_ptr<Walnut::Image> image = renderer.GetFinalImage();
+		Walnut::Timer timer;
+		renderer.Render(screenSize.x, screenSize.y, MS * 1000.0f);
+		MS = timer.ElapsedMillis();
+		FPS = 1000.0f / MS;
 
-		//if (image)
-		//	ImGui::Image(image->GetDescriptorSet(), 
-		//	{(float)image->GetWidth(), (float)image->GetHeight()}, 
-		//	ImVec2(0, 1), ImVec2(1, 0));
+		std::shared_ptr<Walnut::Image> image = renderer.GetImage();
+		if (image)
+		{
+			ImGui::Image(image->GetDescriptorSet(),
+				ImVec2((float)image->GetWidth(), (float)image->GetHeight()),
+				ImVec2(0, 1), ImVec2(1, 0));
+		}
 
 		ImGui::End();
 		ImGui::PopStyleVar();
