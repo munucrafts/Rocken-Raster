@@ -30,31 +30,35 @@ void Renderer::Render(float width, float height, float deltaSecs)
 	}
 
 	deltaTime = deltaSecs / 10000.0f;
-	ClearBackground(glm::vec4(0.25f));
+	ClearBackground(glm::vec4(0.2f));
 
 	if (scene.meshes.empty())
 		return;
 
+	// Note - Model = Object's Local Transform Transfomred to World Space Using Orthographic or Perspective Projection
+	// NDC = Normalized Device Coordinates = Model's World Transform Transformed to UV Space { (0, 0) to (1, 1) } and then to NDC Space { (-1, -1) to (1, 1) }
+	// Pixel = Basically Screen Space which is { (0, 0) to (screenResolution.x, screenResolution.y) }
+
+	glm::vec3 camDir = glm::vec3(0.0f, 0.0f, 1.0f);
+
 	for (Mesh& mesh : scene.meshes)
 	{
-		mesh.Rotate(glm::vec3(0.5f, 0.5f, 0.0f), deltaTime);
+		mesh.Rotate(glm::vec3(0.3f, 0.3f, 0.0f), deltaTime);
 
 		for (Triangle& tri : mesh.triangles)
 		{
-			glm::vec3 ab = tri.b - tri.a;
-			glm::vec3 ac = tri.c - tri.a;
-			glm::vec3 normal = glm::cross(ab, ac);
+			glm::mat4 model = ObjectToModel(mesh.transform);
 
-			if (glm::dot(normal, glm::vec3(0.0f, 0.0f, 1.0f)) > 0.0f)
+			if (BackfaceCulling(camDir, model, tri))
 				continue;
 
-			glm::vec2 a = WorldToUV(tri.a, mesh.transform);
-			glm::vec2 b = WorldToUV(tri.b, mesh.transform);
-			glm::vec2 c = WorldToUV(tri.c, mesh.transform);
+			glm::vec2 a = ModelToNDC(tri.a, model);
+			glm::vec2 b = ModelToNDC(tri.b, model);
+			glm::vec2 c = ModelToNDC(tri.c, model);
 
-			UVToPixel(a); 
-			UVToPixel(b); 
-			UVToPixel(c); 
+			NDCToPixel(a); 
+			NDCToPixel(b); 
+			NDCToPixel(c); 
 
 			BoundingBox box = GetTriangleBoundingBox(a, b, c);
 
@@ -63,9 +67,9 @@ void Renderer::Render(float width, float height, float deltaSecs)
 			int minPixelY = (int)box.minMaxY.x;
 			int maxPixelY = (int)box.minMaxY.y;
 
-			for (int y = minPixelY; y < maxPixelY; y++)
+			for (int y = minPixelY; y <= maxPixelY; y++)
 			{
-				for (int x = minPixelX; x < maxPixelX; x++)
+				for (int x = minPixelX; x <= maxPixelX; x++)
 				{
 					if (InsideTriangle(a, b, c, glm::vec2(x, y)))
 						DrawPixel(glm::vec2(x, y), tri.color);
@@ -101,30 +105,25 @@ bool Renderer::InsideTriangle(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 p
 	bool sideAB = OnRightSideOfLine(a, b, p);
 	bool sideBC = OnRightSideOfLine(b, c, p);
 	bool sideCA = OnRightSideOfLine(c, a, p);
-	return sideAB == sideBC && sideBC == sideCA;
+	return sideAB && sideBC && sideCA;
 }
 
-void Renderer::UVToPixel(glm::vec2& q)
+void Renderer::NDCToPixel(glm::vec2& q)
 {
 	q = q * 0.5f + 0.5f;
 	q = q * screenResolution;
 	q = glm::round(q);
 }
 
-void Renderer::PixelToUV(glm::vec2& q)
+void Renderer::PixelToNDC(glm::vec2& q)
 {
 	q = q / screenResolution;
 	q = q * 2.0f - 1.0f;
 }
 
-glm::vec2 Renderer::WorldToUV(glm::vec3& point, Transform& objectTransform)
+glm::vec2 Renderer::ModelToNDC(glm::vec3& point, glm::mat4& model)
 {
 	float aspectRatio = screenResolution.x / screenResolution.y;
-
-	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::translate(model, objectTransform.location);
-	model = glm::rotate(model, glm::radians(objectTransform.rotation.y), glm::vec3(1, 1, 1));
-	model = glm::scale(model, objectTransform.scale);
 
 	switch (projection)
 	{
@@ -140,7 +139,18 @@ glm::vec2 Renderer::WorldToUV(glm::vec3& point, Transform& objectTransform)
 	}
 }
 
+glm::mat4 Renderer::ObjectToModel(Transform& objectTransform)
+{
+	glm::mat4 model = glm::mat4(1.0f);
 
+	model = glm::translate(model, objectTransform.location);
+	model = glm::rotate(model, glm::radians(objectTransform.rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+	model = glm::rotate(model, glm::radians(objectTransform.rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::rotate(model, glm::radians(objectTransform.rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+	model = glm::scale(model, objectTransform.scale);
+
+	return model;
+}
 
 void Renderer::ClearBackground(glm::vec4 bgColor)
 {
@@ -151,6 +161,16 @@ void Renderer::DrawPixel(glm::vec2 pixelLoc, glm::vec4 pixelColor)
 {
 	if (pixelLoc.x >= 0 && pixelLoc.x <= screenResolution.x && pixelLoc.y >= 0 && pixelLoc.y <= screenResolution.y)
 		imageData[pixelLoc.x + pixelLoc.y * image->GetWidth()] = ColorToRGBA(pixelColor);
+}
+
+bool Renderer::BackfaceCulling(glm::vec3& cameraDirection, glm::mat4& model, Triangle& tri)
+{
+	glm::vec3 worldA = glm::vec3(model * glm::vec4(tri.a, 1.0));
+	glm::vec3 worldB = glm::vec3(model * glm::vec4(tri.b, 1.0));
+	glm::vec3 worldC = glm::vec3(model * glm::vec4(tri.c, 1.0));
+	glm::vec3 normal = glm::normalize(glm::cross(worldB - worldA, worldC - worldA));
+
+	return (glm::dot(normal, cameraDirection) >= 0.0f);
 }
 
 BoundingBox Renderer::GetTriangleBoundingBox(glm::vec2 a, glm::vec2 b, glm::vec2 c)
