@@ -39,22 +39,33 @@ struct Transform
 	glm::vec3 scale = glm::vec3(1.0f);
 };
 
+struct Camera
+{
+	Transform transform;
+
+	glm::vec3 forward = glm::vec3(0.0f, 0.0f, 1.0f);
+	glm::vec3 right = glm::vec3(1.0f, 0.0f, 0.0f);
+	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	float fov = glm::radians(45.0f);
+};
+
 struct Mesh
 {
 	std::vector<Triangle> triangles;
 	Transform transform;
 
-	void Rotate(glm::vec3 speed, float deltaTime)
+	void AddRotation(glm::vec3 speed, float deltaTime)
 	{
 		transform.rotation += speed * deltaTime;
 	};
 
-	void Move(glm::vec3 speed, float deltaTime)
+	void AddLocation(glm::vec3 speed, float deltaTime)
 	{
 		transform.location += speed * deltaTime;
 	};
 
-	void Scale(glm::vec3 speed, float deltaTime)
+	void AddScale(glm::vec3 speed, float deltaTime)
 	{
 		transform.scale += speed * deltaTime;
 	};

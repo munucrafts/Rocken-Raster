@@ -4,14 +4,14 @@ Renderer::Renderer()
 {
 	deltaTime = 0.0f;
 	screenResolution = glm::vec2(0.0f);
-	projection = ORTHOGRAPHIC;
+	projection = PERSPECTIVE;
 
 	Mesh testMesh;
 	testMesh.LoadObjectFile("../Assets/Cube.obj");
 	scene.meshes.push_back(testMesh);
 }
 
-void Renderer::Render(float width, float height, float deltaSecs)
+void Renderer::Render(float width, float height, float delta)
 {
 	if (image)
 	{
@@ -19,6 +19,7 @@ void Renderer::Render(float width, float height, float deltaSecs)
 		{
 			image->Resize(width, height);
 			imageData.resize(width * height);
+			depthBuffer.resize(width * height);
 			screenResolution = glm::vec2(width, height);
 		}
 	}
@@ -26,10 +27,11 @@ void Renderer::Render(float width, float height, float deltaSecs)
 	{
 		image = std::make_shared<Walnut::Image>(width, height, Walnut::ImageFormat::RGBA);
 		imageData.resize(width * height);
+		depthBuffer.resize(width * height);
 		screenResolution = glm::vec2(width, height);
 	}
 
-	deltaTime = deltaSecs / 10000.0f;
+	deltaTime = delta / 10.0f;
 	ClearBackground(glm::vec4(0.2f));
 
 	if (scene.meshes.empty())
@@ -39,22 +41,29 @@ void Renderer::Render(float width, float height, float deltaSecs)
 	// NDC = Normalized Device Coordinates = Model's World Transform Transformed to UV Space { (0, 0) to (1, 1) } and then to NDC Space { (-1, -1) to (1, 1) }
 	// Pixel = Basically Screen Space which is { (0, 0) to (screenResolution.x, screenResolution.y) }
 
-	glm::vec3 camDir = glm::vec3(0.0f, 0.0f, 1.0f);
+	Camera cam;
+	cam.transform.location = glm::vec3(0.0f, 0.0f, -5.0f);   
+	cam.forward = glm::vec3(0.0f, 0.0f, 1.0f);             
+	cam.up = glm::vec3(0.0f, 1.0f, 0.0f);
+	cam.right = glm::vec3(1.0f, 0.0f, 0.0f);
+	cam.fov = glm::radians(45.0f);
 
 	for (Mesh& mesh : scene.meshes)
 	{
-		mesh.Rotate(glm::vec3(0.3f, 0.3f, 0.0f), deltaTime);
+		mesh.transform.scale = glm::vec3(1.0f);
+		mesh.transform.location = glm::vec3(0.0f, 0.0f, 4.0f);
+		mesh.AddRotation(glm::vec3(0.2f, 0.3f, 0.1f), deltaTime);
 
 		for (Triangle& tri : mesh.triangles)
 		{
 			glm::mat4 model = ObjectToModel(mesh.transform);
 
-			if (BackfaceCulling(camDir, model, tri))
+			if (IsBackface(cam.forward, model, tri))
 				continue;
 
-			glm::vec2 a = ModelToNDC(tri.a, model);
-			glm::vec2 b = ModelToNDC(tri.b, model);
-			glm::vec2 c = ModelToNDC(tri.c, model);
+			glm::vec3 a = ModelToNDC(tri.a, model, cam);
+			glm::vec3 b = ModelToNDC(tri.b, model, cam);
+			glm::vec3 c = ModelToNDC(tri.c, model, cam);
 
 			NDCToPixel(a); 
 			NDCToPixel(b); 
@@ -72,7 +81,15 @@ void Renderer::Render(float width, float height, float deltaSecs)
 				for (int x = minPixelX; x <= maxPixelX; x++)
 				{
 					if (InsideTriangle(a, b, c, glm::vec2(x, y)))
-						DrawPixel(glm::vec2(x, y), tri.color);
+					{
+						//float currentDepth = GetPixelDepth();
+
+						if (1)//depthBuffer[x + y * width] > currentDepth)
+						{
+							DrawPixel(glm::vec2(x, y), tri.color);
+							//depthBuffer[x + y * width] = currentDepth;
+						}
+					}
 				}
 			}
 		}
@@ -108,10 +125,10 @@ bool Renderer::InsideTriangle(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 p
 	return sideAB && sideBC && sideCA;
 }
 
-void Renderer::NDCToPixel(glm::vec2& q)
+void Renderer::NDCToPixel(glm::vec3& q)
 {
 	q = q * 0.5f + 0.5f;
-	q = q * screenResolution;
+	q = q * glm::vec3(screenResolution, 1.0f);;
 	q = glm::round(q);
 }
 
@@ -121,21 +138,27 @@ void Renderer::PixelToNDC(glm::vec2& q)
 	q = q * 2.0f - 1.0f;
 }
 
-glm::vec2 Renderer::ModelToNDC(glm::vec3& point, glm::mat4& model)
+glm::vec3 Renderer::ModelToNDC(glm::vec3& point, glm::mat4& model, Camera& cam)
 {
-	float aspectRatio = screenResolution.x / screenResolution.y;
+	float aspectRatio = (float)screenResolution.x / screenResolution.y;
 
 	switch (projection)
 	{
-	case ORTHOGRAPHIC:
-	{
-		glm::mat4 orthoMat = glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f);
-		glm::mat4 transform = orthoMat * model;
-		glm::vec4 transformed = transform * glm::vec4(point, 1.0f);
-		return glm::vec2(transformed.x, transformed.y);
-	}
-	case PERSPECTIVE:
-		return glm::vec2(0.0f);
+		case ORTHOGRAPHIC:
+		{
+			glm::mat4 orthoMat = glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f, -10.0f, 10.0f);
+			glm::mat4 transform = orthoMat * model;
+			glm::vec4 transformed = transform * glm::vec4(point, 1.0f);
+			return glm::vec3(transformed);
+		}
+		case PERSPECTIVE:
+		{
+			glm::mat4 persMat = glm::perspective(cam.fov, aspectRatio, 0.1f, 100.0f);
+			glm::mat4 transform = persMat * model;
+			glm::vec4 transformed = transform * glm::vec4(point, 1.0f);
+			transformed /= transformed.w;
+			return glm::vec3(transformed);
+		}
 	}
 }
 
@@ -143,11 +166,11 @@ glm::mat4 Renderer::ObjectToModel(Transform& objectTransform)
 {
 	glm::mat4 model = glm::mat4(1.0f);
 
-	model = glm::translate(model, objectTransform.location);
+	model = glm::scale(model, objectTransform.scale);
 	model = glm::rotate(model, glm::radians(objectTransform.rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
 	model = glm::rotate(model, glm::radians(objectTransform.rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
 	model = glm::rotate(model, glm::radians(objectTransform.rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-	model = glm::scale(model, objectTransform.scale);
+	model = glm::translate(glm::mat4(1.0f), objectTransform.location) * model;
 
 	return model;
 }
@@ -159,11 +182,14 @@ void Renderer::ClearBackground(glm::vec4 bgColor)
 
 void Renderer::DrawPixel(glm::vec2 pixelLoc, glm::vec4 pixelColor)
 {
-	if (pixelLoc.x >= 0 && pixelLoc.x <= screenResolution.x && pixelLoc.y >= 0 && pixelLoc.y <= screenResolution.y)
-		imageData[pixelLoc.x + pixelLoc.y * image->GetWidth()] = ColorToRGBA(pixelColor);
+	int x = (int)pixelLoc.x;
+	int y = (int)pixelLoc.y;
+
+	if (x >= 0 && x < (int)screenResolution.x && y >= 0 && y < (int)screenResolution.y)
+		imageData[x + y * (int)screenResolution.x] = ColorToRGBA(pixelColor);
 }
 
-bool Renderer::BackfaceCulling(glm::vec3& cameraDirection, glm::mat4& model, Triangle& tri)
+bool Renderer::IsBackface(glm::vec3& cameraDirection, glm::mat4& model, Triangle& tri)
 {
 	glm::vec3 worldA = glm::vec3(model * glm::vec4(tri.a, 1.0));
 	glm::vec3 worldB = glm::vec3(model * glm::vec4(tri.b, 1.0));

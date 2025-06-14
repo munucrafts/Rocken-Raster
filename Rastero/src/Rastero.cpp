@@ -28,7 +28,7 @@ public:
 		ImVec2 screenSize = ImGui::GetContentRegionAvail();
 
 		Walnut::Timer timer;
-		renderer.Render(screenSize.x, screenSize.y, MS * 1000.0f);
+		renderer.Render(screenSize.x, screenSize.y, MS);
 		MS = timer.ElapsedMillis();
 		FPS = 1000.0f / MS;
 
