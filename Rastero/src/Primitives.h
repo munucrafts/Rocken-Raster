@@ -30,6 +30,7 @@ struct BoundingBox
 {
 	glm::vec2 minMaxX;
 	glm::vec2 minMaxY;
+	glm::vec2 minMaxZ;
 };
 
 struct Transform

@@ -14,17 +14,17 @@ public:
 	std::shared_ptr<Walnut::Image>& GetImage();
 
 private:
-	uint32_t ColorToRGBA(glm::vec4 color);
-	bool OnRightSideOfLine(glm::vec2 a, glm::vec2 b, glm::vec2 p);
-	bool InsideTriangle(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 p);
+	uint32_t ColorToRGBA(glm::vec4& color);
+	float GetSignedTriangleArea(glm::vec2& a, glm::vec2& b, glm::vec2& p);
+	bool InsideTriangle(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 p, glm::vec3& weights);
 	void NDCToPixel(glm::vec3& q);
 	void PixelToNDC(glm::vec2& q);
 	glm::vec3 ModelToNDC(glm::vec3& point, glm::mat4& model, Camera& cam);
 	glm::mat4 ObjectToModel(Transform& objectTransform);
-	void ClearBackground(glm::vec4 bgColor);
-	BoundingBox GetTriangleBoundingBox(glm::vec2 a, glm::vec2 b, glm::vec2 c);
+	void ClearBackground(glm::vec4& bgColor);
+	BoundingBox GetTriangleBoundingBox(glm::vec3& a, glm::vec3& b, glm::vec3& c);
 	void DrawPixel(glm::vec2 pixelLoc, glm::vec4 pixelColor);
-	bool IsBackface(glm::vec3& cameraDirection, glm::mat4& model, Triangle& tri);
+	void ResetDepthBuffer();
 
 private:
 	std::vector<uint32_t> imageData;

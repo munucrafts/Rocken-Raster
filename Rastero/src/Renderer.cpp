@@ -1,4 +1,5 @@
 ﻿#include "Renderer.h"
+#include <iostream>
 
 Renderer::Renderer()
 {
@@ -33,6 +34,7 @@ void Renderer::Render(float width, float height, float delta)
 
 	deltaTime = delta / 10.0f;
 	ClearBackground(glm::vec4(0.2f));
+	ResetDepthBuffer();
 
 	if (scene.meshes.empty())
 		return;
@@ -61,31 +63,38 @@ void Renderer::Render(float width, float height, float delta)
 		{
 			glm::mat4 model = ObjectToModel(mesh.transform);
 
-			if (IsBackface(cam.forward, model, tri))
-				continue;
-
 			glm::vec3 a = ModelToNDC(tri.a, model, cam);
 			glm::vec3 b = ModelToNDC(tri.b, model, cam);
 			glm::vec3 c = ModelToNDC(tri.c, model, cam);
-
+			
 			NDCToPixel(a); 
 			NDCToPixel(b); 
 			NDCToPixel(c); 
-
+			
 			BoundingBox box = GetTriangleBoundingBox(a, b, c);
 
 			int minPixelX = (int)box.minMaxX.x;
 			int maxPixelX = (int)box.minMaxX.y;
 			int minPixelY = (int)box.minMaxY.x;
 			int maxPixelY = (int)box.minMaxY.y;
-
+			
 			for (int y = minPixelY; y <= maxPixelY; y++)
 			{
 				for (int x = minPixelX; x <= maxPixelX; x++)
 				{
-					if (InsideTriangle(a, b, c, glm::vec2(x, y)))
+					glm::vec3 weights;
+
+					if (InsideTriangle(a, b, c, glm::vec2(x, y), weights))
 					{
-						DrawPixel(glm::vec2(x, y), tri.color);
+						glm::vec3 abcDepths = glm::vec3(a.z, b.z, c.z);
+						float pixelDepth = glm::dot(abcDepths, weights);
+						int pixelIndex = x + y * screenResolution.x;
+
+						if (pixelDepth >= depthBuffer[pixelIndex]) 
+						{
+							depthBuffer[pixelIndex] = pixelDepth;
+							DrawPixel(glm::vec2(x, y), tri.color);
+						}
 					}
 				}
 			}
@@ -95,7 +104,7 @@ void Renderer::Render(float width, float height, float delta)
 	image->SetData(imageData.data());
 }
 
-uint32_t Renderer::ColorToRGBA(glm::vec4 color)
+uint32_t Renderer::ColorToRGBA(glm::vec4& color)
 {
 	glm::vec4 clampedColor = 255.0f * glm::clamp(color, glm::vec4(0.0f), glm::vec4(1.0f));
 	uint8_t r = (uint8_t)clampedColor.x;
@@ -106,27 +115,35 @@ uint32_t Renderer::ColorToRGBA(glm::vec4 color)
 	return result;
 }
 
-bool Renderer::OnRightSideOfLine(glm::vec2 a, glm::vec2 b, glm::vec2 p)
+float Renderer::GetSignedTriangleArea(glm::vec2& a, glm::vec2& b, glm::vec2& p)
 {
 	glm::vec2 ap = p - a;
 	glm::vec2 ab = b - a;
 	glm::vec2 abPerp = glm::vec2(ab.y, -ab.x);
-	return glm::dot(abPerp, ap) >= 0;
+	return glm::dot(ap, abPerp) / 2.0f;
 }
 
-bool Renderer::InsideTriangle(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 p)
+bool Renderer::InsideTriangle(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 p, glm::vec3& weights)
 {
-	bool sideAB = OnRightSideOfLine(a, b, p);
-	bool sideBC = OnRightSideOfLine(b, c, p);
-	bool sideCA = OnRightSideOfLine(c, a, p);
-	return sideAB && sideBC && sideCA;
+	float areaABP = GetSignedTriangleArea(a, b, p);
+	float areaBCP = GetSignedTriangleArea(b, c, p);
+	float areaCAP = GetSignedTriangleArea(c, a, p);
+
+	float sumArea = areaABP + areaBCP + areaCAP;
+
+	float weightA = areaBCP / sumArea;
+	float weightB = areaCAP / sumArea;
+	float weightC = areaABP / sumArea;
+
+	weights = glm::vec3(weightA, weightB, weightC);
+
+	return areaABP >= 0.0f && areaBCP >= 0.0f && areaCAP >= 0.0f && sumArea > 0.0f;
 }
 
 void Renderer::NDCToPixel(glm::vec3& q)
 {
 	q = q * 0.5f + 0.5f;
-	q = q * glm::vec3(screenResolution, 1.0f);;
-	q = glm::round(q);
+	q = q * glm::vec3(screenResolution, 1.0f);
 }
 
 void Renderer::PixelToNDC(glm::vec2& q)
@@ -172,7 +189,7 @@ glm::mat4 Renderer::ObjectToModel(Transform& objectTransform)
 	return model;
 }
 
-void Renderer::ClearBackground(glm::vec4 bgColor)
+void Renderer::ClearBackground(glm::vec4& bgColor)
 {
 	std::fill(imageData.begin(), imageData.end(), ColorToRGBA(bgColor));
 }
@@ -186,17 +203,12 @@ void Renderer::DrawPixel(glm::vec2 pixelLoc, glm::vec4 pixelColor)
 		imageData[x + y * (int)screenResolution.x] = ColorToRGBA(pixelColor);
 }
 
-bool Renderer::IsBackface(glm::vec3& cameraDirection, glm::mat4& model, Triangle& tri)
+void Renderer::ResetDepthBuffer()
 {
-	glm::vec3 worldA = glm::vec3(model * glm::vec4(tri.a, 1.0));
-	glm::vec3 worldB = glm::vec3(model * glm::vec4(tri.b, 1.0));
-	glm::vec3 worldC = glm::vec3(model * glm::vec4(tri.c, 1.0));
-	glm::vec3 normal = glm::normalize(glm::cross(worldB - worldA, worldC - worldA));
-
-	return (glm::dot(normal, cameraDirection) <= 0.0f);
+	std::fill(depthBuffer.begin(), depthBuffer.end(), -FLT_MAX);
 }
 
-BoundingBox Renderer::GetTriangleBoundingBox(glm::vec2 a, glm::vec2 b, glm::vec2 c)
+BoundingBox Renderer::GetTriangleBoundingBox(glm::vec3& a, glm::vec3& b, glm::vec3& c)
 {
 	int minX = std::max(0, (int)std::floor(std::min({ a.x, b.x, c.x })));
 	int maxX = std::min((int)screenResolution.x, (int)std::ceil(std::max({ a.x, b.x, c.x })));
@@ -204,7 +216,10 @@ BoundingBox Renderer::GetTriangleBoundingBox(glm::vec2 a, glm::vec2 b, glm::vec2
 	int minY = std::max(0, (int)std::floor(std::min({ a.y, b.y, c.y })));
 	int maxY = std::min((int)screenResolution.y, (int)std::ceil(std::max({ a.y, b.y, c.y })));
 
-	return { glm::vec2(minX, maxX), glm::vec2(minY, maxY) };
+	int minZ = (int)std::floor(std::min({ a.z, b.z, c.z }));
+	int maxZ = (int)std::ceil(std::max({ a.z, b.z, c.z }));
+
+	return { glm::vec2(minX, maxX), glm::vec2(minY, maxY), glm::vec2(minZ, maxZ)};
 }
 
 std::shared_ptr<Walnut::Image>& Renderer::GetImage()
