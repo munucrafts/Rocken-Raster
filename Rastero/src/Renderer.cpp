@@ -7,7 +7,7 @@ Renderer::Renderer()
 	projection = PERSPECTIVE;
 
 	Mesh testMesh;
-	testMesh.LoadObjectFile("../Assets/Cube.obj");
+	testMesh.LoadObjectFile("../Assets/Monkey.obj");
 	scene.meshes.push_back(testMesh);
 }
 
@@ -37,13 +37,16 @@ void Renderer::Render(float width, float height, float delta)
 	if (scene.meshes.empty())
 		return;
 
+	// Coordinate Convention = GLM / OpenGL Convention (Right Handed Convention)
+	// Left -> Right = X, Bottom -> Top = Y, Camera -> Screen = -Z
+	// Triangle Winding Convention = counter-clockwise (CCW)
 	// Note - Model = Object's Local Transform Transfomred to World Space Using Orthographic or Perspective Projection
 	// NDC = Normalized Device Coordinates = Model's World Transform Transformed to UV Space { (0, 0) to (1, 1) } and then to NDC Space { (-1, -1) to (1, 1) }
 	// Pixel = Basically Screen Space which is { (0, 0) to (screenResolution.x, screenResolution.y) }
 
 	Camera cam;
-	cam.transform.location = glm::vec3(0.0f, 0.0f, -5.0f);   
-	cam.forward = glm::vec3(0.0f, 0.0f, 1.0f);             
+	cam.transform.location = glm::vec3(0.0f, 0.0f, 10.0f);   
+	cam.forward = glm::vec3(0.0f, 0.0f, -1.0f);             
 	cam.up = glm::vec3(0.0f, 1.0f, 0.0f);
 	cam.right = glm::vec3(1.0f, 0.0f, 0.0f);
 	cam.fov = glm::radians(45.0f);
@@ -51,8 +54,8 @@ void Renderer::Render(float width, float height, float delta)
 	for (Mesh& mesh : scene.meshes)
 	{
 		mesh.transform.scale = glm::vec3(1.0f);
-		mesh.transform.location = glm::vec3(0.0f, 0.0f, 4.0f);
-		mesh.AddRotation(glm::vec3(0.2f, 0.3f, 0.1f), deltaTime);
+		mesh.transform.location = glm::vec3(0.0f, 0.0f, -7.0f);
+		mesh.AddRotation(glm::vec3(0.0f, 0.3f, 0.0f), deltaTime);
 
 		for (Triangle& tri : mesh.triangles)
 		{
@@ -82,13 +85,7 @@ void Renderer::Render(float width, float height, float delta)
 				{
 					if (InsideTriangle(a, b, c, glm::vec2(x, y)))
 					{
-						//float currentDepth = GetPixelDepth();
-
-						if (1)//depthBuffer[x + y * width] > currentDepth)
-						{
-							DrawPixel(glm::vec2(x, y), tri.color);
-							//depthBuffer[x + y * width] = currentDepth;
-						}
+						DrawPixel(glm::vec2(x, y), tri.color);
 					}
 				}
 			}
@@ -196,7 +193,7 @@ bool Renderer::IsBackface(glm::vec3& cameraDirection, glm::mat4& model, Triangle
 	glm::vec3 worldC = glm::vec3(model * glm::vec4(tri.c, 1.0));
 	glm::vec3 normal = glm::normalize(glm::cross(worldB - worldA, worldC - worldA));
 
-	return (glm::dot(normal, cameraDirection) >= 0.0f);
+	return (glm::dot(normal, cameraDirection) <= 0.0f);
 }
 
 BoundingBox Renderer::GetTriangleBoundingBox(glm::vec2 a, glm::vec2 b, glm::vec2 c)
