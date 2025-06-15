@@ -41,10 +41,11 @@ void Renderer::Render(float width, float height, float delta)
 
 	// Coordinate Convention = GLM / OpenGL Convention (Right Handed Convention)
 	// Left -> Right = X, Bottom -> Top = Y, Camera -> Screen = -Z
-	// Triangle Winding Convention = counter-clockwise (CCW)
-	// Note - Model = Object's Local Transform Transfomred to World Space Using Orthographic or Perspective Projection
-	// NDC = Normalized Device Coordinates = Model's World Transform Transformed to UV Space { (0, 0) to (1, 1) } and then to NDC Space { (-1, -1) to (1, 1) }
-	// Pixel = Basically Screen Space which is { (0, 0) to (screenResolution.x, screenResolution.y) }
+	// Triangle Winding Convention = Counter Clockwise (CCW)
+	// Note - Model = Object's Local Transform 
+	// World = Model Transfomred to World Space Using Orthographic or Perspective Projection Using "Model Matrix"
+	// NDC = Normalized Device Coordinates = World -> View -> Clip -> UV Space { (0, 0) to (1, 1) } -> NDC Space { (-1, -1) to (1, 1) }
+	// Pixel / Screen = Basically Screen Space which is { (0, 0) to (screenResolution.x, screenResolution.y) }
 
 	Camera cam;
 	cam.transform.location = glm::vec3(0.0f, 0.0f, 10.0f);   
@@ -55,17 +56,24 @@ void Renderer::Render(float width, float height, float delta)
 
 	for (Mesh& mesh : scene.meshes)
 	{
-		mesh.transform.scale = glm::vec3(1.0f);
-		mesh.transform.location = glm::vec3(0.0f, 0.0f, -7.0f);
-		mesh.AddRotation(glm::vec3(0.0f, 0.3f, 0.0f), deltaTime);
+		mesh.transform.scale = glm::vec3(1.5f);
+		mesh.transform.location = glm::vec3(0.0f, 0.0f, -8.0f);
+		mesh.AddRotation(glm::vec3(0.0f, 0.2f, 0.0f), deltaTime);
 
 		for (Triangle& tri : mesh.triangles)
 		{
-			glm::mat4 model = ObjectToModel(mesh.transform);
+			glm::mat4 model = ModelToWorld(mesh.transform);
 
-			glm::vec3 a = ModelToNDC(tri.a, model, cam);
-			glm::vec3 b = ModelToNDC(tri.b, model, cam);
-			glm::vec3 c = ModelToNDC(tri.c, model, cam);
+			glm::vec4 ndcA = WorldToNDC(tri.a, model, cam);
+			glm::vec4 ndcB = WorldToNDC(tri.b, model, cam);
+			glm::vec4 ndcC = WorldToNDC(tri.c, model, cam);
+
+			if (ndcA.w == 1.0f || ndcB.w == 1.0f || ndcC.w == 1.0f)
+				continue;
+
+			glm::vec3 a = ndcA;
+			glm::vec3 b	= ndcB;
+			glm::vec3 c	= ndcC;
 			
 			NDCToPixel(a); 
 			NDCToPixel(b); 
@@ -87,10 +95,13 @@ void Renderer::Render(float width, float height, float delta)
 					if (InsideTriangle(a, b, c, glm::vec2(x, y), weights))
 					{
 						glm::vec3 abcDepths = glm::vec3(a.z, b.z, c.z);
-						float pixelDepth = glm::dot(abcDepths, weights);
+						float pixelDepth = 1.0f / (glm::dot(1.0f / abcDepths, weights));
 						int pixelIndex = x + y * screenResolution.x;
-
-						if (pixelDepth >= depthBuffer[pixelIndex]) 
+						
+						if (pixelIndex < 0 || pixelIndex >= (int)depthBuffer.size()) 
+							continue;
+							
+						if (pixelDepth <= depthBuffer[pixelIndex]) 
 						{
 							depthBuffer[pixelIndex] = pixelDepth;
 							DrawPixel(glm::vec2(x, y), tri.color);
@@ -117,9 +128,9 @@ uint32_t Renderer::ColorToRGBA(glm::vec4& color)
 
 float Renderer::GetSignedTriangleArea(glm::vec2& a, glm::vec2& b, glm::vec2& p)
 {
-	glm::vec2 ap = p - a;
 	glm::vec2 ab = b - a;
-	glm::vec2 abPerp = glm::vec2(ab.y, -ab.x);
+	glm::vec2 ap = p - a;
+	glm::vec2 abPerp = glm::vec2(-ab.y, ab.x);
 	return glm::dot(ap, abPerp) / 2.0f;
 }
 
@@ -152,31 +163,41 @@ void Renderer::PixelToNDC(glm::vec2& q)
 	q = q * 2.0f - 1.0f;
 }
 
-glm::vec3 Renderer::ModelToNDC(glm::vec3& point, glm::mat4& model, Camera& cam)
+glm::vec4 Renderer::WorldToNDC(glm::vec3& point, glm::mat4& model, Camera& cam)
 {
 	float aspectRatio = (float)screenResolution.x / screenResolution.y;
-
+	glm::mat4 transform;
+	
 	switch (projection)
 	{
 		case ORTHOGRAPHIC:
 		{
 			glm::mat4 orthoMat = glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f, -10.0f, 10.0f);
-			glm::mat4 transform = orthoMat * model;
-			glm::vec4 transformed = transform * glm::vec4(point, 1.0f);
-			return glm::vec3(transformed);
+			transform = orthoMat * model;
+			break;
 		}
 		case PERSPECTIVE:
 		{
 			glm::mat4 persMat = glm::perspective(cam.fov, aspectRatio, 0.1f, 100.0f);
-			glm::mat4 transform = persMat * model;
-			glm::vec4 transformed = transform * glm::vec4(point, 1.0f);
-			transformed /= transformed.w;
-			return glm::vec3(transformed);
+			transform = persMat * model;
+			break;
 		}
 	}
+
+	glm::vec4 clipSpacePos = transform * glm::vec4(point, 1.0f);
+
+	if (clipSpacePos.x < -clipSpacePos.w || clipSpacePos.x > clipSpacePos.w ||
+		clipSpacePos.y < -clipSpacePos.w || clipSpacePos.y > clipSpacePos.w ||
+		clipSpacePos.z < -clipSpacePos.w || clipSpacePos.z > clipSpacePos.w)
+	{
+		return glm::vec4(0.0f, 0.0f, 0.0f, true); // Clipped
+	}
+
+	glm::vec3 ndc = glm::vec3(clipSpacePos) / clipSpacePos.w;
+	return glm::vec4(ndc, false); // Not Clipped
 }
 
-glm::mat4 Renderer::ObjectToModel(Transform& objectTransform)
+glm::mat4 Renderer::ModelToWorld(Transform& objectTransform)
 {
 	glm::mat4 model = glm::mat4(1.0f);
 
@@ -205,7 +226,7 @@ void Renderer::DrawPixel(glm::vec2 pixelLoc, glm::vec4 pixelColor)
 
 void Renderer::ResetDepthBuffer()
 {
-	std::fill(depthBuffer.begin(), depthBuffer.end(), -FLT_MAX);
+	std::fill(depthBuffer.begin(), depthBuffer.end(), FLT_MAX);
 }
 
 BoundingBox Renderer::GetTriangleBoundingBox(glm::vec3& a, glm::vec3& b, glm::vec3& c)
