@@ -7,9 +7,20 @@ Renderer::Renderer()
 	screenResolution = glm::vec2(0.0f);
 	projection = PERSPECTIVE;
 
-	Mesh testMesh;
-	testMesh.LoadObjectFile("../Assets/Monkey.obj");
-	scene.meshes.push_back(testMesh);
+	{
+		Mesh Mill;
+		Mill.LoadObjectFile("../Assets/Mill.obj");
+		Mill.transform.scale = glm::vec3(2.5f);
+		Mill.transform.location = glm::vec3(0.0f, -1.5f, -8.0f);
+		scene.meshes.push_back(Mill);
+
+		Mesh Propeller;
+		Propeller.LoadObjectFile("../Assets/Propeller.obj");
+		Propeller.transform.scale = glm::vec3(14.f);
+		Propeller.transform.location = glm::vec3(0.0075f, 0.40f, -4.0f);
+		Propeller.speedComp.angularSpeed = glm::vec3(0.0f, 0.0f, 0.2f);
+		scene.meshes.push_back(Propeller);
+	}
 }
 
 void Renderer::Render(float width, float height, float delta)
@@ -47,26 +58,19 @@ void Renderer::Render(float width, float height, float delta)
 	// NDC = Normalized Device Coordinates = World -> View -> Clip -> UV Space { (0, 0) to (1, 1) } -> NDC Space { (-1, -1) to (1, 1) }
 	// Pixel / Screen = Basically Screen Space which is { (0, 0) to (screenResolution.x, screenResolution.y) }
 
-	Camera cam;
-	cam.transform.location = glm::vec3(0.0f, 0.0f, 10.0f);   
-	cam.forward = glm::vec3(0.0f, 0.0f, -1.0f);             
-	cam.up = glm::vec3(0.0f, 1.0f, 0.0f);
-	cam.right = glm::vec3(1.0f, 0.0f, 0.0f);
-	cam.fov = glm::radians(45.0f);
+	camera.Navigate(deltaTime);
 
 	for (Mesh& mesh : scene.meshes)
 	{
-		mesh.transform.scale = glm::vec3(1.5f);
-		mesh.transform.location = glm::vec3(0.0f, 0.0f, -8.0f);
-		mesh.AddRotation(glm::vec3(0.0f, 0.2f, 0.0f), deltaTime);
+		mesh.AddRotation(deltaTime);
 
 		for (Triangle& tri : mesh.triangles)
 		{
-			glm::mat4 model = ModelToWorld(mesh.transform);
+			glm::mat4 modelWorld = ModelToWorld(mesh.transform);
 
-			glm::vec4 ndcA = WorldToNDC(tri.a, model, cam);
-			glm::vec4 ndcB = WorldToNDC(tri.b, model, cam);
-			glm::vec4 ndcC = WorldToNDC(tri.c, model, cam);
+			glm::vec4 ndcA = WorldToNDC(tri.a, modelWorld);
+			glm::vec4 ndcB = WorldToNDC(tri.b, modelWorld);
+			glm::vec4 ndcC = WorldToNDC(tri.c, modelWorld);
 
 			if (ndcA.w == 1.0f || ndcB.w == 1.0f || ndcC.w == 1.0f)
 				continue;
@@ -163,23 +167,24 @@ void Renderer::PixelToNDC(glm::vec2& q)
 	q = q * 2.0f - 1.0f;
 }
 
-glm::vec4 Renderer::WorldToNDC(glm::vec3& point, glm::mat4& model, Camera& cam)
+glm::vec4 Renderer::WorldToNDC(glm::vec3& point, glm::mat4& model)
 {
 	float aspectRatio = (float)screenResolution.x / screenResolution.y;
 	glm::mat4 transform;
+	glm::mat4 view = camera.GetViewMatrix();
 	
 	switch (projection)
 	{
 		case ORTHOGRAPHIC:
 		{
 			glm::mat4 orthoMat = glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f, -10.0f, 10.0f);
-			transform = orthoMat * model;
+			transform = orthoMat * view * model;
 			break;
 		}
 		case PERSPECTIVE:
 		{
-			glm::mat4 persMat = glm::perspective(cam.fov, aspectRatio, 0.1f, 100.0f);
-			transform = persMat * model;
+			glm::mat4 persMat = glm::perspective(camera.fov, aspectRatio, 0.1f, 100.0f);
+			transform = persMat * view * model;
 			break;
 		}
 	}

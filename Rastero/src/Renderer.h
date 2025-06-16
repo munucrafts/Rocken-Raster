@@ -19,7 +19,7 @@ private:
 	bool InsideTriangle(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 p, glm::vec3& weights);
 	void NDCToPixel(glm::vec3& q);
 	void PixelToNDC(glm::vec2& q);
-	glm::vec4 WorldToNDC(glm::vec3& point, glm::mat4& model, Camera& cam);
+	glm::vec4 WorldToNDC(glm::vec3& point, glm::mat4& model);
 	glm::mat4 ModelToWorld(Transform& objectTransform);
 	void ClearBackground(glm::vec4& bgColor);
 	BoundingBox GetTriangleBoundingBox(glm::vec3& a, glm::vec3& b, glm::vec3& c);
@@ -32,6 +32,7 @@ private:
 	std::shared_ptr<Walnut::Image> image;
 	glm::vec2 screenResolution;
 	Scene scene;
+	Camera camera;
 	Projection projection;
 	float deltaTime;
 };
