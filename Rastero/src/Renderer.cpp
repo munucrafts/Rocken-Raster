@@ -11,13 +11,14 @@ Renderer::Renderer()
 		Mesh Mill;
 		Mill.LoadObjectFile("../Assets/Mill.obj");
 		Mill.transform.scale = glm::vec3(2.5f);
-		Mill.transform.location = glm::vec3(0.0f, -1.5f, -8.0f);
+		Mill.transform.location = glm::vec3(0.0f, -1.5f, -5.0f);
 		scene.meshes.push_back(Mill);
 
 		Mesh Propeller;
 		Propeller.LoadObjectFile("../Assets/Propeller.obj");
-		Propeller.transform.scale = glm::vec3(14.f);
-		Propeller.transform.location = glm::vec3(0.0075f, 0.40f, -4.0f);
+		Propeller.transform.scale = glm::vec3(25.0f);
+		Propeller.transform.location = glm::vec3(0.0075f, 0.76f, -4.0f);
+		Propeller.transform.rotation = glm::vec3(0.0f, 180.0f, 0.0f);
 		Propeller.speedComp.angularSpeed = glm::vec3(0.0f, 0.0f, 0.2f);
 		scene.meshes.push_back(Propeller);
 	}
