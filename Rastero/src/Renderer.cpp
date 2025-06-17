@@ -59,11 +59,11 @@ void Renderer::Render(float width, float height, float delta)
 	// NDC = Normalized Device Coordinates = World -> View -> Clip -> UV Space { (0, 0) to (1, 1) } -> NDC Space { (-1, -1) to (1, 1) }
 	// Pixel / Screen = Basically Screen Space which is { (0, 0) to (screenResolution.x, screenResolution.y) }
 
-	camera.Navigate(deltaTime);
+	camera.NavigateCamera(deltaTime);
 
 	for (Mesh& mesh : scene.meshes)
 	{
-		mesh.AddRotation(deltaTime);
+		mesh.RotateMesh(deltaTime);
 
 		for (Triangle& tri : mesh.triangles)
 		{

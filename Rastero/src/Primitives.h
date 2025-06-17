@@ -49,126 +49,23 @@ struct SpeedComponent
 	glm::vec3 scalingSpeed = glm::vec3(0.0f);
 };
 
-struct Camera
-{
-private:
-	Transform transform;
-	SpeedComponent speedComp;
-	glm::vec3 forward = glm::vec3(0.0f, 0.0f, -1.0f);
-	glm::vec3 right = glm::vec3(1.0f, 0.0f, 0.0f);
-	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-
-	bool firstMouse = true;
-	float speedMultiplier = 0.1f;
-	float mouseSensitivity = 0.1f;
-	glm::vec2 lastMousePos = glm::vec2(0.0f);
-
-public:
-	float fov = glm::radians(60.0f);
-
-private:
-	void AddRotation(float deltaTime)
-	{
-		transform.rotation += speedComp.angularSpeed * deltaTime;
-	};
-	void AddLocation(float deltaTime)
-	{
-		transform.location += speedComp.linearSpeed * deltaTime;
-	};
-
-public:
-	glm::mat4 GetViewMatrix()
-	{
-		return glm::lookAt(transform.location, transform.location + forward, up);
-	};
-	void Navigate(float deltaTime)
-	{
-		if (!Walnut::Input::IsMouseButtonDown(Walnut::MouseButton::Right))
-		{
-			firstMouse = true;
-			return;
-		}
-		if (Walnut::Input::IsKeyDown(Walnut::Key::A))
-		{
-			speedComp.linearSpeed = -right * speedMultiplier;
-			AddLocation(deltaTime);
-		}
-		if (Walnut::Input::IsKeyDown(Walnut::Key::D))
-		{
-			speedComp.linearSpeed = right * speedMultiplier;
-			AddLocation(deltaTime);
-		}
-		if (Walnut::Input::IsKeyDown(Walnut::Key::E))
-		{
-			speedComp.linearSpeed = up * speedMultiplier;
-			AddLocation(deltaTime);
-		}
-		if (Walnut::Input::IsKeyDown(Walnut::Key::Q))
-		{
-			speedComp.linearSpeed = -up * speedMultiplier;
-			AddLocation(deltaTime);
-		}
-		if (Walnut::Input::IsKeyDown(Walnut::Key::W))
-		{
-			speedComp.linearSpeed = forward * speedMultiplier;
-			AddLocation(deltaTime);
-		}
-		if (Walnut::Input::IsKeyDown(Walnut::Key::S))
-		{
-			speedComp.linearSpeed = -forward * speedMultiplier;
-			AddLocation(deltaTime);
-		}
-
-		{
-			glm::vec2 mousePos = Walnut::Input::GetMousePosition();
-
-			if (firstMouse)
-			{
-				lastMousePos = mousePos;
-				firstMouse = false;
-			}
-
-			glm::vec2 delta = mousePos - lastMousePos;
-			lastMousePos = mousePos;
-
-			
-
-			float& yaw = transform.rotation.y;
-			float& pitch = transform.rotation.x;
-
-			yaw += delta.x * mouseSensitivity;
-			pitch -= delta.y * mouseSensitivity;
-			pitch = glm::clamp(pitch, -89.0f, 89.0f);
-
-			glm::vec3 direction;
-			direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-			direction.y = sin(glm::radians(pitch));
-			direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-
-			forward = glm::normalize(direction);
-			right = glm::normalize(glm::cross(forward, glm::vec3(0.0f, 1.0f, 0.0f)));
-			up = glm::normalize(glm::cross(right, forward));
-		}
-	}
-};
-
 struct Mesh
 {
 	std::vector<Triangle> triangles;
 	Transform transform;
 	SpeedComponent speedComp;
 
-	void AddRotation(float deltaTime)
+	void RotateMesh(float deltaTime)
 	{
 		transform.rotation += speedComp.angularSpeed * deltaTime;
 	};
 
-	void AddLocation(float deltaTime)
+	void TranslateMesh (float deltaTime)
 	{
 		transform.location += speedComp.linearSpeed * deltaTime;
 	};
 
-	void AddScale(float deltaTime)
+	void ScaleMesh(float deltaTime)
 	{
 		transform.scale += speedComp.scalingSpeed * deltaTime;
 	};
