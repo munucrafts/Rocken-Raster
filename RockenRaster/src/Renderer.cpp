@@ -11,13 +11,13 @@ Renderer::Renderer()
 		Mesh Mill;
 		Mill.LoadObjectFile("../Assets/Mill.obj");
 		Mill.transform.scale = glm::vec3(2.5f);
-		Mill.transform.location = glm::vec3(0.0f, -1.5f, -5.0f);
+		Mill.transform.location = glm::vec3(0.0f, -1.5f, -10.0f);
 		scene.meshes.push_back(Mill);
 
 		Mesh Propeller;
 		Propeller.LoadObjectFile("../Assets/Propeller.obj");
 		Propeller.transform.scale = glm::vec3(25.0f);
-		Propeller.transform.location = glm::vec3(0.0075f, 0.76f, -4.0f);
+		Propeller.transform.location = glm::vec3(0.0075f, 0.76f, -9.0f);
 		Propeller.transform.rotation = glm::vec3(0.0f, 180.0f, 0.0f);
 		Propeller.speedComp.angularSpeed = glm::vec3(0.0f, 0.0f, 0.2f);
 		scene.meshes.push_back(Propeller);
@@ -59,7 +59,7 @@ void Renderer::Render(float width, float height, float delta)
 	// NDC = Normalized Device Coordinates = World -> View -> Clip -> UV Space { (0, 0) to (1, 1) } -> NDC Space { (-1, -1) to (1, 1) }
 	// Pixel / Screen = Basically Screen Space which is { (0, 0) to (screenResolution.x, screenResolution.y) }
 
-	camera.NavigateCamera(deltaTime);
+	camera.NavigateCamera(deltaTime, projection);
 
 	for (Mesh& mesh : scene.meshes)
 	{
@@ -170,7 +170,7 @@ void Renderer::PixelToNDC(glm::vec2& q)
 
 glm::vec4 Renderer::WorldToNDC(glm::vec3& point, glm::mat4& model)
 {
-	float aspectRatio = (float)screenResolution.x / screenResolution.y;
+	float aspectRatio = (float)screenResolution.x / (float)screenResolution.y;
 	glm::mat4 transform;
 	glm::mat4 view = camera.GetViewMatrix();
 	
@@ -178,7 +178,10 @@ glm::vec4 Renderer::WorldToNDC(glm::vec3& point, glm::mat4& model)
 	{
 		case ORTHOGRAPHIC:
 		{
-			glm::mat4 orthoMat = glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f, -10.0f, 10.0f);
+			glm::mat4 orthoMat = glm::ortho(-camera.orthoValue * aspectRatio, 
+											 camera.orthoValue * aspectRatio, -1.0f * camera.orthoValue, 1.0f * 
+											 camera.orthoValue, -10.0f, 10.0f);
+
 			transform = orthoMat * view * model;
 			break;
 		}
@@ -196,11 +199,11 @@ glm::vec4 Renderer::WorldToNDC(glm::vec3& point, glm::mat4& model)
 		clipSpacePos.y < -clipSpacePos.w || clipSpacePos.y > clipSpacePos.w ||
 		clipSpacePos.z < -clipSpacePos.w || clipSpacePos.z > clipSpacePos.w)
 	{
-		return glm::vec4(0.0f, 0.0f, 0.0f, true); // Clipped
+		return glm::vec4(0.0f, 0.0f, 0.0f, true); 
 	}
 
 	glm::vec3 ndc = glm::vec3(clipSpacePos) / clipSpacePos.w;
-	return glm::vec4(ndc, false); // Not Clipped
+	return glm::vec4(ndc, false);
 }
 
 glm::mat4 Renderer::ModelToWorld(Transform& objectTransform)
