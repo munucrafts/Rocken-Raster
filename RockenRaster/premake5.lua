@@ -1,4 +1,4 @@
-project "Rastero"
+project "RockenRaster"
    kind "ConsoleApp"
    language "C++"
    cppdialect "C++17"

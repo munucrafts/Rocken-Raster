@@ -5,7 +5,7 @@
 
 #include "Renderer.h"
 
-class Rastero : public Walnut::Layer
+class RockenRaster : public Walnut::Layer
 {
 private:
 	Renderer renderer;
@@ -48,10 +48,10 @@ public:
 Walnut::Application* Walnut::CreateApplication(int argc, char** argv)
 {
 	Walnut::ApplicationSpecification spec;
-	spec.Name = "Rastero";
+	spec.Name = "Rocken Raster";
 
 	Walnut::Application* app = new Walnut::Application(spec);
-	app->PushLayer<Rastero>();
+	app->PushLayer<RockenRaster>();
 
 	return app;
 }
