@@ -59,17 +59,14 @@ struct Mesh
 	{
 		transform.rotation += speedComp.angularSpeed * deltaTime;
 	};
-
 	void TranslateMesh (float deltaTime)
 	{
 		transform.location += speedComp.linearSpeed * deltaTime;
 	};
-
 	void ScaleMesh(float deltaTime)
 	{
 		transform.scale += speedComp.scalingSpeed * deltaTime;
 	};
-
 	void LoadObjectFile(std::string filePath)
 	{
 		std::ifstream input(filePath);
@@ -99,7 +96,6 @@ struct Mesh
 			}
 		}
 	}
-
 };
 
 struct Scene

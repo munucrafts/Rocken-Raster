@@ -191,7 +191,7 @@ public:
 			delta /= 300.0f;
 			lastMousePos = mousePos;
 
-			speedComp.linearSpeed = (delta.x * right) + (-delta.y * up);
+			speedComp.linearSpeed = (-delta.x * right) + (delta.y * up);
 			PanCamera(deltaTime);
 		}
 	}

@@ -73,7 +73,7 @@ void Renderer::Render(float width, float height, float delta)
 			glm::vec4 ndcB = WorldToNDC(tri.b, modelWorld);
 			glm::vec4 ndcC = WorldToNDC(tri.c, modelWorld);
 
-			if (ndcA.w == 1.0f || ndcB.w == 1.0f || ndcC.w == 1.0f)
+			if ((ndcA.w || ndcB.w || ndcC.w))
 				continue;
 
 			glm::vec3 a = ndcA;
@@ -103,9 +103,9 @@ void Renderer::Render(float width, float height, float delta)
 						float pixelDepth = 1.0f / (glm::dot(1.0f / abcDepths, weights));
 						int pixelIndex = x + y * screenResolution.x;
 						
-						if (pixelIndex < 0 || pixelIndex >= (int)depthBuffer.size()) 
-							continue;
-							
+						if (pixelIndex < 0 || pixelIndex >= depthBuffer.size()) 
+							continue;					
+
 						if (pixelDepth <= depthBuffer[pixelIndex]) 
 						{
 							depthBuffer[pixelIndex] = pixelDepth;
@@ -173,21 +173,21 @@ glm::vec4 Renderer::WorldToNDC(glm::vec3& point, glm::mat4& model)
 	float aspectRatio = (float)screenResolution.x / (float)screenResolution.y;
 	glm::mat4 transform;
 	glm::mat4 view = camera.GetViewMatrix();
-	
+
 	switch (projection)
 	{
 		case ORTHOGRAPHIC:
 		{
-			glm::mat4 orthoMat = glm::ortho(-camera.orthoValue * aspectRatio, 
-											 camera.orthoValue * aspectRatio, -1.0f * camera.orthoValue, 1.0f * 
-											 camera.orthoValue, -10.0f, 10.0f);
+			glm::mat4 orthoMat = glm::ortho(-camera.orthoValue * aspectRatio,
+				camera.orthoValue * aspectRatio, -1.0f * camera.orthoValue, 1.0f *
+				camera.orthoValue, -10.0f, 10.0f);
 
 			transform = orthoMat * view * model;
 			break;
 		}
 		case PERSPECTIVE:
 		{
-			glm::mat4 persMat = glm::perspective(camera.fov, aspectRatio, 0.1f, 100.0f);
+			glm::mat4 persMat = glm::perspective(camera.fov, aspectRatio, 1.0f, 100.0f);
 			transform = persMat * view * model;
 			break;
 		}
@@ -199,11 +199,11 @@ glm::vec4 Renderer::WorldToNDC(glm::vec3& point, glm::mat4& model)
 		clipSpacePos.y < -clipSpacePos.w || clipSpacePos.y > clipSpacePos.w ||
 		clipSpacePos.z < -clipSpacePos.w || clipSpacePos.z > clipSpacePos.w)
 	{
-		return glm::vec4(0.0f, 0.0f, 0.0f, true); 
+		return { glm::vec3(0.0f), true };
 	}
 
 	glm::vec3 ndc = glm::vec3(clipSpacePos) / clipSpacePos.w;
-	return glm::vec4(ndc, false);
+	return { ndc, false };
 }
 
 glm::mat4 Renderer::ModelToWorld(Transform& objectTransform)
