@@ -69,22 +69,23 @@ void Renderer::Render(float width, float height, float delta)
 		{
 			glm::mat4 modelWorld = ModelToWorld(mesh.transform);
 
-			glm::vec4 ndcA = WorldToNDC(tri.a, modelWorld);
-			glm::vec4 ndcB = WorldToNDC(tri.b, modelWorld);
-			glm::vec4 ndcC = WorldToNDC(tri.c, modelWorld);
+			glm::vec4 clipA = WorldToClip(tri.a, modelWorld);
+			glm::vec4 clipB = WorldToClip(tri.b, modelWorld);
+			glm::vec4 clipC = WorldToClip(tri.c, modelWorld);
 
-			if ((ndcA.w || ndcB.w || ndcC.w))
-				continue;
+			int clipCount = PointOutsideClipSpace(clipA) + PointOutsideClipSpace(clipB) + PointOutsideClipSpace(clipC);
+			
+			if (clipCount <= 3 && clipCount > 0) continue;
 
-			glm::vec3 a = ndcA;
-			glm::vec3 b	= ndcB;
-			glm::vec3 c	= ndcC;
+			glm::vec3 ndcA = (glm::vec3)clipA / clipA.w;
+			glm::vec3 ndcB	= (glm::vec3)clipB / clipB.w;
+			glm::vec3 ndcC	= (glm::vec3)clipC / clipC.w;
 			
-			NDCToPixel(a); 
-			NDCToPixel(b); 
-			NDCToPixel(c); 
+			NDCToPixel(ndcA); 
+			NDCToPixel(ndcB); 
+			NDCToPixel(ndcC); 
 			
-			BoundingBox box = GetTriangleBoundingBox(a, b, c);
+			BoundingBox box = GetTriangleBoundingBox(ndcA, ndcB, ndcC);
 
 			int minPixelX = (int)box.minMaxX.x;
 			int maxPixelX = (int)box.minMaxX.y;
@@ -97,9 +98,9 @@ void Renderer::Render(float width, float height, float delta)
 				{
 					glm::vec3 weights;
 
-					if (InsideTriangle(a, b, c, glm::vec2(x, y), weights))
+					if (InsideTriangle((glm::vec2)ndcA, (glm::vec2)ndcB, (glm::vec2)ndcC, glm::vec2(x, y), weights))
 					{
-						glm::vec3 abcDepths = glm::vec3(a.z, b.z, c.z);
+						glm::vec3 abcDepths = glm::vec3(ndcA.z, ndcB.z, ndcC.z);
 						float pixelDepth = 1.0f / (glm::dot(1.0f / abcDepths, weights));
 						int pixelIndex = x + y * screenResolution.x;
 						
@@ -139,7 +140,7 @@ float Renderer::GetSignedTriangleArea(glm::vec2& a, glm::vec2& b, glm::vec2& p)
 	return glm::dot(ap, abPerp) / 2.0f;
 }
 
-bool Renderer::InsideTriangle(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 p, glm::vec3& weights)
+bool Renderer::InsideTriangle(glm::vec2& a, glm::vec2& b, glm::vec2& c, glm::vec2& p, glm::vec3& weights)
 {
 	float areaABP = GetSignedTriangleArea(a, b, p);
 	float areaBCP = GetSignedTriangleArea(b, c, p);
@@ -168,42 +169,35 @@ void Renderer::PixelToNDC(glm::vec2& q)
 	q = q * 2.0f - 1.0f;
 }
 
-glm::vec4 Renderer::WorldToNDC(glm::vec3& point, glm::mat4& model)
+glm::vec4 Renderer::WorldToClip(glm::vec3& point, glm::mat4& model)
 {
 	float aspectRatio = (float)screenResolution.x / (float)screenResolution.y;
-	glm::mat4 transform;
 	glm::mat4 view = camera.GetViewMatrix();
+	glm::mat4 transform;
+	glm::mat4 proj;
+	glm::vec4 clip;
 
 	switch (projection)
 	{
 		case ORTHOGRAPHIC:
-		{
-			glm::mat4 orthoMat = glm::ortho(-camera.orthoValue * aspectRatio,
-				camera.orthoValue * aspectRatio, -1.0f * camera.orthoValue, 1.0f *
-				camera.orthoValue, -10.0f, 10.0f);
-
-			transform = orthoMat * view * model;
+			proj = glm::ortho(-camera.orthoValue * aspectRatio, camera.orthoValue * aspectRatio,
+							  -camera.orthoValue, camera.orthoValue, -10.0f, 10.0f);
 			break;
-		}
 		case PERSPECTIVE:
-		{
-			glm::mat4 persMat = glm::perspective(camera.fov, aspectRatio, 1.0f, 100.0f);
-			transform = persMat * view * model;
+			proj = glm::perspective(camera.fov, aspectRatio, 1.0f, 100.0f);
 			break;
-		}
 	}
 
-	glm::vec4 clipSpacePos = transform * glm::vec4(point, 1.0f);
+	transform = proj * view * model;
+	clip = transform * glm::vec4(point, 1.0f);
+	return clip;
+}
 
-	if (clipSpacePos.x < -clipSpacePos.w || clipSpacePos.x > clipSpacePos.w ||
-		clipSpacePos.y < -clipSpacePos.w || clipSpacePos.y > clipSpacePos.w ||
-		clipSpacePos.z < -clipSpacePos.w || clipSpacePos.z > clipSpacePos.w)
-	{
-		return { glm::vec3(0.0f), true };
-	}
-
-	glm::vec3 ndc = glm::vec3(clipSpacePos) / clipSpacePos.w;
-	return { ndc, false };
+bool Renderer::PointOutsideClipSpace(glm::vec4& point)
+{
+	return ( point.x < -point.w || point.x > point.w ||
+			 point.y < -point.w || point.y > point.w ||
+			 point.z < -point.w || point.z > point.w );
 }
 
 glm::mat4 Renderer::ModelToWorld(Transform& objectTransform)
@@ -224,7 +218,7 @@ void Renderer::ClearBackground(glm::vec4& bgColor)
 	std::fill(imageData.begin(), imageData.end(), ColorToRGBA(bgColor));
 }
 
-void Renderer::DrawPixel(glm::vec2 pixelLoc, glm::vec4 pixelColor)
+void Renderer::DrawPixel(glm::vec2& pixelLoc, glm::vec4& pixelColor)
 {
 	int x = (int)pixelLoc.x;
 	int y = (int)pixelLoc.y;
