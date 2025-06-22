@@ -8,18 +8,19 @@ Renderer::Renderer()
 	projection = PERSPECTIVE;
 
 	{
-		Mesh Mill;
-		Mill.LoadObjectFile("../Assets/Mill.obj");
-		Mill.transform.scale = glm::vec3(2.5f);
-		Mill.transform.location = glm::vec3(0.0f, -1.5f, -10.0f);
-		scene.meshes.push_back(Mill);
+		Mesh Windmill;
+		Windmill.LoadObjectFile("../Assets/Windmill.obj", "../Assets/Windmill.png");
+		Windmill.transform.scale = glm::vec3(2.5f);
+		Windmill.transform.rotation = glm::vec3(0.0f, 180.0f, 0.0f);
+		Windmill.transform.location = glm::vec3(0.0f, -2.5f, -10.0f);
+		scene.meshes.push_back(Windmill);
 
 		Mesh Propeller;
-		Propeller.LoadObjectFile("../Assets/Propeller.obj");
-		Propeller.transform.scale = glm::vec3(25.0f);
-		Propeller.transform.location = glm::vec3(0.0075f, 0.76f, -9.0f);
+		Propeller.LoadObjectFile("../Assets/Propeller.obj", "../Assets/Propeller.png");
+		Propeller.transform.scale = glm::vec3(2.5f);
 		Propeller.transform.rotation = glm::vec3(0.0f, 180.0f, 0.0f);
-		Propeller.speedComp.angularSpeed = glm::vec3(0.0f, 0.0f, 0.2f);
+		Propeller.transform.location = glm::vec3(0.0f, 1.37f, -9.97f);
+		Propeller.speedComp.angularSpeed = glm::vec3(0.0f, 0.0f, -0.2f);
 		scene.meshes.push_back(Propeller);
 	}
 }
@@ -69,17 +70,21 @@ void Renderer::Render(float width, float height, float delta)
 		{
 			glm::mat4 modelWorld = ModelToWorld(mesh.transform);
 
-			glm::vec4 clipA = WorldToClip(tri.a, modelWorld);
-			glm::vec4 clipB = WorldToClip(tri.b, modelWorld);
-			glm::vec4 clipC = WorldToClip(tri.c, modelWorld);
+			glm::vec4 clipA = WorldToClip(tri.vertices[0].vert, modelWorld);
+			glm::vec4 clipB = WorldToClip(tri.vertices[1].vert, modelWorld);
+			glm::vec4 clipC = WorldToClip(tri.vertices[2].vert, modelWorld);
 
-			int clipCount = PointOutsideClipSpace(clipA) + PointOutsideClipSpace(clipB) + PointOutsideClipSpace(clipC);
+			bool outA = PointOutsideClipSpace(clipA);
+			bool outB = PointOutsideClipSpace(clipB);
+			bool outC = PointOutsideClipSpace(clipC);
+
+			int clipCount = outA + outB + outC;
 			
-			if (clipCount <= 3 && clipCount > 0) continue;
+			if (clipCount > 0) continue;
 
 			glm::vec3 ndcA = (glm::vec3)clipA / clipA.w;
-			glm::vec3 ndcB	= (glm::vec3)clipB / clipB.w;
-			glm::vec3 ndcC	= (glm::vec3)clipC / clipC.w;
+			glm::vec3 ndcB = (glm::vec3)clipB / clipB.w;
+			glm::vec3 ndcC = (glm::vec3)clipC / clipC.w;
 			
 			NDCToPixel(ndcA); 
 			NDCToPixel(ndcB); 
@@ -110,7 +115,17 @@ void Renderer::Render(float width, float height, float delta)
 						if (pixelDepth <= depthBuffer[pixelIndex]) 
 						{
 							depthBuffer[pixelIndex] = pixelDepth;
-							DrawPixel(glm::vec2(x, y), tri.color);
+
+							glm::vec2 uv0 = tri.vertices[0].uv / ndcA.z;
+							glm::vec2 uv1 = tri.vertices[1].uv / ndcB.z;
+							glm::vec2 uv2 = tri.vertices[2].uv / ndcC.z;
+
+							glm::vec2 uvInterp = uv0 * weights.x + uv1 * weights.y + uv2 * weights.z;
+							float invZ = weights.x / ndcA.z + weights.y / ndcB.z + weights.z / ndcC.z;
+
+							glm::vec2 texCoords = uvInterp / invZ;
+							glm::vec4 col = mesh.mat.texture.LoadColorAtTexureCoordinates(texCoords);
+							DrawPixel(glm::vec2(x, y), col);
 						}
 					}
 				}
@@ -218,13 +233,13 @@ void Renderer::ClearBackground(glm::vec4& bgColor)
 	std::fill(imageData.begin(), imageData.end(), ColorToRGBA(bgColor));
 }
 
-void Renderer::DrawPixel(glm::vec2& pixelLoc, glm::vec4& pixelColor)
+void Renderer::DrawPixel(glm::vec2& pixelLoc, glm::vec4& color)
 {
 	int x = (int)pixelLoc.x;
 	int y = (int)pixelLoc.y;
 
 	if (x >= 0 && x < (int)screenResolution.x && y >= 0 && y < (int)screenResolution.y)
-		imageData[x + y * (int)screenResolution.x] = ColorToRGBA(pixelColor);
+		imageData[x + y * (int)screenResolution.x] = ColorToRGBA(color);
 }
 
 void Renderer::ResetDepthBuffer()

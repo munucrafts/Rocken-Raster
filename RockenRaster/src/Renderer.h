@@ -25,7 +25,7 @@ private:
 	glm::mat4 ModelToWorld(Transform& objectTransform);
 	void ClearBackground(glm::vec4& bgColor);
 	BoundingBox GetTriangleBoundingBox(glm::vec3& a, glm::vec3& b, glm::vec3& c);
-	void DrawPixel(glm::vec2& pixelLoc, glm::vec4& pixelColor);
+	void DrawPixel(glm::vec2& pixelLoc, glm::vec4& color);
 	void ResetDepthBuffer();
 
 private:

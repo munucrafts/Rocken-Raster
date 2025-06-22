@@ -2,7 +2,6 @@
 #include <Walnut/EntryPoint.h>
 #include <Walnut/Timer.h>
 #include <Walnut/Image.h>
-
 #include "Renderer.h"
 
 class RockenRaster : public Walnut::Layer
