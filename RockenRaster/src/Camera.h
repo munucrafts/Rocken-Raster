@@ -73,12 +73,12 @@ private:
 		if (io.MouseWheel > 0.0f)
 		{
 			orthoValue -= step;
-			orthoValue = glm::clamp(orthoValue, 1.0f, 30.0f);
+			orthoValue = glm::clamp(orthoValue, 5.0f, 100.0f);
 		}
 		else if (io.MouseWheel < 0.0f)
 		{
 			orthoValue += step;
-			orthoValue = glm::clamp(orthoValue, 1.0f, 30.0f);
+			orthoValue = glm::clamp(orthoValue, 5.0f, 100.0f);
 		}
 	};
 

@@ -25,7 +25,7 @@ struct Texture
 	}
 	glm::vec4 LoadColorAtTexureCoordinates(glm::vec2& uv)
 	{
-		if (!texData) return glm::vec4(1.0f);
+		if (!texData) return glm::vec4(0.0f);
 
 		glm::vec2 clampedUV = glm::clamp(uv, glm::vec2(0.0f), glm::vec2(1.0f));
 		int x = (int)(clampedUV.x * (texWidth - 1));

@@ -112,18 +112,28 @@ void Renderer::Render(float width, float height, float delta)
 						if (pixelIndex < 0 || pixelIndex >= depthBuffer.size()) 
 							continue;					
 
-						if (pixelDepth <= depthBuffer[pixelIndex]) 
+						if (pixelDepth <= depthBuffer[pixelIndex])
 						{
 							depthBuffer[pixelIndex] = pixelDepth;
+							glm::vec2 texCoords;
 
-							glm::vec2 uv0 = tri.vertices[0].uv / ndcA.z;
-							glm::vec2 uv1 = tri.vertices[1].uv / ndcB.z;
-							glm::vec2 uv2 = tri.vertices[2].uv / ndcC.z;
+							if (projection == PERSPECTIVE)
+							{
+								glm::vec2 uv0 = tri.vertices[0].uv / ndcA.z;
+								glm::vec2 uv1 = tri.vertices[1].uv / ndcB.z;
+								glm::vec2 uv2 = tri.vertices[2].uv / ndcC.z;
 
-							glm::vec2 uvInterp = uv0 * weights.x + uv1 * weights.y + uv2 * weights.z;
-							float invZ = weights.x / ndcA.z + weights.y / ndcB.z + weights.z / ndcC.z;
-
-							glm::vec2 texCoords = uvInterp / invZ;
+								glm::vec2 uvInterp = uv0 * weights.x + uv1 * weights.y + uv2 * weights.z;
+								float invZ = weights.x / ndcA.z + weights.y / ndcB.z + weights.z / ndcC.z;
+								texCoords = uvInterp / invZ;
+							}
+							else if (projection == ORTHOGRAPHIC)
+							{
+								texCoords = tri.vertices[0].uv * weights.x +
+											tri.vertices[1].uv * weights.y +
+											tri.vertices[2].uv * weights.z;
+							}
+							
 							glm::vec4 col = mesh.mat.texture.LoadColorAtTexureCoordinates(texCoords);
 							DrawPixel(glm::vec2(x, y), col);
 						}
@@ -196,10 +206,10 @@ glm::vec4 Renderer::WorldToClip(glm::vec3& point, glm::mat4& model)
 	{
 		case ORTHOGRAPHIC:
 			proj = glm::ortho(-camera.orthoValue * aspectRatio, camera.orthoValue * aspectRatio,
-							  -camera.orthoValue, camera.orthoValue, -10.0f, 10.0f);
+							  -camera.orthoValue, camera.orthoValue, -50.0f, 50.0f);
 			break;
 		case PERSPECTIVE:
-			proj = glm::perspective(camera.fov, aspectRatio, 1.0f, 100.0f);
+			proj = glm::perspective(camera.fov, aspectRatio, 0.01f, 100.0f);
 			break;
 	}
 

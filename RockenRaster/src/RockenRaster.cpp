@@ -7,6 +7,7 @@
 class RockenRaster : public Walnut::Layer
 {
 private:
+	Walnut::Application* apple;
 	Renderer renderer;
 	float MS;
 	float FPS;
@@ -41,6 +42,9 @@ public:
 
 		ImGui::End();
 		ImGui::PopStyleVar();
+
+		if (Walnut::Input::IsKeyDown(Walnut::Key::Escape))
+			Walnut::Application::Get().Close();
 	}
 };
 
