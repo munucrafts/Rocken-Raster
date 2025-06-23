@@ -1,36 +1,15 @@
-﻿#include "Renderer.h"
-#include <iostream>
+﻿#include <iostream>
+#include "Renderer.h"
 
 Renderer::Renderer()
 {
 	nearClip = 0.01f;
 	farClip = 100.0f;
-	skyColor = glm::vec4(0.53f, 0.81f, 0.98f, 1.0f);
 	deltaTime = 0.0f;
 	screenResolution = glm::vec2(0.0f);
 	projection = PERSPECTIVE;
 
-	{
-		Mesh Windmill;
-		Windmill.LoadObjectFile("../Assets/Windmill.obj", "../Assets/Windmill.png");
-		Windmill.transform.scale = glm::vec3(2.5f);
-		Windmill.transform.rotation = glm::vec3(0.0f, 180.0f, 0.0f);
-		Windmill.transform.location = glm::vec3(0.0f, -2.5f, -10.0f);
-		scene.meshes.push_back(Windmill);
-
-		Mesh Propeller;
-		Propeller.LoadObjectFile("../Assets/Propeller.obj", "../Assets/Propeller.png");
-		Propeller.transform.scale = glm::vec3(2.5f);
-		Propeller.transform.rotation = glm::vec3(0.0f, 180.0f, 0.0f);
-		Propeller.transform.location = glm::vec3(0.0f, 1.37f, -9.97f);
-		Propeller.speedComp.angularSpeed = glm::vec3(0.0f, 0.0f, -0.2f);
-		scene.meshes.push_back(Propeller);
-
-		DirectionalLight* dirLight = new DirectionalLight();
-		dirLight->direction = glm::vec3(-20.0f, 20.f, 0.0f);
-		dirLight->intensity = 2.50f;
-		scene.lights.push_back(dirLight);
-	}
+	Windmill windmill(scene);
 }
 
 void Renderer::Render(float width, float height, float delta)
@@ -54,7 +33,11 @@ void Renderer::Render(float width, float height, float delta)
 	}
 
 	deltaTime = delta / 10.0f;
-	ClearBackground(skyColor);
+
+	glm::vec4 skyTop = glm::vec4(0.22f, 0.71f, 1.0f, 1.0f);
+	glm::vec4 skyBottom = glm::vec4(0.83f, 0.84f, 0.85f, 1.0f);
+
+	ClearBackground(skyTop, skyBottom);
 	ResetDepthBuffer();
 
 	if (scene.meshes.empty())
@@ -69,6 +52,11 @@ void Renderer::Render(float width, float height, float delta)
 	// Pixel / Screen = Basically Screen Space which is { (0, 0) to (screenResolution.x, screenResolution.y) }
 
 	camera.NavigateCamera(deltaTime, projection);
+
+	for (ParticleSystem& particleSystem : scene.particleSystems)
+	{
+		particleSystem.Emit(deltaTime, screenResolution);
+	}
 
 	for (Mesh& mesh : scene.meshes)
 	{
@@ -166,8 +154,8 @@ void Renderer::Render(float width, float height, float delta)
 								}
 							}
 			
-							glm::vec4 texCol = mesh.mat.texture.LoadColorAtTexureCoordinates(texCoords);
-							DrawPixel(glm::vec2(x, y), intensity * texCol);
+							glm::vec4 finalColor = mesh.mat.tex ? mesh.mat.texture.LoadColorAtTexureCoordinates(texCoords) : mesh.mat.color;
+							DrawPixel(glm::vec2(x, y), intensity * finalColor);
 						}
 					}
 				}
@@ -270,9 +258,19 @@ glm::mat4 Renderer::ModelToWorld(Transform& objectTransform)
 	return model;
 }
 
-void Renderer::ClearBackground(glm::vec4& bgColor)
+void Renderer::ClearBackground(glm::vec4& topColor, glm::vec4& bottomColor)
 {
-	std::fill(imageData.begin(), imageData.end(), ColorToRGBA(bgColor));
+	for (int y = 0; y < screenResolution.y; y++)
+	{
+		float gradient = float(y) / (screenResolution.y - 1);
+		glm::vec4 rowColor = glm::mix(bottomColor, topColor, gradient);
+
+		for (int x = 0; x < screenResolution.x; x++)
+		{
+			int index = x + y * screenResolution.x;
+			imageData[index] = ColorToRGBA(rowColor);
+		}
+	}
 }
 
 void Renderer::DrawPixel(glm::vec2& pixelLoc, glm::vec4& color)

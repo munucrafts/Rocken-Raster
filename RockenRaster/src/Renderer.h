@@ -23,10 +23,10 @@ private:
 	glm::vec4 WorldToClip(glm::vec3& point, glm::mat4& model);
 	bool PointOutsideClipSpace(glm::vec4& point);
 	glm::mat4 ModelToWorld(Transform& objectTransform);
-	void ClearBackground(glm::vec4& bgColor);
+	void ClearBackground(glm::vec4& topColor, glm::vec4& bottomColor);
 	BoundingBox GetTriangleBoundingBox(glm::vec3& a, glm::vec3& b, glm::vec3& c);
-	void DrawPixel(glm::vec2& pixelLoc, glm::vec4& color);
 	void ResetDepthBuffer();
+	void DrawPixel(glm::vec2& pixelLoc, glm::vec4& color);
 
 private:
 	std::vector<uint32_t> imageData;
@@ -39,6 +39,5 @@ private:
 	float deltaTime;
 	float nearClip;
 	float farClip;
-	glm::vec4 skyColor;
 };
 

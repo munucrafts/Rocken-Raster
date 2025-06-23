@@ -8,6 +8,7 @@
 #include <Walnut/Input/Input.h>
 #include "Renderer.h"
 #include "Light.h"
+#include "ParticleSystem.h"
 #include "../../Walnut/vendor/stb_image/stb_image.h"
 
 enum Projection
@@ -47,7 +48,9 @@ public:
 
 struct Material
 {
+	bool tex;
 	Texture texture;
+	glm::vec4 color;
 	glm::vec4 RandomColor()
 	{
 		static std::mt19937 rng(std::random_device{}());
@@ -186,4 +189,41 @@ struct Scene
 {
 	std::vector<Mesh> meshes;
 	std::vector<Light*> lights;
+	std::vector<ParticleSystem> particleSystems;
+};
+
+struct Windmill : public Scene
+{
+	Windmill(Scene& activeScene)
+	{
+		Mesh island;
+		island.LoadObjectFile("../Assets/island.obj", "../Assets/island.png");
+		island.transform.scale = glm::vec3(0.15f);
+		island.transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+		island.transform.location = glm::vec3(-2.0f, -3.3f, -14.0f);
+		island.mat.tex = true;
+		activeScene.meshes.push_back(island);
+
+		Mesh windmill;
+		windmill.LoadObjectFile("../Assets/Windmill.obj", "../Assets/Windmill.png");
+		windmill.transform.scale = glm::vec3(2.5f);
+		windmill.transform.rotation = glm::vec3(0.0f, 180.0f, 0.0f);
+		windmill.transform.location = glm::vec3(0.0f, -1.2f, -14.0f);
+		windmill.mat.tex = true;
+		activeScene.meshes.push_back(windmill);
+
+		Mesh fan;
+		fan.LoadObjectFile("../Assets/Fan.obj", "../Assets/Fan.png");
+		fan.transform.scale = glm::vec3(2.5f);
+		fan.transform.rotation = glm::vec3(0.0f, 180.0f, 0.0f);
+		fan.transform.location = glm::vec3(0.0f, 2.85f, -13.97f);
+		fan.speedComp.angularSpeed = glm::vec3(0.0f, 0.0f, -0.2f);
+		fan.mat.tex = true;
+		activeScene.meshes.push_back(fan);
+
+		DirectionalLight* dirLight = new DirectionalLight();
+		dirLight->direction = glm::vec3(-20.0f, 20.f, 0.0f);
+		dirLight->intensity = 0.25f;
+		activeScene.lights.push_back(dirLight);
+	}
 };
