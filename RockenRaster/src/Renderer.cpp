@@ -26,11 +26,10 @@ Renderer::Renderer()
 		Propeller.speedComp.angularSpeed = glm::vec3(0.0f, 0.0f, -0.2f);
 		scene.meshes.push_back(Propeller);
 
-		Light atmLight;
-		atmLight.location = {glm::vec3(-20.0f, 20.f, -10.f)};
-		atmLight.direction = { glm::vec3(-20.0f, 20.f, -10.f) };
-		atmLight.intensityMultiplier = 2.0f;
-		scene.lights.push_back(atmLight);
+		DirectionalLight* dirLight = new DirectionalLight();
+		dirLight->direction = glm::vec3(-20.0f, 20.f, 0.0f);
+		dirLight->intensity = 2.50f;
+		scene.lights.push_back(dirLight);
 	}
 }
 
@@ -158,12 +157,13 @@ void Renderer::Render(float width, float height, float delta)
 							normal = glm::normalize(normal);
 							float intensity = 1.0f;
 
-							for (Light& light : scene.lights)
+							for (Light* light : scene.lights)
 							{
-								if (glm::distance(light.location, mesh.transform.location) > farClip) continue;
-
-								glm::vec3 lightDir = glm::normalize(light.direction);
-								intensity += glm::clamp(glm::dot(normal, -lightDir), 0.0f, 1.0f) * light.intensityMultiplier;
+								if (DirectionalLight* direcLight = dynamic_cast<DirectionalLight*>(light))
+								{
+									glm::vec3 lightDir = glm::normalize(direcLight->direction);
+									intensity += glm::clamp(glm::dot(normal, -lightDir), 0.0f, 1.0f) * direcLight->intensity;
+								}
 							}
 			
 							glm::vec4 texCol = mesh.mat.texture.LoadColorAtTexureCoordinates(texCoords);

@@ -2,7 +2,11 @@
 
 Light::Light()
 {
-	location = glm::vec3(0.0f);
-	direction = glm::vec3(0.0f);
-	intensityMultiplier = 1.0f;
+	intensity = 1.0f;
  }
+
+DirectionalLight::DirectionalLight()
+{
+	intensity = 1.0f;
+	direction = glm::vec3(0.0f);
+}

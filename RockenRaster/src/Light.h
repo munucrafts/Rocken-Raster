@@ -5,10 +5,17 @@ class Light
 {
 public:
 	Light();
+	virtual ~Light() = default;
 
 public:
-	glm::vec3 location;
-	glm::vec3 direction;
-	float intensityMultiplier;
+	float intensity;
 };
 
+class DirectionalLight : public Light
+{
+public:
+	DirectionalLight();
+
+public:
+	glm::vec3 direction;
+};

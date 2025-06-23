@@ -185,5 +185,5 @@ struct Mesh
 struct Scene
 {
 	std::vector<Mesh> meshes;
-	std::vector<Light> lights;
+	std::vector<Light*> lights;
 };
