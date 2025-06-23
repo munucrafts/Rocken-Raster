@@ -37,5 +37,8 @@ private:
 	Camera camera;
 	Projection projection;
 	float deltaTime;
+	float nearClip;
+	float farClip;
+	glm::vec4 skyColor;
 };
 

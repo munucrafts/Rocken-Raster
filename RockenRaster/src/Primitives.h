@@ -7,6 +7,7 @@
 #include <random>
 #include <Walnut/Input/Input.h>
 #include "Renderer.h"
+#include "Light.h"
 #include "../../Walnut/vendor/stb_image/stb_image.h"
 
 enum Projection
@@ -16,10 +17,12 @@ enum Projection
 
 struct Texture
 {
+private:
 	int texWidth = 0, texHeight = 0, channels = 0;
 	uint8_t* texData = nullptr;
 
-	void LoadTexture(std::string& texPath)
+public:
+	void LoadTextureFile(std::string& texPath)
 	{
 		texData = stbi_load(texPath.c_str(), &texWidth, &texHeight, &channels, 4);
 	}
@@ -57,6 +60,7 @@ struct Vertex
 {
 	glm::vec3 vert;
 	glm::vec2 uv;
+	glm::vec3 normal;
 };
 
 struct Triangle
@@ -112,6 +116,7 @@ struct Mesh
 
 		std::string line;
 		std::vector<glm::vec3> vertexPoints;
+		std::vector<glm::vec3> normals;
 		std::vector<glm::vec2> uvs;
 
 		while (std::getline(input, line))
@@ -125,6 +130,13 @@ struct Mesh
 				iss >> vt >> u >> v;
 				uvs.push_back({ u, 1.0f - v });
 			}
+			else if (line.rfind("vn", 0) == 0)
+			{
+				std::string vn;
+				float i, j, k;
+				iss >> vn >> i >> j >> k;
+				normals.push_back({ i, j, k});
+			}
 			else if (line.rfind("v ", 0) == 0)
 			{
 				std::string v;
@@ -137,34 +149,41 @@ struct Mesh
 				std::string f, a, b, c;
 				iss >> f >> a >> b >> c;
 
-				int slashA = a.find('/');
-				int aInd = std::stoi(a.substr(0, slashA)) - 1;
-				int aTexInd = std::stoi(a.substr(slashA + 1)) - 1;
+				size_t aSlash1 = a.find('/');
+				size_t aSlash2 = a.find('/', aSlash1 + 1);
+				int aInd = std::stoi(a.substr(0, aSlash1)) - 1;
+				int aTexInd = std::stoi(a.substr(aSlash1 + 1, aSlash2 - aSlash1 - 1)) - 1;
+				int aNorInd = std::stoi(a.substr(aSlash2 + 1)) - 1;
 
-				int slashB = b.find('/');
-				int bInd = std::stoi(b.substr(0, slashB)) - 1;
-				int bTexInd  = std::stoi(b.substr(slashB + 1)) - 1;
+				size_t bSlash1 = b.find('/');
+				size_t bSlash2 = b.find('/', bSlash1 + 1);
+				int bInd = std::stoi(b.substr(0, bSlash1)) - 1;
+				int bTexInd = std::stoi(b.substr(bSlash1 + 1, bSlash2 - bSlash1 - 1)) - 1;
+				int bNorInd = std::stoi(b.substr(bSlash2 + 1)) - 1;
 
-				int slashC = c.find('/');
-				int cInd = std::stoi(c.substr(0, slashC)) - 1;
-				int cTexInd = std::stoi(c.substr(slashC + 1)) - 1;
+				size_t cSlash1 = c.find('/');
+				size_t cSlash2 = c.find('/', cSlash1 + 1);
+				int cInd = std::stoi(c.substr(0, cSlash1)) - 1;
+				int cTexInd = std::stoi(c.substr(cSlash1 + 1, cSlash2 - cSlash1 - 1)) - 1;
+				int cNorInd = std::stoi(c.substr(cSlash2 + 1)) - 1;
 
-				std::vector<Vertex> verts = 
+				std::vector<Vertex> verts =
 				{
-					{ vertexPoints[aInd], uvs[aTexInd] },
-					{ vertexPoints[bInd], uvs[bTexInd] },
-					{ vertexPoints[cInd], uvs[cTexInd] }
+					{ vertexPoints[aInd], uvs[aTexInd], normals[aNorInd] },
+					{ vertexPoints[bInd], uvs[bTexInd], normals[bNorInd] },
+					{ vertexPoints[cInd], uvs[cTexInd], normals[cNorInd] }
 				};
 
-				triangles.push_back({verts});
+				triangles.push_back({ verts });
 			}
 		}
 
-		mat.texture.LoadTexture(texPath);
+		mat.texture.LoadTextureFile(texPath);
 	}
 };
 
 struct Scene
 {
 	std::vector<Mesh> meshes;
+	std::vector<Light> lights;
 };

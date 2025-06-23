@@ -1,5 +1,5 @@
-#include "Primitives.h"
 #include <imgui.h>
+#include "Primitives.h"
 
 struct Camera
 {

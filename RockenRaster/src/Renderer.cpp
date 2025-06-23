@@ -3,6 +3,9 @@
 
 Renderer::Renderer()
 {
+	nearClip = 0.01f;
+	farClip = 100.0f;
+	skyColor = glm::vec4(0.53f, 0.81f, 0.98f, 1.0f);
 	deltaTime = 0.0f;
 	screenResolution = glm::vec2(0.0f);
 	projection = PERSPECTIVE;
@@ -22,6 +25,12 @@ Renderer::Renderer()
 		Propeller.transform.location = glm::vec3(0.0f, 1.37f, -9.97f);
 		Propeller.speedComp.angularSpeed = glm::vec3(0.0f, 0.0f, -0.2f);
 		scene.meshes.push_back(Propeller);
+
+		Light atmLight;
+		atmLight.location = {glm::vec3(-20.0f, 20.f, -10.f)};
+		atmLight.direction = { glm::vec3(-20.0f, 20.f, -10.f) };
+		atmLight.intensityMultiplier = 2.0f;
+		scene.lights.push_back(atmLight);
 	}
 }
 
@@ -46,7 +55,7 @@ void Renderer::Render(float width, float height, float delta)
 	}
 
 	deltaTime = delta / 10.0f;
-	ClearBackground(glm::vec4(0.2f));
+	ClearBackground(skyColor);
 	ResetDepthBuffer();
 
 	if (scene.meshes.empty())
@@ -116,26 +125,49 @@ void Renderer::Render(float width, float height, float delta)
 						{
 							depthBuffer[pixelIndex] = pixelDepth;
 							glm::vec2 texCoords;
+							glm::vec3 normal;
 
 							if (projection == PERSPECTIVE)
 							{
 								glm::vec2 uv0 = tri.vertices[0].uv / ndcA.z;
 								glm::vec2 uv1 = tri.vertices[1].uv / ndcB.z;
 								glm::vec2 uv2 = tri.vertices[2].uv / ndcC.z;
-
 								glm::vec2 uvInterp = uv0 * weights.x + uv1 * weights.y + uv2 * weights.z;
+								
+								glm::vec3 nor0 = tri.vertices[0].normal / ndcA.z;
+								glm::vec3 nor1 = tri.vertices[1].normal / ndcB.z;
+								glm::vec3 nor2 = tri.vertices[2].normal / ndcC.z;
+								glm::vec3 norInterp = nor0 * weights.x + nor1 * weights.y + nor2 * weights.z;
+
 								float invZ = weights.x / ndcA.z + weights.y / ndcB.z + weights.z / ndcC.z;
+
 								texCoords = uvInterp / invZ;
+								normal = norInterp / invZ;
 							}
 							else if (projection == ORTHOGRAPHIC)
 							{
 								texCoords = tri.vertices[0].uv * weights.x +
 											tri.vertices[1].uv * weights.y +
 											tri.vertices[2].uv * weights.z;
+
+								normal = tri.vertices[0].normal * weights.x +
+										 tri.vertices[1].normal * weights.y +
+										 tri.vertices[2].normal * weights.z;
 							}
-							
-							glm::vec4 col = mesh.mat.texture.LoadColorAtTexureCoordinates(texCoords);
-							DrawPixel(glm::vec2(x, y), col);
+
+							normal = glm::normalize(normal);
+							float intensity = 1.0f;
+
+							for (Light& light : scene.lights)
+							{
+								if (glm::distance(light.location, mesh.transform.location) > farClip) continue;
+
+								glm::vec3 lightDir = glm::normalize(light.direction);
+								intensity += glm::clamp(glm::dot(normal, -lightDir), 0.0f, 1.0f) * light.intensityMultiplier;
+							}
+			
+							glm::vec4 texCol = mesh.mat.texture.LoadColorAtTexureCoordinates(texCoords);
+							DrawPixel(glm::vec2(x, y), intensity * texCol);
 						}
 					}
 				}
@@ -209,7 +241,7 @@ glm::vec4 Renderer::WorldToClip(glm::vec3& point, glm::mat4& model)
 							  -camera.orthoValue, camera.orthoValue, -50.0f, 50.0f);
 			break;
 		case PERSPECTIVE:
-			proj = glm::perspective(camera.fov, aspectRatio, 0.01f, 100.0f);
+			proj = glm::perspective(camera.fov, aspectRatio, nearClip, farClip);
 			break;
 	}
 
