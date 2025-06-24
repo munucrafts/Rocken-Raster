@@ -2,13 +2,15 @@
 
 <table>
 <tr>
-<td>
+<td valign="top">
 
-**Rocken Raster** is a **CPU-based software rasterizer** designed to render **3D scenes**. It supports modern rendering techniques, including **triangle rasterization**, **depth testing**, **basic shading**, and more — all built from scratch. The **Walnut framework** is being used for basic operations such as **window creation**, **UI**, and the **GLM math library**.
+* **Rocken Raster** is a **CPU-based Software Rasterizer** designed to render **3D scenes**.
+* It supports modern rendering techniques, including **Triangle Rasterization**, **Depth Testing**, **Basic Shading**, and more — all built from scratch.
+* The **Walnut Framework** is being used for basic operations such as **Window Creation**, **UI**, and the **GLM Math Library**.
 
 </td>
 <td>
-<img src="Assets/logo.png" alt="Rocken Raster Logo" width="960"/>
+<img src="Assets/logo.png" alt="Rocken Raster Logo" width="260"/>
 </td>
 </tr>
 </table>
