@@ -1,19 +1,11 @@
-<div style="display: flex; align-items: center; justify-content: space-between; gap: 40px;">
+# Rocken Raster - A CPU Rasterizer
 
-  <div style="flex: 1; font-size: 1.1em;">
-    <p><strong>Rocken Raster</strong> is a <strong>CPU-based Software Rasterizer</strong> designed to render <strong>3D scenes</strong>.</p>
-    <p>It supports modern rendering techniques, including <strong>Triangle Rasterization</strong>, <strong>Depth Testing</strong>, <strong>Basic Shading</strong>, and more — all built from scratch.</p>
-    <p>The <strong>Walnut Framework</strong> is used for basic operations such as <strong>Window Creation</strong>, <strong>UI</strong>, and the <strong>GLM Math Library</strong>.</p>
-  </div>
+<img align="right" alt="Coding" width="200" src="Assets/logo.png">
 
-  <div style="flex: 1; text-align: right;">
-    <img src="Assets/logo.png" alt="Rocken Raster Logo" style="max-width: 100%; height: auto;" />
-  </div>
+* **Rocken Raster** is a **CPU-based Software Rasterizer** designed to render **3D scenes**.
+* It supports modern rendering techniques, including **Triangle Rasterization**, **Depth Testing**, **Basic Shading**, and more — all built from scratch.
+* The **Walnut Framework** is used for basic operations such as **Window Creation**, **UI**, and the **GLM Math Library**.
 
-</div>
-
-
----
 
 ## 🐉 Features
 
