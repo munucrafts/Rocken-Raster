@@ -8,7 +8,7 @@
 
 </td>
 <td>
-<img src="Assets/logo.png" alt="Rocken Raster Logo" width="260"/>
+<img src="Assets/logo.png" alt="Rocken Raster Logo" width="960"/>
 </td>
 </tr>
 </table>
