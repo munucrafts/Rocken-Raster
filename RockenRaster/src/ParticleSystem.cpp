@@ -1,67 +1,41 @@
 #include "ParticleSystem.h"
 
-void ParticleSystem::ResetParticle(Particle& particle)
+void ParticleSystem::EmitParticles(float deltaTime)
 {
-    particle.active = true;
-    particle.location = particlesProps.location;
-
-    glm::vec2 randomVel = particlesProps.velocityVariation * (glm::vec2)Walnut::Random::Vec3();
-    particle.velocity = particlesProps.velocity + randomVel;
-
-    particle.colorBegin = particlesProps.colorBegin;
-    particle.colorEnd = particlesProps.colorEnd;
-
-    float randomSize = particlesProps.sizeVariation * Walnut::Random::Float();
-    particle.sizeBegin = particlesProps.sizeBegin + randomSize;
-    particle.sizeEnd = particlesProps.sizeEnd;
-
-    particle.lifetime = particlesProps.lifetime;
-    particle.lifeRemaining = particlesProps.lifetime;
-
-    particle.rotation = Walnut::Random::Float() * 2.0f * 3.1415926f;
-}
-
-void ParticleSystem::DrawParticle(glm::vec2 location, float size, glm::vec4 color)
-{
-
-}
-
-void ParticleSystem::InitializeParticleSystem()
-{
-    particles.resize(particlesProps.particleCount);
-
-    for (Particle& particle : particles)
+    if (particles.size() != particlesProps.particleCount)
     {
-        particle.active = false;
+        particles.resize(particlesProps.particleCount);
+        triangles.clear();
+
+        for (int i = 0; i < particlesProps.particleCount; i++)
+        {
+            Triangle tri;
+            Vertex v0, v1, v2;
+
+            v0.vert = glm::vec3(0.0f, 1.0f, 0.0f);
+            v1.vert = glm::vec3(-1.0f, -1.0f, 0.0f);
+            v2.vert = glm::vec3(1.0f, -1.0f, 0.0f);
+
+            v0.uv = glm::vec2(0.5f, 1.0f);
+            v1.uv = glm::vec2(0.0f, 0.0f);
+            v2.uv = glm::vec2(1.0f, 0.0f);
+
+            glm::vec3 normal = glm::vec3(0.0f, 0.0f, 1.0f);
+            v0.normal = v1.normal = v2.normal = normal;
+
+            tri.vertices = { v0, v1, v2 };
+            triangles.push_back(tri);
+        }
     }
+
+
 }
 
-void ParticleSystem::Emit(float deltaTime, glm::vec2& screenResolution)
+void Particle::ResetParticle(ParticleProperties& particleProps)
 {
-    for (Particle& particle : particles)
-    {
-        if (!particle.active)
-        {
-            ResetParticle(particle);
-            continue;
-        }
-
-        if (particle.lifeRemaining <= 0.0f)
-        {
-            particle.active = false;
-            continue;
-        }
-
-        deltaTime *= 0.1f;
-
-        particle.lifeRemaining -= deltaTime;
-        particle.location += particle.velocity * deltaTime;
-
-        float lifeRatio = particle.lifeRemaining / particle.lifetime;
-        glm::vec4 color = glm::mix(particle.colorEnd, particle.colorBegin, lifeRatio);
-        float size = glm::mix(particle.sizeEnd, particle.sizeBegin, lifeRatio);
-
-        DrawParticle(particle.location, size, color);
-    }
+    transform = particleProps.transformBegin;
+    speedComp = particleProps.speedCompBegin;
+    color = particleProps.colorBegin;
+    lifeRemaining = particleProps.lifetime;
+    active = true;
 }
-

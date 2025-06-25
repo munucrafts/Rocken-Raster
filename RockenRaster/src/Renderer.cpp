@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include "Renderer.h"
+#include "Scenes.h"
 
 Renderer::Renderer()
 {
@@ -53,18 +54,16 @@ void Renderer::Render(float width, float height, float delta)
 
 	camera.NavigateCamera(deltaTime, projection);
 
-	for (ParticleSystem& particleSystem : scene.particleSystems)
+	for (Mesh* mesh : scene.meshes)
 	{
-		particleSystem.Emit(deltaTime, screenResolution);
-	}
+		mesh->RotateMesh(deltaTime);
 
-	for (Mesh& mesh : scene.meshes)
-	{
-		mesh.RotateMesh(deltaTime);
+		ParticleSystem* ps = dynamic_cast<ParticleSystem*>(mesh);
+		if (ps) ps->EmitParticles(deltaTime * 0.01f); 
 
-		for (Triangle& tri : mesh.triangles)
+		for (Triangle& tri : mesh->triangles)
 		{
-			glm::mat4 modelWorld = ModelToWorld(mesh.transform);
+			glm::mat4 modelWorld = ModelToWorld(mesh->transform);
 
 			glm::vec4 clipA = WorldToClip(tri.vertices[0].vert, modelWorld);
 			glm::vec4 clipB = WorldToClip(tri.vertices[1].vert, modelWorld);
@@ -154,7 +153,7 @@ void Renderer::Render(float width, float height, float delta)
 								}
 							}
 			
-							glm::vec4 finalColor = mesh.mat.tex ? mesh.mat.texture.LoadColorAtTexureCoordinates(texCoords) : mesh.mat.color;
+							glm::vec4 finalColor = mesh->mat.tex ? mesh->mat.texture.LoadColorAtTexureCoordinates(texCoords) : mesh->mat.color;
 							DrawPixel(glm::vec2(x, y), intensity * finalColor);
 						}
 					}

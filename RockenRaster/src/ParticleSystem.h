@@ -4,38 +4,35 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <Walnut/Random.h>
+#include "Primitives.h"
 
 struct ParticleProperties
 {
 	int particleCount;
 	float rate;
-	glm::vec2 location;
-	glm::vec2 velocity, velocityVariation;
+	Transform transformBegin, transformEnd;
+	SpeedComponent speedCompBegin, speedCompEnd;
 	glm::vec4 colorBegin, colorEnd;
-	float sizeBegin, sizeEnd, sizeVariation;
 	float lifetime;
 };
 
 struct Particle
 {
-	glm::vec2 location;
-	float rotation;
-	glm::vec2 velocity;
-	glm::vec4 colorBegin, colorEnd;
-	float sizeBegin, sizeEnd;
-	float lifetime;
+	float age = 10.0f;
+	Transform transform;
+	SpeedComponent speedComp;
+	glm::vec4 color;
 	float lifeRemaining;
 	bool active;
+
+	void ResetParticle(ParticleProperties& particleProps);
 };
 
-class ParticleSystem
+class ParticleSystem : public Mesh
 {
 public:
 	ParticleSystem() = default;
-	void InitializeParticleSystem();
-	void Emit(float deltaTime, glm::vec2& screenResolution);
-	void ResetParticle(Particle& particle);
-	void DrawParticle(glm::vec2 location, float size, glm::vec4 color);
+	void EmitParticles(float deltaTime);
 
 public:
 	ParticleProperties particlesProps;
@@ -43,5 +40,3 @@ public:
 private:
 	std::vector<Particle> particles;
 };
-
-
