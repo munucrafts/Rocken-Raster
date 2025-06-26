@@ -100,11 +100,10 @@ struct Entity
 	virtual ~Entity() = default;
 
 	virtual void RotateEntity(float deltaTime) {};
-	virtual void TranslateEntity(float deltaTime) {};
+	virtual void MoveEntity(float deltaTime) {};
 	virtual void ScaleEntity(float deltaTime) {};
 
 	Mobility mobility = Mobility::Static;
-	bool dirty = true;
 };
 
 struct Mesh : public Entity
@@ -121,7 +120,7 @@ struct Mesh : public Entity
 	{
 		transform.rotation += speedComp.angularSpeed * deltaTime;
 	};
-	void TranslateEntity(float deltaTime) override
+	void MoveEntity(float deltaTime) override
 	{
 		transform.location += speedComp.linearSpeed * deltaTime;
 	};

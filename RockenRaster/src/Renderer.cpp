@@ -5,11 +5,13 @@
 
 Renderer::Renderer()
 {
+	firstFrame = true;
 	nearClip = 0.01f;
 	farClip = 100.0f;
 	deltaTime = 0.0f;
 	screenResolution = glm::vec2(0.0f);
 	projection = PERSPECTIVE;
+	camera.transform.location = glm::vec3(0.0f, 0.0f, 13.0f);
 
 	Windmill windmill(scene);
 }
@@ -57,8 +59,6 @@ void Renderer::Render(float width, float height, float delta)
 
 	for (Entity* entity : scene.entities)
 	{
-		if (!TransformUpdateRequired(camera, *entity)) continue;
-
 		if (entity->mobility == Mobility::Movable)
 		{
 			entity->RotateEntity(deltaTime);
@@ -174,6 +174,7 @@ void Renderer::Render(float width, float height, float delta)
 	}
 
 	image->SetData(imageData.data());
+	firstFrame = false;
 }
 
 uint32_t Renderer::ColorToRGBA(glm::vec4& color)
@@ -292,9 +293,9 @@ void Renderer::DrawPixel(glm::vec2& pixelLoc, glm::vec4& color)
 		imageData[x + y * (int)screenResolution.x] = ColorToRGBA(color);
 }
 
-bool Renderer::TransformUpdateRequired(Camera& camera, Entity& entity)
+bool Renderer::TransformUpdateRequired(Camera& camera)
 {
-	return (entity.mobility == Mobility::Movable || entity.dirty || camera.dirty);
+	return camera.isDirty || firstFrame;
 }
 
 void Renderer::ResetDepthBuffer()

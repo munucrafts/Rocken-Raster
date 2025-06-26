@@ -27,7 +27,7 @@ private:
 	BoundingBox GetTriangleBoundingBox(glm::vec3& a, glm::vec3& b, glm::vec3& c);
 	void ResetDepthBuffer();
 	void DrawPixel(glm::vec2& pixelLoc, glm::vec4& color);
-	bool TransformUpdateRequired(Camera& camera, Entity& entity);
+	bool TransformUpdateRequired(Camera& camera);
 
 private:
 	std::vector<uint32_t> imageData;
@@ -40,5 +40,6 @@ private:
 	float deltaTime;
 	float nearClip;
 	float farClip;
+	bool firstFrame;
 };
 
