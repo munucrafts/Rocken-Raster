@@ -32,6 +32,7 @@ class ParticleSystem : public Mesh
 {
 public:
 	ParticleSystem() = default;
+	~ParticleSystem() = default;
 	void EmitParticles(float deltaTime);
 
 public:

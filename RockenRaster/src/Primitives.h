@@ -6,7 +6,6 @@
 #include <sstream>
 #include <random>
 #include <Walnut/Input/Input.h>
-#include "Light.h"
 #include "../../Walnut/vendor/stb_image/stb_image.h"
 
 enum Projection
@@ -90,24 +89,43 @@ struct SpeedComponent
 	glm::vec3 scalingSpeed = glm::vec3(0.0f);
 };
 
-struct Mesh
+enum Mobility
 {
-	virtual ~Mesh() {};
+	Static, Movable
+};
+
+struct Entity
+{
+	Entity() = default;
+	virtual ~Entity() = default;
+
+	virtual void RotateEntity(float deltaTime) {};
+	virtual void TranslateEntity(float deltaTime) {};
+	virtual void ScaleEntity(float deltaTime) {};
+
+	Mobility mobility = Mobility::Static;
+	bool dirty = true;
+};
+
+struct Mesh : public Entity
+{
+	Mesh() = default;
+	virtual ~Mesh() = default;
 
 	std::vector<Triangle> triangles;
 	Transform transform;
 	SpeedComponent speedComp;
 	Material mat;
 
-	void RotateMesh(float deltaTime)
+	void RotateEntity(float deltaTime) override
 	{
 		transform.rotation += speedComp.angularSpeed * deltaTime;
 	};
-	void TranslateMesh (float deltaTime)
+	void TranslateEntity(float deltaTime) override
 	{
 		transform.location += speedComp.linearSpeed * deltaTime;
 	};
-	void ScaleMesh(float deltaTime)
+	void ScaleEntity(float deltaTime) override
 	{
 		transform.scale += speedComp.scalingSpeed * deltaTime;
 	};
@@ -185,8 +203,8 @@ struct Mesh
 	};
 };
 
+
 struct Scene
 {
-	std::vector<Mesh*> meshes;
-	std::vector<Light*> lights;
+	std::vector<Entity*> entities;
 };

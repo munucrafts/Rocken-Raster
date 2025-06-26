@@ -1,7 +1,8 @@
 #pragma once
 #include <glm/glm.hpp>
+#include "Primitives.h"
 
-class Light
+class Light : public Entity
 {
 public:
 	Light();
@@ -9,13 +10,12 @@ public:
 
 public:
 	float intensity;
+	glm::vec3 direction;
 };
 
 class DirectionalLight : public Light
 {
 public:
 	DirectionalLight();
-
-public:
-	glm::vec3 direction;
+	~DirectionalLight() = default;
 };

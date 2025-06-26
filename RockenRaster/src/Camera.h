@@ -18,6 +18,7 @@ public:
 	Transform transform;
 	SpeedComponent speedComp;
 	float orthoValue = 10.0f;
+	bool dirty = true;
 
 private:
 	void RotateCamera(float deltaTime)
