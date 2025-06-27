@@ -11,14 +11,14 @@ private:
 
 	bool firstMouse = true;
 	float speedMultiplier = 0.1f;
-	float mouseSensitivity = 0.075f;
+	float mouseSensitivity = 0.1f;
 	glm::vec2 lastMousePos = glm::vec2(0.0f);
 
 public:
 	float fov = glm::radians(60.0f);
 	Transform transform;
 	SpeedComponent speedComp;
-	float orthoValue = 10.0f;
+	float orthoValue = 20.0f;
 	bool isMoving = false;
 
 private:
@@ -79,13 +79,15 @@ private:
 		if (io.MouseWheel > 0.0f)
 		{
 			orthoValue -= step;
-			orthoValue = glm::clamp(orthoValue, 5.0f, 100.0f);
+			orthoValue = glm::clamp(orthoValue, 10.0f, 100.0f);
 		}
 		else if (io.MouseWheel < 0.0f)
 		{
 			orthoValue += step;
-			orthoValue = glm::clamp(orthoValue, 5.0f, 100.0f);
+			orthoValue = glm::clamp(orthoValue, 10.0f, 100.0f);
 		}
+
+		isMoving = true;
 	};
 
 public:
@@ -107,7 +109,6 @@ public:
 				firstMouse = true;
 				return;
 			}
-
 			if (Walnut::Input::IsKeyDown(Walnut::Key::A))
 			{
 				speedComp.linearSpeed = -right * speedMultiplier;
@@ -161,6 +162,8 @@ public:
 		}
 		else if (projType == ORTHOGRAPHIC) 
 		{
+			OrthographicZoom(1.0f);
+
 			if (Walnut::Input::IsKeyDown(Walnut::Key::A))
 			{
 				speedComp.linearSpeed = -right * speedMultiplier;
@@ -188,8 +191,6 @@ public:
 				return;
 			}
 
-			OrthographicZoom(1.0f);
-
 			glm::vec2 mousePos = Walnut::Input::GetMousePosition();
 
 			if (firstMouse)
@@ -203,8 +204,7 @@ public:
 
 			if (glm::length(delta) < 0.1f) return;
 
-			delta *= orthoValue;
-			delta /= 300.0f;
+			delta *= orthoValue * 0.002f;
 			lastMousePos = mousePos;
 
 			speedComp.linearSpeed = (-delta.x * right) + (delta.y * up);

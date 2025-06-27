@@ -10,7 +10,7 @@ Renderer::Renderer()
 	farClip = 100.0f;
 	deltaTime = 0.0f;
 	screenResolution = glm::vec2(0.0f);
-	projection = PERSPECTIVE;
+	projection = ORTHOGRAPHIC;
 	camera.transform.location = glm::vec3(0.0f, 0.0f, 13.0f);
 
 	Windmill windmill(scene);
@@ -252,14 +252,21 @@ void Renderer::PixelToNDC(glm::vec2& q)
 
 glm::vec4 Renderer::WorldToClip(glm::vec3& point, glm::mat4& model)
 {
-	float aspectRatio = (float)screenResolution.x / (float)screenResolution.y;
-	glm::mat4 view = camera.GetViewMatrix(firstFrame);
-	glm::mat4 transform;
-	glm::mat4 proj;
+	static glm::mat4 cachedViewProj;
+	static glm::vec2 cachedResolution;
+	static Projection cachedProjectionType;
+	static bool firstRun = true;
+
 	glm::vec4 clip;
 
-	switch (projection)
+	if (camera.isMoving || projection != cachedProjectionType || screenResolution != cachedResolution || firstRun)
 	{
+		float aspectRatio = (float)screenResolution.x / (float)screenResolution.y;
+		glm::mat4 view = camera.GetViewMatrix(firstFrame);
+		glm::mat4 proj;
+
+		switch (projection)
+		{
 		case ORTHOGRAPHIC:
 			proj = glm::ortho(-camera.orthoValue * aspectRatio, camera.orthoValue * aspectRatio,
 							  -camera.orthoValue, camera.orthoValue, -50.0f, 50.0f);
@@ -267,10 +274,15 @@ glm::vec4 Renderer::WorldToClip(glm::vec3& point, glm::mat4& model)
 		case PERSPECTIVE:
 			proj = glm::perspective(camera.fov, aspectRatio, nearClip, farClip);
 			break;
+		}
+
+		cachedViewProj = proj * view;
+		cachedProjectionType = projection;
+		cachedResolution = screenResolution;
+		firstRun = false;
 	}
 
-	transform = proj * view * model;
-	clip = transform * glm::vec4(point, 1.0f);
+	clip = cachedViewProj * model * glm::vec4(point, 1.0f);
 	return clip;
 }
 
