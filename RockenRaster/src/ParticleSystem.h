@@ -31,7 +31,7 @@ struct Particle
 class ParticleSystem : public Mesh
 {
 public:
-	ParticleSystem() = default;
+	ParticleSystem();
 	~ParticleSystem() = default;
 	void EmitParticles(float deltaTime);
 

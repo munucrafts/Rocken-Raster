@@ -1,5 +1,11 @@
 #include "ParticleSystem.h"
 
+ParticleSystem::ParticleSystem()
+{
+    mobility = Movable;
+    isMoving = true;
+}
+
 void ParticleSystem::EmitParticles(float deltaTime)
 {
     if (particles.size() != particlesProps.particleCount)
@@ -27,8 +33,6 @@ void ParticleSystem::EmitParticles(float deltaTime)
             triangles.push_back(tri);
         }
     }
-
-
 }
 
 void Particle::ResetParticle(ParticleProperties& particleProps)

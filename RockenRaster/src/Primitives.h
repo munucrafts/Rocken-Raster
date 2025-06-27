@@ -103,12 +103,17 @@ struct Entity
 	virtual void MoveEntity(float deltaTime) {};
 	virtual void ScaleEntity(float deltaTime) {};
 
-	Mobility mobility = Mobility::Static;
+	Mobility mobility = Static;
 };
 
 struct Mesh : public Entity
 {
 	Mesh() = default;
+	Mesh(Mobility mob)
+	{
+		mobility = mob;
+		isMoving = mobility == Movable;
+	};
 	virtual ~Mesh() = default;
 
 	std::vector<Triangle> triangles;
@@ -116,17 +121,23 @@ struct Mesh : public Entity
 	SpeedComponent speedComp;
 	Material mat;
 
+	glm::mat4 bakedTransform = glm::mat4(0.0f);
+	bool isMoving = false;
+
 	void RotateEntity(float deltaTime) override
 	{
 		transform.rotation += speedComp.angularSpeed * deltaTime;
+		isMoving = true;
 	};
 	void MoveEntity(float deltaTime) override
 	{
 		transform.location += speedComp.linearSpeed * deltaTime;
+		isMoving = true;
 	};
 	void ScaleEntity(float deltaTime) override
 	{
 		transform.scale += speedComp.scalingSpeed * deltaTime;
+		isMoving = true;
 	};
 	void LoadObjectFile(std::string objPath, std::string texPath)
 	{
@@ -201,7 +212,6 @@ struct Mesh : public Entity
 		mat.texture.LoadTextureFile(texPath);
 	};
 };
-
 
 struct Scene
 {

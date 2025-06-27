@@ -7,6 +7,7 @@ private:
 	glm::vec3 forward = glm::vec3(0.0f, 0.0f, -1.0f);
 	glm::vec3 right = glm::vec3(1.0f, 0.0f, 0.0f);
 	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::mat4 viewMatrix = glm::mat4(0.0f);
 
 	bool firstMouse = true;
 	float speedMultiplier = 0.1f;
@@ -18,7 +19,7 @@ public:
 	Transform transform;
 	SpeedComponent speedComp;
 	float orthoValue = 10.0f;
-	bool isDirty = false;
+	bool isMoving = false;
 
 private:
 	void RotateCamera(float deltaTime)
@@ -26,12 +27,12 @@ private:
 		transform.rotation += speedComp.angularSpeed * deltaTime;
 		transform.rotation.x = glm::clamp(transform.rotation.x, -89.0f, 89.0f);
 		UpdateDirectionVectors();
-		isDirty = true;
+		isMoving = true;
 	};
 	void MoveCamera(float deltaTime)
 	{
 		transform.location += speedComp.linearSpeed * deltaTime;
-		isDirty = true;
+		isMoving = true;
 	};
 	void UpdateCameraSpeed(float step)
 	{
@@ -68,7 +69,7 @@ private:
 	{
 		transform.location.x += speedComp.linearSpeed.x * deltaTime;
 		transform.location.y += speedComp.linearSpeed.y * deltaTime;
-		isDirty = true;
+		isMoving = true;
 	};
 	void OrthographicZoom(float step) 
 	{
@@ -88,13 +89,16 @@ private:
 	};
 
 public:
-	glm::mat4 GetViewMatrix()
+	glm::mat4 GetViewMatrix(bool firstFrame)
 	{
-		return glm::lookAt(transform.location, transform.location + forward, up);
+		if (isMoving || firstFrame)
+			viewMatrix = glm::lookAt(transform.location, transform.location + forward, up);
+
+		return viewMatrix;
 	};
 	void NavigateCamera(float deltaTime, Projection& projType)
 	{
-		isDirty = false;
+		isMoving = false;
 
 		if (projType == PERSPECTIVE)
 		{
@@ -155,6 +159,56 @@ public:
 			speedComp.angularSpeed = glm::vec3(-delta.y * mouseSensitivity, delta.x * mouseSensitivity, 0.0f);
 			RotateCamera(deltaTime);
 		}
-		else if (projType == ORTHOGRAPHIC);
+		else if (projType == ORTHOGRAPHIC) 
+		{
+			if (Walnut::Input::IsKeyDown(Walnut::Key::A))
+			{
+				speedComp.linearSpeed = -right * speedMultiplier;
+				PanCamera(deltaTime);
+			}
+			if (Walnut::Input::IsKeyDown(Walnut::Key::D))
+			{
+				speedComp.linearSpeed = right * speedMultiplier;
+				PanCamera(deltaTime);
+			}
+			if (Walnut::Input::IsKeyDown(Walnut::Key::E))
+			{
+				speedComp.linearSpeed = up * speedMultiplier;
+				PanCamera(deltaTime);
+			}
+			if (Walnut::Input::IsKeyDown(Walnut::Key::Q))
+			{
+				speedComp.linearSpeed = -up * speedMultiplier;
+				PanCamera(deltaTime);
+			}
+
+			if (!Walnut::Input::IsMouseButtonDown(Walnut::MouseButton::Right))
+			{
+				firstMouse = true;
+				return;
+			}
+
+			OrthographicZoom(1.0f);
+
+			glm::vec2 mousePos = Walnut::Input::GetMousePosition();
+
+			if (firstMouse)
+			{
+				lastMousePos = mousePos;
+				firstMouse = false;
+				return;
+			}
+
+			glm::vec2 delta = mousePos - lastMousePos;
+
+			if (glm::length(delta) < 0.1f) return;
+
+			delta *= orthoValue;
+			delta /= 300.0f;
+			lastMousePos = mousePos;
+
+			speedComp.linearSpeed = (-delta.x * right) + (delta.y * up);
+			PanCamera(deltaTime);
+		};
 	}
 };

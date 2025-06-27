@@ -59,20 +59,45 @@ void Renderer::Render(float width, float height, float delta)
 
 	for (Entity* entity : scene.entities)
 	{
-		if (entity->mobility == Mobility::Movable)
+		if (entity->mobility == Movable)
 		{
 			entity->RotateEntity(deltaTime);
-		}
 
-		if (ParticleSystem* ps = dynamic_cast<ParticleSystem*>(entity))
-			ps->EmitParticles(deltaTime * 0.01f);
+			if (ParticleSystem* ps = dynamic_cast<ParticleSystem*>(entity))
+				ps->EmitParticles(deltaTime * 0.01f);
+		}
 
 		if (Mesh* mesh = dynamic_cast<Mesh*>(entity))
 		{
+			glm::mat4 modelWorld;
+
+			if (mesh->mobility == Static)
+			{
+				if (firstFrame)
+				{
+					modelWorld = ModelToWorld(mesh->transform);
+					mesh->bakedTransform = modelWorld;
+				}
+				else
+				{
+					modelWorld = mesh->bakedTransform;
+				}
+			}
+			else if (mesh->mobility == Movable)
+			{
+				if (firstFrame || mesh->isMoving)
+				{
+					modelWorld = ModelToWorld(mesh->transform);
+					mesh->bakedTransform = modelWorld;
+				}
+				else
+				{
+					modelWorld = mesh->bakedTransform;
+				}
+			}
+
 			for (Triangle& tri : mesh->triangles)
 			{
-				glm::mat4 modelWorld = ModelToWorld(mesh->transform);
-
 				glm::vec4 clipA = WorldToClip(tri.vertices[0].vert, modelWorld);
 				glm::vec4 clipB = WorldToClip(tri.vertices[1].vert, modelWorld);
 				glm::vec4 clipC = WorldToClip(tri.vertices[2].vert, modelWorld);
@@ -228,7 +253,7 @@ void Renderer::PixelToNDC(glm::vec2& q)
 glm::vec4 Renderer::WorldToClip(glm::vec3& point, glm::mat4& model)
 {
 	float aspectRatio = (float)screenResolution.x / (float)screenResolution.y;
-	glm::mat4 view = camera.GetViewMatrix();
+	glm::mat4 view = camera.GetViewMatrix(firstFrame);
 	glm::mat4 transform;
 	glm::mat4 proj;
 	glm::vec4 clip;
@@ -295,7 +320,7 @@ void Renderer::DrawPixel(glm::vec2& pixelLoc, glm::vec4& color)
 
 bool Renderer::TransformUpdateRequired(Camera& camera)
 {
-	return camera.isDirty || firstFrame;
+	return camera.isMoving || firstFrame;
 }
 
 void Renderer::ResetDepthBuffer()
