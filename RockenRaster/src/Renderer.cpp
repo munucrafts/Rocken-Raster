@@ -113,9 +113,7 @@ void Renderer::Render(float width, float height, float delta)
 				bool outB = PointOutsideClipSpace(clipB);
 				bool outC = PointOutsideClipSpace(clipC);
 
-				int clipCount = outA + outB + outC;
-
-				if (clipCount > 0)
+				if (mesh->Retriangulate(outA + outB + outC))
 					continue;
 
 				glm::vec3 ndcA = glm::vec3(clipA) / clipA.w;
@@ -208,6 +206,99 @@ void Renderer::Render(float width, float height, float delta)
 					}
 				}
 			}
+			for (Triangle& tri : mesh->newTriangles)
+			{
+				glm::vec3 ndcA = tri.vertices[0].vert;
+				glm::vec3 ndcB = tri.vertices[1].vert;
+				glm::vec3 ndcC = tri.vertices[2].vert;
+
+				NDCToPixel(ndcA);
+				NDCToPixel(ndcB);
+				NDCToPixel(ndcC);
+
+				BoundingBox box = GetTriangleBoundingBox(ndcA, ndcB, ndcC);
+
+				int minPixelX = (int)box.minMaxX.x;
+				int maxPixelX = (int)box.minMaxX.y;
+				int minPixelY = (int)box.minMaxY.x;
+				int maxPixelY = (int)box.minMaxY.y;
+
+				for (int y = minPixelY; y <= maxPixelY; y++)
+				{
+					for (int x = minPixelX; x <= maxPixelX; x++)
+					{
+						glm::vec3 weights;
+
+						if (InsideTriangle((glm::vec2)ndcA, (glm::vec2)ndcB, (glm::vec2)ndcC, glm::vec2(x, y), weights))
+						{
+							glm::vec3 abcDepths = glm::vec3(ndcA.z, ndcB.z, ndcC.z);
+							float pixelDepth = 1.0f / glm::dot(1.0f / abcDepths, weights);
+							int pixelIndex = x + y * (int)screenResolution.x;
+
+							if (pixelIndex < 0 || pixelIndex >= depthBuffer.size())
+								continue;
+
+							if (pixelDepth <= depthBuffer[pixelIndex])
+							{
+								depthBuffer[pixelIndex] = pixelDepth;
+								glm::vec2 texCoords;
+								glm::vec3 normal;
+
+								if (projection == PERSPECTIVE)
+								{
+									glm::vec2 uv0 = tri.vertices[0].uv / ndcA.z;
+									glm::vec2 uv1 = tri.vertices[1].uv / ndcB.z;
+									glm::vec2 uv2 = tri.vertices[2].uv / ndcC.z;
+									glm::vec2 uvInterp = uv0 * weights.x + uv1 * weights.y + uv2 * weights.z;
+
+									glm::vec3 nor0 = tri.vertices[0].normal / ndcA.z;
+									glm::vec3 nor1 = tri.vertices[1].normal / ndcB.z;
+									glm::vec3 nor2 = tri.vertices[2].normal / ndcC.z;
+									glm::vec3 norInterp = nor0 * weights.x + nor1 * weights.y + nor2 * weights.z;
+
+									float invZ = weights.x / ndcA.z + weights.y / ndcB.z + weights.z / ndcC.z;
+
+									texCoords = uvInterp / invZ;
+									normal = norInterp / invZ;
+								}
+								else if (projection == ORTHOGRAPHIC)
+								{
+									texCoords = tri.vertices[0].uv * weights.x +
+										tri.vertices[1].uv * weights.y +
+										tri.vertices[2].uv * weights.z;
+
+									normal = tri.vertices[0].normal * weights.x +
+										tri.vertices[1].normal * weights.y +
+										tri.vertices[2].normal * weights.z;
+								}
+
+								normal = glm::normalize(normal);
+								float accLightIntensity = 1.0f;
+
+								for (Entity* light : scene.entities)
+								{
+									if (DirectionalLight* direcLight = dynamic_cast<DirectionalLight*>(light))
+									{
+										glm::vec3 lightDir = glm::normalize(direcLight->direction);
+										accLightIntensity += glm::clamp(glm::dot(normal, -lightDir), 0.0f, 1.0f) * direcLight->intensity;
+									}
+								}
+
+								glm::vec4 finalColor = mesh->mat.tex ? mesh->mat.texture.LoadColorAtTexureCoordinates(texCoords) : mesh->mat.color;
+
+								if (atmFog)
+								{
+									fogFactor = atmFog->CalculateFogFactor(nearClip, farClip, pixelDepth);
+									finalColor = glm::mix(finalColor, skyTop, fogFactor);
+								}
+
+								DrawPixel(glm::vec2(x, y), accLightIntensity * finalColor);
+							}
+						}
+					}
+				}
+			}
+			mesh->newTriangles.clear();
 		}
 	}
 

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
@@ -117,6 +117,7 @@ struct Mesh : public Entity
 	virtual ~Mesh() = default;
 
 	std::vector<Triangle> triangles;
+	std::vector<Triangle> newTriangles;
 	Transform transform;
 	SpeedComponent speedComp;
 	Material mat;
@@ -211,6 +212,11 @@ struct Mesh : public Entity
 
 		mat.texture.LoadTextureFile(texPath);
 	};
+	bool Retriangulate(int clipCount)
+	{
+		if (clipCount == 0) return false;
+		else if (clipCount == 3) return true;
+	}
 };
 
 struct Scene

@@ -10,7 +10,7 @@
   
 <br>
 
-## 🐉 Features
+## 🐉 Available Features
 
 - Custom **OBJ Mesh** and **Texture Loading**  
 - **3D Rasterization** with support for both **Orthographic** and **Perspective projection**  
@@ -21,6 +21,18 @@
 - Concept of **Static and Movable** objects
 - Automatic **View & Transform Baking** for *Camera and Entities* for *optimisations*
 - **Exponential Fog** entity that blends with the *Sky Color* based on distance and *fog falloff* value
+
+## 🛩️ Currently Working On
+
+- **Physically Based Rendering (PBR)** material system  
+- **Ray-traced Shadows** 
+- **DLSS-like Super-resolution** system  
+
+## 👽 Future Plans
+
+- Improved **Clip Space Culling** with *Retriangulation* instead of full triangle discard  
+- CPU based **Particle System**
+- General **Performance Optimization**
 
 ## 🖼️ Rendering Pipeline
 
@@ -34,13 +46,3 @@
    - Camera → Screen = **–Z**  
 
 - **Triangle Winding Convention**: *Counter Clockwise (CCW)*
-
-## 👽 Future Plans
-
-- Improved **Clip Space Culling** with *Retriangulation* instead of full triangle discard  
-- **Physically Based Rendering (PBR)** material system  
-- **Ray-traced Shadows**  
-- **Particle System** (e.g., smoke, fire)  
-- **DLSS-like Super-resolution** system  
-- **GPU Hardware Acceleration**  
-- General **Performance Optimization**
