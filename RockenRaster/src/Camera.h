@@ -97,7 +97,7 @@ public:
 			viewMatrix = glm::lookAt(transform.location, transform.location + forward, up);
 
 		return viewMatrix;
-	};
+	}; 
 	void NavigateCamera(float deltaTime, Projection& projType)
 	{
 		isMoving = false;

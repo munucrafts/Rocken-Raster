@@ -10,7 +10,7 @@ Renderer::Renderer()
 	farClip = 100.0f;
 	deltaTime = 0.0f;
 	screenResolution = glm::vec2(0.0f);
-	projection = ORTHOGRAPHIC;
+	projection = PERSPECTIVE;
 	camera.transform.location = glm::vec3(0.0f, 0.0f, 13.0f);
 
 	Windmill windmill(scene);

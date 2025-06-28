@@ -18,6 +18,8 @@
 - **Scene Creation** with multiple objects  
 - **Camera Controls**: *Movement*, *Rotation*, *Panning*, *Zooming*, *Camera Speed* (supports both Orthographic and Perspective)  
 - **Material system** supporting both *Texture-based* and *Color-based* rendering
+- Concept of **Static and Movable** objects
+- Automatic **View & Transform Baking** for *Camera and Entities* for *optimisations*
 
 ## 🖼️ Rendering Pipeline
 
