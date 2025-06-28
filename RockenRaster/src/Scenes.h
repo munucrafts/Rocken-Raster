@@ -2,6 +2,7 @@
 #include "Primitives.h"
 #include "ParticleSystem.h"
 #include "Light.h"
+#include "Fog.h"
 
 struct Windmill : public Scene
 {
@@ -32,21 +33,24 @@ struct Windmill : public Scene
 		fan->mat.tex = true;
 		activeScene.entities.push_back(fan);
 
-		ParticleSystem* fire = new ParticleSystem();
-		fire->transform.location = glm::vec3(0.0f, 2.85f, -10.97f);
-		fire->speedComp.angularSpeed = glm::vec3(0.0f, 0.0f, 5.0f);
-		fire->mat.tex = false;
-		fire->mat.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-		fire->particlesProps.particleCount = 10;
-		fire->particlesProps.rate = 10.0f;
-		fire->particlesProps.transformBegin = {glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f)};
-		fire->particlesProps.transformEnd = {glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)};
-		fire->particlesProps.speedCompBegin = {glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)};
-		fire->particlesProps.speedCompEnd = {glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f)};
-		fire->particlesProps.colorBegin = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-		fire->particlesProps.colorEnd = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
-		fire->particlesProps.lifetime = 2.0f;
-		activeScene.entities.push_back(fire);
+		Fog* atmFog = new Fog();
+		activeScene.entities.push_back(atmFog);
+
+		//ParticleSystem* fire = new ParticleSystem();
+		//fire->transform.location = glm::vec3(0.0f, 2.85f, -10.97f);
+		//fire->speedComp.angularSpeed = glm::vec3(0.0f, 0.0f, 5.0f);
+		//fire->mat.tex = false;
+		//fire->mat.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+		//fire->particlesProps.particleCount = 10;
+		//fire->particlesProps.rate = 10.0f;
+		//fire->particlesProps.transformBegin = {glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f)};
+		//fire->particlesProps.transformEnd = {glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)};
+		//fire->particlesProps.speedCompBegin = {glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)};
+		//fire->particlesProps.speedCompEnd = {glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f)};
+		//fire->particlesProps.colorBegin = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+		//fire->particlesProps.colorEnd = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+		//fire->particlesProps.lifetime = 2.0f;
+		//activeScene.entities.push_back(fire);
 
 		DirectionalLight* dirLight = new DirectionalLight();
 		dirLight->direction = glm::vec3(-20.0f, 20.f, 0.0f);

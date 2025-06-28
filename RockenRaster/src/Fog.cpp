@@ -1,0 +1,18 @@
+#include "Fog.h"
+
+Fog::Fog()
+{
+	falloffDistance = 25.0f;
+	fogDensity = 0.001f;
+	mobility = Static;
+}
+
+float Fog::CalculateFogFactor(float nearClip, float farClip, float pixelDepth)
+{
+	float linearDepth = (2.0f * nearClip * farClip) / (farClip + nearClip - pixelDepth * (farClip - nearClip));
+	float fogCoord = glm::clamp((linearDepth - falloffDistance) / (farClip - falloffDistance), 0.0f, 1.0f);
+	float fogFactor = 1.0f - glm::exp(-fogCoord * fogDensity);
+	fogFactor = glm::clamp(fogFactor, 0.0f, 1.0f);
+	return fogFactor * 1000.f;
+}
+

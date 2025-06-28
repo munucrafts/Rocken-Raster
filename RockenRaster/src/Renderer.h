@@ -6,6 +6,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "Primitives.h"
 #include "Camera.h"
+#include "Fog.h"
 
 class Renderer
 {

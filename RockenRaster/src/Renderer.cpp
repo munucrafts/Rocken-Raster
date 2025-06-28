@@ -3,6 +3,7 @@
 #include "Scenes.h"
 #include "Light.h"
 
+
 Renderer::Renderer()
 {
 	firstFrame = true;
@@ -57,6 +58,9 @@ void Renderer::Render(float width, float height, float delta)
 
 	camera.NavigateCamera(deltaTime, projection);
 
+	static Fog* atmFog = nullptr;
+	static float fogFactor = 0.0f;
+
 	for (Entity* entity : scene.entities)
 	{
 		if (entity->mobility == Movable)
@@ -66,6 +70,9 @@ void Renderer::Render(float width, float height, float delta)
 			if (ParticleSystem* ps = dynamic_cast<ParticleSystem*>(entity))
 				ps->EmitParticles(deltaTime * 0.01f);
 		}
+
+		if (!atmFog)
+			atmFog = dynamic_cast<Fog*>(entity);
 
 		if (Mesh* mesh = dynamic_cast<Mesh*>(entity))
 		{
@@ -176,20 +183,26 @@ void Renderer::Render(float width, float height, float delta)
 								}
 
 								normal = glm::normalize(normal);
-								float intensity = 1.0f;
+								float accLightIntensity = 1.0f;
 
 								for (Entity* light : scene.entities)
 								{
 									if (DirectionalLight* direcLight = dynamic_cast<DirectionalLight*>(light))
 									{
 										glm::vec3 lightDir = glm::normalize(direcLight->direction);
-										intensity += glm::clamp(glm::dot(normal, -lightDir), 0.0f, 1.0f) * direcLight->intensity;
+										accLightIntensity += glm::clamp(glm::dot(normal, -lightDir), 0.0f, 1.0f) * direcLight->intensity;
 									}
 								}
 
 								glm::vec4 finalColor = mesh->mat.tex ? mesh->mat.texture.LoadColorAtTexureCoordinates(texCoords) : mesh->mat.color;
 
-								DrawPixel(glm::vec2(x, y), intensity * finalColor);
+								if (atmFog)
+								{
+									fogFactor = atmFog->CalculateFogFactor(nearClip, farClip, pixelDepth);
+									finalColor = glm::mix(finalColor, skyTop, fogFactor);
+								}
+								
+								DrawPixel(glm::vec2(x, y), accLightIntensity * finalColor);
 							}
 						}
 					}

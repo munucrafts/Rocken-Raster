@@ -20,6 +20,7 @@
 - **Material system** supporting both *Texture-based* and *Color-based* rendering
 - Concept of **Static and Movable** objects
 - Automatic **View & Transform Baking** for *Camera and Entities* for *optimisations*
+- **Exponential Fog** entity that blends with the *Sky Color* based on distance and *fog falloff* value
 
 ## 🖼️ Rendering Pipeline
 
@@ -39,7 +40,6 @@
 - Improved **Clip Space Culling** with *Retriangulation* instead of full triangle discard  
 - **Physically Based Rendering (PBR)** material system  
 - **Ray-traced Shadows**  
-- **Volumetric Fog**  
 - **Particle System** (e.g., smoke, fire)  
 - **DLSS-like Super-resolution** system  
 - **GPU Hardware Acceleration**  
