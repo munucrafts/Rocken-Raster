@@ -436,12 +436,13 @@ glm::vec4 Renderer::GetColorBasedOnViewMode(Mesh* mesh, Triangle& tri, glm::vec2
 	switch (viewMode)
 	{
 		case LIT:
-			return mesh->mat.hasTex ? mesh->mat.texture.LoadColorAtTexureCoordinates(texCoords) : glm::vec4(1.0f);
+			return mesh->mat.texture.LoadColorAtTexureCoordinates(texCoords);
 		case UNLIT:
-			return mesh->mat.hasTex ? mesh->mat.texture.LoadColorAtTexureCoordinates(texCoords) : glm::vec4(1.0f);
+			return mesh->mat.texture.LoadColorAtTexureCoordinates(texCoords);
 		case TRIAGULATE:
 		{
 			size_t memoryHash = reinterpret_cast<size_t>(&tri) * 9973;
+
 			glm::vec3 color = glm::vec3(pow(((memoryHash >> 0) & 0xFF) / 255.0f, 1.0f), 
 										pow(((memoryHash >> 8) & 0xFF) / 255.0f, 1.0f), 
 										pow(((memoryHash >> 16) & 0xFF) / 255.0f, 1.0f));

@@ -2,7 +2,7 @@
 
 ExponentialFog::ExponentialFog()
 {
-	falloffDistance = 35.0f;
+	falloffDistance = 50.0f;
 	fogDensity = 0.001f;
 	mobility = Static;
 }

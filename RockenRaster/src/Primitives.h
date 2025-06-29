@@ -18,47 +18,9 @@ enum ViewMode
 	LIT, UNLIT, TRIAGULATE, DEPTH, NORMAL
 };
 
-struct Texture
+enum Mobility
 {
-private:
-	int texWidth = 0, texHeight = 0, channels = 0;
-	uint8_t* texData = nullptr;
-
-public:
-	void LoadTextureFile(std::string& texPath)
-	{
-		texData = stbi_load(texPath.c_str(), &texWidth, &texHeight, &channels, 4);
-	}
-	glm::vec4 LoadColorAtTexureCoordinates(glm::vec2& uv)
-	{
-		if (!texData) return glm::vec4(0.0f);
-
-		glm::vec2 clampedUV = glm::clamp(uv, glm::vec2(0.0f), glm::vec2(1.0f));
-		int x = (int)(clampedUV.x * (texWidth - 1));
-		int y = (int)(clampedUV.y * (texHeight - 1));
-
-		int pixelIndex = (x + y * texWidth) * 4;
-
-		uint8_t r = texData[pixelIndex + 0];
-		uint8_t g = texData[pixelIndex + 1];
-		uint8_t b = texData[pixelIndex + 2];
-		uint8_t a = texData[pixelIndex + 3];
-
-		return glm::vec4(r, g, b, a) / 255.0f;
-	}
-};
-
-struct Material
-{
-	glm::vec4 RandomColor()
-	{
-		static std::mt19937 rng(std::random_device{}());
-		static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
-		return glm::vec4(dist(rng), dist(rng), dist(rng), 1.0f);
-	}
-
-	bool hasTex;
-	Texture texture;
+	Static, Movable
 };
 
 struct Vertex
@@ -94,11 +56,6 @@ struct SpeedComponent
 	glm::vec3 scalingSpeed = glm::vec3(0.0f);
 };
 
-enum Mobility
-{
-	Static, Movable
-};
-
 struct Entity
 {
 	Entity() = default;
@@ -109,6 +66,52 @@ struct Entity
 	virtual void ScaleEntity(float deltaTime) {};
 
 	Mobility mobility = Static;
+};
+
+struct Texture
+{
+private:
+	int texWidth = 0, texHeight = 0, channels = 0;
+
+public:
+	uint8_t* texData = nullptr;
+	void LoadTextureFile(std::string& texPath)
+	{
+		texData = stbi_load(texPath.c_str(), &texWidth, &texHeight, &channels, 4);
+	}
+	glm::vec4 LoadColorAtTexureCoordinates(glm::vec2& uv)
+	{
+		if (!texData) return glm::vec4(1.0f);
+
+		glm::vec2 clampedUV = glm::clamp(uv, glm::vec2(0.0f), glm::vec2(1.0f));
+		int x = (int)(clampedUV.x * (texWidth - 1));
+		int y = (int)(clampedUV.y * (texHeight - 1));
+
+		int pixelIndex = (x + y * texWidth) * 4;
+
+		uint8_t r = texData[pixelIndex + 0];
+		uint8_t g = texData[pixelIndex + 1];
+		uint8_t b = texData[pixelIndex + 2];
+		uint8_t a = texData[pixelIndex + 3];
+
+		return glm::vec4(r, g, b, a) / 255.0f;
+	}
+};
+
+struct Material
+{
+	glm::vec4 RandomColor()
+	{
+		static std::mt19937 rng(std::random_device{}());
+		static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+		return glm::vec4(dist(rng), dist(rng), dist(rng), 1.0f);
+	}
+	bool hasTex()
+	{
+		return texture.texData;
+	};
+
+	Texture texture;
 };
 
 struct Mesh : public Entity
