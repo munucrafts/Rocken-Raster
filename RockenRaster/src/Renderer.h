@@ -28,7 +28,7 @@ private:
 	BoundingBox GetTriangleBoundingBox(glm::vec3& a, glm::vec3& b, glm::vec3& c);
 	void ResetDepthBuffer();
 	void DrawPixel(glm::vec2& pixelLoc, glm::vec4& color);
-	bool TransformUpdateRequired(Camera& camera);
+	glm::vec4 GetColorBasedOnViewMode(Mesh* mesh, Triangle& tri, glm::vec2& texCoords, float depthAtPixel, glm::vec3& interpNormal);
 
 private:
 	std::vector<uint32_t> imageData;
@@ -37,7 +37,8 @@ private:
 	glm::vec2 screenResolution;
 	Scene scene;
 	Camera camera;
-	Projection projection;
+	Projection projectionType;
+	ViewMode viewMode;
 	float deltaTime;
 	float nearClip;
 	float farClip;

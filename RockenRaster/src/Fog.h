@@ -4,12 +4,20 @@
 class Fog : public Entity
 {
 public:
-	Fog();
+	Fog() = default;
 	virtual ~Fog() = default;
-	float CalculateFogFactor(float nearClip, float farClip, float pixelDepth);
 
 public:
 	float fogDensity;
-	float falloffDistance;
 };
 
+class ExponentialFog : public Fog
+{
+public:
+	ExponentialFog();
+	virtual ~ExponentialFog() = default;
+	float CalculateFogFactor(float nearClip, float farClip, float pixelDepth);
+
+public:
+	float falloffDistance;
+};

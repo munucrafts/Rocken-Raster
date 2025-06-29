@@ -13,6 +13,11 @@ enum Projection
 	ORTHOGRAPHIC, PERSPECTIVE
 };
 
+enum ViewMode
+{
+	LIT, UNLIT, TRIAGULATE, DEPTH, NORMAL
+};
+
 struct Texture
 {
 private:
@@ -45,15 +50,15 @@ public:
 
 struct Material
 {
-	bool tex;
-	Texture texture;
-	glm::vec4 color;
 	glm::vec4 RandomColor()
 	{
 		static std::mt19937 rng(std::random_device{}());
 		static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
 		return glm::vec4(dist(rng), dist(rng), dist(rng), 1.0f);
 	}
+
+	bool hasTex;
+	Texture texture;
 };
 
 struct Vertex

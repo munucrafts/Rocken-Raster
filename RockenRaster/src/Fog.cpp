@@ -1,13 +1,13 @@
 #include "Fog.h"
 
-Fog::Fog()
+ExponentialFog::ExponentialFog()
 {
-	falloffDistance = 25.0f;
+	falloffDistance = 35.0f;
 	fogDensity = 0.001f;
 	mobility = Static;
 }
 
-float Fog::CalculateFogFactor(float nearClip, float farClip, float pixelDepth)
+float ExponentialFog::CalculateFogFactor(float nearClip, float farClip, float pixelDepth)
 {
 	float linearDepth = (2.0f * nearClip * farClip) / (farClip + nearClip - pixelDepth * (farClip - nearClip));
 	float fogCoord = glm::clamp((linearDepth - falloffDistance) / (farClip - falloffDistance), 0.0f, 1.0f);

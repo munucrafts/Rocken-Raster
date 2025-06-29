@@ -11,7 +11,8 @@ Renderer::Renderer()
 	farClip = 100.0f;
 	deltaTime = 0.0f;
 	screenResolution = glm::vec2(0.0f);
-	projection = PERSPECTIVE;
+	projectionType = PERSPECTIVE;
+	viewMode = LIT;
 	camera.transform.location = glm::vec3(0.0f, 0.0f, 13.0f);
 
 	Windmill windmill(scene);
@@ -48,17 +49,9 @@ void Renderer::Render(float width, float height, float delta)
 	if (scene.entities.empty())
 		return;
 
-	// Coordinate Convention = GLM / OpenGL Convention (Right Handed Convention)
-	// Left -> Right = X, Bottom -> Top = Y, Camera -> Screen = -Z
-	// Triangle Winding Convention = Counter Clockwise (CCW)
-	// Note - Model = Object's Local Transform 
-	// World = Model Transfomred to World Space Using Orthographic or Perspective Projection Using "Model Matrix"
-	// NDC = Normalized Device Coordinates = World -> View -> Clip -> UV Space { (0, 0) to (1, 1) } -> NDC Space { (-1, -1) to (1, 1) }
-	// Pixel / Screen = Basically Screen Space which is { (0, 0) to (screenResolution.x, screenResolution.y) }
+	camera.NavigateCamera(deltaTime, projectionType);
 
-	camera.NavigateCamera(deltaTime, projection);
-
-	static Fog* atmFog = nullptr;
+	static ExponentialFog* atmFog = nullptr;
 	static float fogFactor = 0.0f;
 
 	for (Entity* entity : scene.entities)
@@ -72,7 +65,7 @@ void Renderer::Render(float width, float height, float delta)
 		}
 
 		if (!atmFog)
-			atmFog = dynamic_cast<Fog*>(entity);
+			atmFog = dynamic_cast<ExponentialFog*>(entity);
 
 		if (Mesh* mesh = dynamic_cast<Mesh*>(entity))
 		{
@@ -152,7 +145,7 @@ void Renderer::Render(float width, float height, float delta)
 								glm::vec2 texCoords;
 								glm::vec3 normal;
 
-								if (projection == PERSPECTIVE)
+								if (projectionType == PERSPECTIVE)
 								{
 									glm::vec2 uv0 = tri.vertices[0].uv / ndcA.z;
 									glm::vec2 uv1 = tri.vertices[1].uv / ndcB.z;
@@ -169,7 +162,7 @@ void Renderer::Render(float width, float height, float delta)
 									texCoords = uvInterp / invZ;
 									normal = norInterp / invZ;
 								}
-								else if (projection == ORTHOGRAPHIC)
+								else if (projectionType == ORTHOGRAPHIC)
 								{
 									texCoords = tri.vertices[0].uv * weights.x +
 												tri.vertices[1].uv * weights.y +
@@ -182,24 +175,26 @@ void Renderer::Render(float width, float height, float delta)
 
 								normal = glm::normalize(normal);
 								float accLightIntensity = 1.0f;
+								glm::vec4 finalColor = GetColorBasedOnViewMode(mesh, tri, texCoords, pixelDepth, normal);
 
-								for (Entity* light : scene.entities)
-								{
-									if (DirectionalLight* direcLight = dynamic_cast<DirectionalLight*>(light))
+								if (viewMode == LIT)
+								{								
+									for (Entity* light : scene.entities)
 									{
-										glm::vec3 lightDir = glm::normalize(direcLight->direction);
-										accLightIntensity += glm::clamp(glm::dot(normal, -lightDir), 0.0f, 1.0f) * direcLight->intensity;
+										if (DirectionalLight* direcLight = dynamic_cast<DirectionalLight*>(light))
+										{
+											glm::vec3 lightDir = glm::normalize(direcLight->direction);
+											accLightIntensity += glm::clamp(glm::dot(normal, -lightDir), 0.0f, 1.0f) * direcLight->intensity;
+										}
+									}
+
+									if (atmFog)
+									{
+										fogFactor = atmFog->CalculateFogFactor(nearClip, farClip, pixelDepth);
+										finalColor = glm::mix(finalColor, skyTop, fogFactor);
 									}
 								}
 
-								glm::vec4 finalColor = mesh->mat.tex ? mesh->mat.texture.LoadColorAtTexureCoordinates(texCoords) : mesh->mat.color;
-
-								if (atmFog)
-								{
-									fogFactor = atmFog->CalculateFogFactor(nearClip, farClip, pixelDepth);
-									finalColor = glm::mix(finalColor, skyTop, fogFactor);
-								}
-								
 								DrawPixel(glm::vec2(x, y), accLightIntensity * finalColor);
 							}
 						}
@@ -244,7 +239,7 @@ void Renderer::Render(float width, float height, float delta)
 								glm::vec2 texCoords;
 								glm::vec3 normal;
 
-								if (projection == PERSPECTIVE)
+								if (projectionType == PERSPECTIVE)
 								{
 									glm::vec2 uv0 = tri.vertices[0].uv / ndcA.z;
 									glm::vec2 uv1 = tri.vertices[1].uv / ndcB.z;
@@ -261,7 +256,7 @@ void Renderer::Render(float width, float height, float delta)
 									texCoords = uvInterp / invZ;
 									normal = norInterp / invZ;
 								}
-								else if (projection == ORTHOGRAPHIC)
+								else if (projectionType == ORTHOGRAPHIC)
 								{
 									texCoords = tri.vertices[0].uv * weights.x +
 										tri.vertices[1].uv * weights.y +
@@ -274,22 +269,24 @@ void Renderer::Render(float width, float height, float delta)
 
 								normal = glm::normalize(normal);
 								float accLightIntensity = 1.0f;
+								glm::vec4 finalColor = GetColorBasedOnViewMode(mesh, tri, texCoords, pixelDepth, normal);
 
-								for (Entity* light : scene.entities)
+								if (viewMode == LIT)
 								{
-									if (DirectionalLight* direcLight = dynamic_cast<DirectionalLight*>(light))
+									for (Entity* light : scene.entities)
 									{
-										glm::vec3 lightDir = glm::normalize(direcLight->direction);
-										accLightIntensity += glm::clamp(glm::dot(normal, -lightDir), 0.0f, 1.0f) * direcLight->intensity;
+										if (DirectionalLight* direcLight = dynamic_cast<DirectionalLight*>(light))
+										{
+											glm::vec3 lightDir = glm::normalize(direcLight->direction);
+											accLightIntensity += glm::clamp(glm::dot(normal, -lightDir), 0.0f, 1.0f) * direcLight->intensity;
+										}
 									}
-								}
 
-								glm::vec4 finalColor = mesh->mat.tex ? mesh->mat.texture.LoadColorAtTexureCoordinates(texCoords) : mesh->mat.color;
-
-								if (atmFog)
-								{
-									fogFactor = atmFog->CalculateFogFactor(nearClip, farClip, pixelDepth);
-									finalColor = glm::mix(finalColor, skyTop, fogFactor);
+									if (atmFog)
+									{
+										fogFactor = atmFog->CalculateFogFactor(nearClip, farClip, pixelDepth);
+										finalColor = glm::mix(finalColor, skyTop, fogFactor);
+									}
 								}
 
 								DrawPixel(glm::vec2(x, y), accLightIntensity * finalColor);
@@ -363,13 +360,13 @@ glm::vec4 Renderer::WorldToClip(glm::vec3& point, glm::mat4& model)
 
 	glm::vec4 clip;
 
-	if (camera.isMoving || projection != cachedProjectionType || screenResolution != cachedResolution || firstRun)
+	if (camera.isMoving || projectionType != cachedProjectionType || screenResolution != cachedResolution || firstRun)
 	{
 		float aspectRatio = (float)screenResolution.x / (float)screenResolution.y;
 		glm::mat4 view = camera.GetViewMatrix(firstFrame);
 		glm::mat4 proj;
 
-		switch (projection)
+		switch (projectionType)
 		{
 		case ORTHOGRAPHIC:
 			proj = glm::ortho(-camera.orthoValue * aspectRatio, camera.orthoValue * aspectRatio,
@@ -381,7 +378,7 @@ glm::vec4 Renderer::WorldToClip(glm::vec3& point, glm::mat4& model)
 		}
 
 		cachedViewProj = proj * view;
-		cachedProjectionType = projection;
+		cachedProjectionType = projectionType;
 		cachedResolution = screenResolution;
 		firstRun = false;
 	}
@@ -434,9 +431,34 @@ void Renderer::DrawPixel(glm::vec2& pixelLoc, glm::vec4& color)
 		imageData[x + y * (int)screenResolution.x] = ColorToRGBA(color);
 }
 
-bool Renderer::TransformUpdateRequired(Camera& camera)
+glm::vec4 Renderer::GetColorBasedOnViewMode(Mesh* mesh, Triangle& tri, glm::vec2& texCoords, float depthAtPixel, glm::vec3& interpNormal)
 {
-	return camera.isMoving || firstFrame;
+	switch (viewMode)
+	{
+		case LIT:
+			return mesh->mat.hasTex ? mesh->mat.texture.LoadColorAtTexureCoordinates(texCoords) : glm::vec4(1.0f);
+		case UNLIT:
+			return mesh->mat.hasTex ? mesh->mat.texture.LoadColorAtTexureCoordinates(texCoords) : glm::vec4(1.0f);
+		case TRIAGULATE:
+		{
+			size_t memoryHash = reinterpret_cast<size_t>(&tri) * 9973;
+			glm::vec3 color = glm::vec3(pow(((memoryHash >> 0) & 0xFF) / 255.0f, 1.0f), 
+										pow(((memoryHash >> 8) & 0xFF) / 255.0f, 1.0f), 
+										pow(((memoryHash >> 16) & 0xFF) / 255.0f, 1.0f));
+
+			int maxIndex = (color.r > color.g && color.r > color.b) ? 0 : (color.g > color.b) ? 1 : 2;
+			color[maxIndex] = 1.0f;
+			return glm::vec4(color, 1.0f);
+		}
+		case DEPTH: 
+		{
+			return glm::vec4(depthAtPixel);
+		}
+		case NORMAL: 
+		{
+			return glm::vec4(interpNormal * 0.5f + 0.5f, 1.0f);
+		}
+	}
 }
 
 void Renderer::ResetDepthBuffer()

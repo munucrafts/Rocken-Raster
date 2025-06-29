@@ -13,7 +13,7 @@ struct Windmill : public Scene
 		island->transform.scale = glm::vec3(0.15f);
 		island->transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 		island->transform.location = glm::vec3(-2.0f, -3.3f, -14.0f);
-		island->mat.tex = true;
+		island->mat.hasTex = true;
 		activeScene.entities.push_back(island);
 
 		Mesh* windmill = new Mesh(Static);
@@ -21,7 +21,7 @@ struct Windmill : public Scene
 		windmill->transform.scale = glm::vec3(2.5f);
 		windmill->transform.rotation = glm::vec3(0.0f, 180.0f, 0.0f);
 		windmill->transform.location = glm::vec3(0.0f, -1.2f, -14.0f);
-		windmill->mat.tex = true;
+		windmill->mat.hasTex = true;
 		activeScene.entities.push_back(windmill);
 
 		Mesh* fan = new Mesh(Movable);
@@ -30,10 +30,10 @@ struct Windmill : public Scene
 		fan->transform.rotation = glm::vec3(0.0f, 180.0f, 0.0f);
 		fan->transform.location = glm::vec3(0.0f, 2.85f, -13.97f);
 		fan->speedComp.angularSpeed = glm::vec3(0.0f, 0.0f, -0.2f);
-		fan->mat.tex = true;
+		fan->mat.hasTex = true;
 		activeScene.entities.push_back(fan);
 
-		Fog* atmFog = new Fog();
+		ExponentialFog* atmFog = new ExponentialFog();
 		activeScene.entities.push_back(atmFog);
 
 		//ParticleSystem* fire = new ParticleSystem();
@@ -54,7 +54,7 @@ struct Windmill : public Scene
 
 		DirectionalLight* dirLight = new DirectionalLight();
 		dirLight->direction = glm::vec3(-20.0f, 20.f, 0.0f);
-		dirLight->intensity = 0.25f;
+		dirLight->intensity = 1.0f;
 		activeScene.entities.push_back(dirLight);
 	}
 };
