@@ -125,7 +125,7 @@ struct Mesh : public Entity
 	virtual ~Mesh() = default;
 
 	std::vector<Triangle> triangles;
-	std::vector<Triangle> newTriangles;
+	std::vector<Triangle> newTrianglesNDC;
 	Transform transform;
 	SpeedComponent speedComp;
 	Material mat;

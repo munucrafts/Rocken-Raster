@@ -20,8 +20,8 @@
 - Different **View Modes** such as **Lit**, **Unlit**, **Triangulate**, **Depth**, and **Normal**  
 - **Material System** supporting both **Texture-based** and **Color-based** rendering  
 - Concept of **Static** and **Movable** objects  
-- Automatic **View & Transform Baking** for **Camera** and **Entities** for **optimisations**  
-- **Exponential Fog** entity that blends with the **Sky Color** based on **distance** and **fog falloff** value
+- Automatic **View & Transform Baking** for **Camera** and **Entities** for **Optimisations**  
+- **Exponential Fog** entity that blends with the **Sky Color** based on **Distance** and **Fog Falloff** value
 
 ## 🛩️ **Currently Working On**
 

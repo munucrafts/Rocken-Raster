@@ -201,7 +201,7 @@ void Renderer::Render(float width, float height, float delta)
 					}
 				}
 			}
-			for (Triangle& tri : mesh->newTriangles)
+			for (Triangle& tri : mesh->newTrianglesNDC)
 			{
 				glm::vec3 ndcA = tri.vertices[0].vert;
 				glm::vec3 ndcB = tri.vertices[1].vert;
@@ -259,12 +259,12 @@ void Renderer::Render(float width, float height, float delta)
 								else if (projectionType == ORTHOGRAPHIC)
 								{
 									texCoords = tri.vertices[0].uv * weights.x +
-										tri.vertices[1].uv * weights.y +
-										tri.vertices[2].uv * weights.z;
+												tri.vertices[1].uv * weights.y +
+												tri.vertices[2].uv * weights.z;
 
 									normal = tri.vertices[0].normal * weights.x +
-										tri.vertices[1].normal * weights.y +
-										tri.vertices[2].normal * weights.z;
+											 tri.vertices[1].normal * weights.y +
+											 tri.vertices[2].normal * weights.z;
 								}
 
 								normal = glm::normalize(normal);
@@ -295,7 +295,7 @@ void Renderer::Render(float width, float height, float delta)
 					}
 				}
 			}
-			mesh->newTriangles.clear();
+			mesh->newTrianglesNDC.clear();
 		}
 	}
 
