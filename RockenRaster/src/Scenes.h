@@ -9,21 +9,21 @@ struct Windmill : public Scene
 	Windmill(Scene& activeScene)
 	{
 		Mesh* island = new Mesh(Static);
-		island->LoadObjectFile("../Assets/island.obj", "../Assets/island.png");
+		island->LoadObjectFile("Assets/island.obj", "Assets/island.png");
 		island->transform.scale = glm::vec3(0.15f);
 		island->transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 		island->transform.location = glm::vec3(-2.0f, -3.3f, -14.0f);
 		activeScene.entities.push_back(island);
 
 		Mesh* windmill = new Mesh(Static);
-		windmill->LoadObjectFile("../Assets/Windmill.obj", "../Assets/Windmill.png");
+		windmill->LoadObjectFile("Assets/Windmill.obj", "Assets/Windmill.png");
 		windmill->transform.scale = glm::vec3(2.5f);
 		windmill->transform.rotation = glm::vec3(0.0f, 180.0f, 0.0f);
 		windmill->transform.location = glm::vec3(0.0f, -1.2f, -14.0f);
 		activeScene.entities.push_back(windmill);
 
 		Mesh* fan = new Mesh(Movable);
-		fan->LoadObjectFile("../Assets/Fan.obj", "../Assets/Fan.png");
+		fan->LoadObjectFile("Assets/Fan.obj", "Assets/Fan.png");
 		fan->transform.scale = glm::vec3(2.5f);
 		fan->transform.rotation = glm::vec3(0.0f, 180.0f, 0.0f);
 		fan->transform.location = glm::vec3(0.0f, 2.85f, -13.97f);
