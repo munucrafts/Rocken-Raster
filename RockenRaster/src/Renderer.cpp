@@ -436,9 +436,9 @@ glm::vec4 Renderer::GetColorBasedOnViewMode(Mesh* mesh, Triangle& tri, glm::vec2
 	switch (viewMode)
 	{
 		case LIT:
-			return mesh->mat.texture.LoadColorAtTexureCoordinates(texCoords);
+			return mesh->mat.texture.SampleTexture(texCoords);
 		case UNLIT:
-			return mesh->mat.texture.LoadColorAtTexureCoordinates(texCoords);
+			return mesh->mat.texture.SampleTexture(texCoords);
 		case TRIAGULATE:
 		{
 			size_t memoryHash = reinterpret_cast<size_t>(&tri) * 9973;
@@ -459,6 +459,8 @@ glm::vec4 Renderer::GetColorBasedOnViewMode(Mesh* mesh, Triangle& tri, glm::vec2
 		{
 			return glm::vec4(interpNormal * 0.5f + 0.5f, 1.0f);
 		}
+		default:
+			return glm::vec4(0.0f);
 	}
 }
 
@@ -475,10 +477,7 @@ BoundingBox Renderer::GetTriangleBoundingBox(glm::vec3& a, glm::vec3& b, glm::ve
 	int minY = std::max(0, (int)std::floor(std::min({ a.y, b.y, c.y })));
 	int maxY = std::min((int)screenResolution.y, (int)std::ceil(std::max({ a.y, b.y, c.y })));
 
-	int minZ = (int)std::floor(std::min({ a.z, b.z, c.z }));
-	int maxZ = (int)std::ceil(std::max({ a.z, b.z, c.z }));
-
-	return { glm::vec2(minX, maxX), glm::vec2(minY, maxY), glm::vec2(minZ, maxZ)};
+	return { glm::vec2(minX, maxX), glm::vec2(minY, maxY)};
 }
 
 std::shared_ptr<Walnut::Image>& Renderer::GetImage()

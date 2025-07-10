@@ -8,6 +8,13 @@
 #include <Walnut/Input/Input.h>
 #include "../../Walnut/vendor/stb_image/stb_image.h"
 
+static glm::vec4 RandomColor()
+{
+	static std::mt19937 rng(std::random_device{}());
+	static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+	return glm::vec4(dist(rng), dist(rng), dist(rng), 1.0f);
+}
+
 enum Projection
 {
 	ORTHOGRAPHIC, PERSPECTIVE
@@ -39,7 +46,6 @@ struct BoundingBox
 {
 	glm::vec2 minMaxX;
 	glm::vec2 minMaxY;
-	glm::vec2 minMaxZ;
 };
 
 struct Transform
@@ -79,7 +85,7 @@ public:
 	{
 		texData = stbi_load(texPath.c_str(), &texWidth, &texHeight, &channels, 4);
 	}
-	glm::vec4 LoadColorAtTexureCoordinates(glm::vec2& uv)
+	glm::vec4 SampleTexture(glm::vec2& uv)
 	{
 		if (!texData) return glm::vec4(1.0f);
 
@@ -100,18 +106,10 @@ public:
 
 struct Material
 {
-	glm::vec4 RandomColor()
-	{
-		static std::mt19937 rng(std::random_device{}());
-		static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
-		return glm::vec4(dist(rng), dist(rng), dist(rng), 1.0f);
-	}
-	bool hasTex()
-	{
-		return texture.texData;
-	};
-
 	Texture texture;
+	float metallic = 0.0f;
+	float roughness = 1.0f;
+	float emissiveness = 0.0f;
 };
 
 struct Mesh : public Entity
