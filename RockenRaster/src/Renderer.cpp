@@ -113,11 +113,11 @@ void Renderer::Render(float width, float height, float delta)
 				glm::vec3 ndcB = glm::vec3(clipB) / clipB.w;
 				glm::vec3 ndcC = glm::vec3(clipC) / clipC.w;
 
-				NDCToPixel(ndcA);
-				NDCToPixel(ndcB);
-				NDCToPixel(ndcC);
+				glm::vec3 pixelA = NDCToPixel(ndcA);
+				glm::vec3 pixelB = NDCToPixel(ndcB);
+				glm::vec3 pixelC = NDCToPixel(ndcC);
 
-				BoundingBox box = GetTriangleBoundingBox(ndcA, ndcB, ndcC);
+				BoundingBox box = GetTriangleBoundingBox(pixelA, pixelB, pixelC);
 
 				int minPixelX = (int)box.minMaxX.x;
 				int maxPixelX = (int)box.minMaxX.y;
@@ -130,9 +130,9 @@ void Renderer::Render(float width, float height, float delta)
 					{
 						glm::vec3 weights;
 
-						if (InsideTriangle((glm::vec2)ndcA, (glm::vec2)ndcB, (glm::vec2)ndcC, glm::vec2(x, y), weights))
+						if (InsideTriangle((glm::vec2)pixelA, (glm::vec2)pixelB, (glm::vec2)pixelC, glm::vec2(x, y), weights))
 						{
-							glm::vec3 abcDepths = glm::vec3(ndcA.z, ndcB.z, ndcC.z);
+							glm::vec3 abcDepths = glm::vec3(pixelA.z, pixelB.z, pixelC.z);
 							float pixelDepth = 1.0f / glm::dot(1.0f / abcDepths, weights);
 							int pixelIndex = x + y * (int)screenResolution.x;
 
@@ -147,17 +147,17 @@ void Renderer::Render(float width, float height, float delta)
 
 								if (projectionType == PERSPECTIVE)
 								{
-									glm::vec2 uv0 = tri.vertices[0].uv / ndcA.z;
-									glm::vec2 uv1 = tri.vertices[1].uv / ndcB.z;
-									glm::vec2 uv2 = tri.vertices[2].uv / ndcC.z;
+									glm::vec2 uv0 = tri.vertices[0].uv / pixelA.z;
+									glm::vec2 uv1 = tri.vertices[1].uv / pixelB.z;
+									glm::vec2 uv2 = tri.vertices[2].uv / pixelC.z;
 									glm::vec2 uvInterp = uv0 * weights.x + uv1 * weights.y + uv2 * weights.z;
 
-									glm::vec3 nor0 = tri.vertices[0].normal / ndcA.z;
-									glm::vec3 nor1 = tri.vertices[1].normal / ndcB.z;
-									glm::vec3 nor2 = tri.vertices[2].normal / ndcC.z;
+									glm::vec3 nor0 = tri.vertices[0].normal / pixelA.z;
+									glm::vec3 nor1 = tri.vertices[1].normal / pixelB.z;
+									glm::vec3 nor2 = tri.vertices[2].normal / pixelC.z;
 									glm::vec3 norInterp = nor0 * weights.x + nor1 * weights.y + nor2 * weights.z;
 
-									float invZ = weights.x / ndcA.z + weights.y / ndcB.z + weights.z / ndcC.z;
+									float invZ = weights.x / pixelA.z + weights.y / pixelB.z + weights.z / pixelC.z;
 
 									texCoords = uvInterp / invZ;
 									normal = norInterp / invZ;
@@ -207,11 +207,11 @@ void Renderer::Render(float width, float height, float delta)
 				glm::vec3 ndcB = tri.vertices[1].vert;
 				glm::vec3 ndcC = tri.vertices[2].vert;
 
-				NDCToPixel(ndcA);
-				NDCToPixel(ndcB);
-				NDCToPixel(ndcC);
+				glm::vec3 pixelA = NDCToPixel(ndcA);
+				glm::vec3 pixelB = NDCToPixel(ndcB);
+				glm::vec3 pixelC = NDCToPixel(ndcC);
 
-				BoundingBox box = GetTriangleBoundingBox(ndcA, ndcB, ndcC);
+				BoundingBox box = GetTriangleBoundingBox(pixelA, pixelB, pixelC);
 
 				int minPixelX = (int)box.minMaxX.x;
 				int maxPixelX = (int)box.minMaxX.y;
@@ -224,9 +224,9 @@ void Renderer::Render(float width, float height, float delta)
 					{
 						glm::vec3 weights;
 
-						if (InsideTriangle((glm::vec2)ndcA, (glm::vec2)ndcB, (glm::vec2)ndcC, glm::vec2(x, y), weights))
+						if (InsideTriangle((glm::vec2)pixelA, (glm::vec2)pixelB, (glm::vec2)pixelC, glm::vec2(x, y), weights))
 						{
-							glm::vec3 abcDepths = glm::vec3(ndcA.z, ndcB.z, ndcC.z);
+							glm::vec3 abcDepths = glm::vec3(pixelA.z, pixelB.z, pixelC.z);
 							float pixelDepth = 1.0f / glm::dot(1.0f / abcDepths, weights);
 							int pixelIndex = x + y * (int)screenResolution.x;
 
@@ -241,17 +241,17 @@ void Renderer::Render(float width, float height, float delta)
 
 								if (projectionType == PERSPECTIVE)
 								{
-									glm::vec2 uv0 = tri.vertices[0].uv / ndcA.z;
-									glm::vec2 uv1 = tri.vertices[1].uv / ndcB.z;
-									glm::vec2 uv2 = tri.vertices[2].uv / ndcC.z;
+									glm::vec2 uv0 = tri.vertices[0].uv / pixelA.z;
+									glm::vec2 uv1 = tri.vertices[1].uv / pixelB.z;
+									glm::vec2 uv2 = tri.vertices[2].uv / pixelC.z;
 									glm::vec2 uvInterp = uv0 * weights.x + uv1 * weights.y + uv2 * weights.z;
 
-									glm::vec3 nor0 = tri.vertices[0].normal / ndcA.z;
-									glm::vec3 nor1 = tri.vertices[1].normal / ndcB.z;
-									glm::vec3 nor2 = tri.vertices[2].normal / ndcC.z;
+									glm::vec3 nor0 = tri.vertices[0].normal / pixelA.z;
+									glm::vec3 nor1 = tri.vertices[1].normal / pixelB.z;
+									glm::vec3 nor2 = tri.vertices[2].normal / pixelC.z;
 									glm::vec3 norInterp = nor0 * weights.x + nor1 * weights.y + nor2 * weights.z;
 
-									float invZ = weights.x / ndcA.z + weights.y / ndcB.z + weights.z / ndcC.z;
+									float invZ = weights.x / pixelA.z + weights.y / pixelB.z + weights.z / pixelC.z;
 
 									texCoords = uvInterp / invZ;
 									normal = norInterp / invZ;
@@ -339,16 +339,12 @@ bool Renderer::InsideTriangle(glm::vec2& a, glm::vec2& b, glm::vec2& c, glm::vec
 	return areaABP >= 0.0f && areaBCP >= 0.0f && areaCAP >= 0.0f && sumArea > 0.0f;
 }
 
-void Renderer::NDCToPixel(glm::vec3& q)
+glm::vec3 Renderer::NDCToPixel(glm::vec3& q)
 {
-	q = q * 0.5f + 0.5f;
-	q = q * glm::vec3(screenResolution, 1.0f);
-}
+	glm::vec3 p = q * 0.5f + 0.5f;
+	p = p * glm::vec3(screenResolution, 1.0f);
 
-void Renderer::PixelToNDC(glm::vec2& q)
-{
-	q = q / screenResolution;
-	q = q * 2.0f - 1.0f;
+	return p;
 }
 
 glm::vec4 Renderer::WorldToClip(glm::vec3& point, glm::mat4& model)

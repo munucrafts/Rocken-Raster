@@ -19,8 +19,7 @@ private:
 	uint32_t ColorToRGBA(glm::vec4& color);
 	float GetSignedTriangleArea(glm::vec2& a, glm::vec2& b, glm::vec2& p);
 	bool InsideTriangle(glm::vec2& a, glm::vec2& b, glm::vec2& c, glm::vec2& p, glm::vec3& weights);
-	void NDCToPixel(glm::vec3& q);
-	void PixelToNDC(glm::vec2& q);
+	glm::vec3 NDCToPixel(glm::vec3& q);
 	glm::vec4 WorldToClip(glm::vec3& point, glm::mat4& model);
 	bool PointOutsideClipSpace(glm::vec4& point);
 	glm::mat4 ModelToWorld(Transform& objectTransform);
