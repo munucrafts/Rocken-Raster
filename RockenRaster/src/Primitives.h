@@ -22,7 +22,7 @@ enum Projection
 
 enum ViewMode
 {
-	LIT, UNLIT, TRIAGULATE, DEPTH, NORMAL
+	LIT, UNLIT, TRIANGULATE, DEPTH, NORMAL
 };
 
 enum Mobility
@@ -221,7 +221,20 @@ struct Mesh : public Entity
 	}
 };
 
+struct SkyColor
+{
+	glm::vec4 topSky;
+	glm::vec4 bottomSky;
+};
+
 struct Scene
 {
+	virtual void LoadIntoScene(Scene& activeScene) {};
+	virtual void UnloadScene()
+	{
+		entities.clear();
+	};
 	std::vector<Entity*> entities;
+	SkyColor sceneSkyColor;
+	std::string sceneName;
 };

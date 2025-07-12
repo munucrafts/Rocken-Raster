@@ -1,4 +1,4 @@
-#include <Walnut/Application.h>
+﻿#include <Walnut/Application.h>
 #include <Walnut/EntryPoint.h>
 #include <Walnut/Timer.h>
 #include <Walnut/Image.h>
@@ -7,15 +7,14 @@
 class RockenRaster : public Walnut::Layer
 {
 private:
-	Walnut::Application* apple;
 	Renderer renderer;
-	float MS;
-	float FPS;
+	float MS = 0.0f;
+	float FPS = 0.0f;
 
 public:
 	virtual void OnUIRender() override
 	{
-		ImGui::Begin("Stats");
+		ImGui::Begin("Statistics");
 
 		ImVec4 textCol = FPS < 20.0f ? ImVec4(1.0f, 0.0f, 0.0f, 1.0f) : FPS < 40.0f ? ImVec4(1.0f, 1.0f, 0.0f, 1.0f) : ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
 		ImGui::TextColored(textCol, "FPS: %.0f", FPS);
@@ -23,7 +22,7 @@ public:
 		ImGui::End();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-		ImGui::Begin("Viewport Window");
+		ImGui::Begin("Viewport");
 
 		ImVec2 screenSize = ImGui::GetContentRegionAvail();
 

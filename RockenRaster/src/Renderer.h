@@ -23,18 +23,20 @@ private:
 	glm::vec4 WorldToClip(glm::vec3& point, glm::mat4& model);
 	bool PointOutsideClipSpace(glm::vec4& point);
 	glm::mat4 ModelToWorld(Transform& objectTransform);
-	void ClearBackground(glm::vec4& topColor, glm::vec4& bottomColor);
+	void ClearBackground();
 	BoundingBox GetTriangleBoundingBox(glm::vec3& a, glm::vec3& b, glm::vec3& c);
 	void ResetDepthBuffer();
 	void DrawPixel(glm::vec2& pixelLoc, glm::vec4& color);
 	glm::vec4 GetColorBasedOnViewMode(Mesh* mesh, Triangle& tri, glm::vec2& texCoords, float depthAtPixel, glm::vec3& interpNormal);
+	void HandleUI();
 
 private:
 	std::vector<uint32_t> imageData;
 	std::vector<float> depthBuffer;
 	std::shared_ptr<Walnut::Image> image;
 	glm::vec2 screenResolution;
-	Scene scene;
+	Scene activeScene;
+	std::vector<Scene> allSceneRefs;
 	Camera camera;
 	Projection projectionType;
 	ViewMode viewMode;
@@ -42,5 +44,6 @@ private:
 	float nearClip;
 	float farClip;
 	bool firstFrame;
+	SkyColor skyColor;
 };
 

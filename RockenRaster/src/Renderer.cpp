@@ -3,7 +3,6 @@
 #include "Scenes.h"
 #include "Light.h"
 
-
 Renderer::Renderer()
 {
 	firstFrame = true;
@@ -15,7 +14,113 @@ Renderer::Renderer()
 	viewMode = LIT;
 	camera.transform.location = glm::vec3(0.0f, 0.0f, 13.0f);
 
-	Windmill windmill(scene);
+	StylizedGuitar stylizedGuitar;
+	Windmill windmill;
+	Space space;
+	RetroKeyboard retroKeyboard;
+	Chestnut chestnut;
+
+	allSceneRefs = {stylizedGuitar, windmill, space, retroKeyboard, chestnut};
+
+	chestnut.LoadIntoScene(activeScene);
+	skyColor = activeScene.sceneSkyColor;
+}
+
+void Renderer::HandleUI()
+{
+	ImGui::Begin("Renderer Settings");
+	ImGui::Spacing();
+
+	{
+		ImGui::Text("  Projection Mode");
+		ImGui::Spacing();
+
+		if (ImGui::Button("Perspective", ImVec2(120, 40)))
+			projectionType = PERSPECTIVE;
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Orthographic", ImVec2(120, 40)))
+			projectionType = ORTHOGRAPHIC;
+
+		ImGui::Spacing();
+		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();
+		ImGui::Spacing();
+	}
+
+	{
+		ImGui::Text("  View Mode");
+		ImGui::Spacing();
+
+		if (ImGui::Button("LIT", ImVec2(120, 40)))
+			viewMode = LIT;
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("UNLIT", ImVec2(120, 40)))
+			viewMode = UNLIT;
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("TRIANGULATE", ImVec2(120, 40)))
+			viewMode = TRIANGULATE;
+
+		if (ImGui::Button("DEPTH", ImVec2(120, 40)))
+			viewMode = DEPTH;
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("NORMAL", ImVec2(120, 40)))
+			viewMode = NORMAL;
+
+		ImGui::Spacing();
+		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();
+		ImGui::Spacing();
+	}
+
+	{
+		ImGui::Text("  Sky Color");
+		ImGui::Spacing();
+
+		float top[4] = { skyColor.topSky.r, skyColor.topSky.g, skyColor.topSky.b, skyColor.topSky.a };
+		float bottom[4] = { skyColor.bottomSky.r, skyColor.bottomSky.g, skyColor.bottomSky.b, skyColor.bottomSky.a };
+
+		if (ImGui::ColorEdit4("Top Sky", top))
+			skyColor.topSky = glm::vec4(top[0], top[1], top[2], top[3]);
+
+		if (ImGui::ColorEdit4("Bottom Sky", bottom))
+			skyColor.bottomSky = glm::vec4(bottom[0], bottom[1], bottom[2], bottom[3]);
+
+		ImGui::Spacing();
+		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();
+		ImGui::Spacing();
+	}
+
+	{
+		/*ImGui::Text("  Scenes");
+		ImGui::Spacing();*/
+
+		//activeScene.UnloadScene();
+		//allSceneRefs[2].LoadIntoScene(activeScene);
+		
+		// Write Scene Load Unload Code Here
+
+
+		/*ImGui::Spacing();
+		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();
+		ImGui::Spacing();*/
+
+	}
+
+	ImGui::End();
 }
 
 void Renderer::Render(float width, float height, float delta)
@@ -38,15 +143,14 @@ void Renderer::Render(float width, float height, float delta)
 		screenResolution = glm::vec2(width, height);
 	}
 
+	HandleUI();
+
 	deltaTime = delta / 10.0f;
 
-	glm::vec4 skyTop = glm::vec4(0.22f, 0.71f, 1.0f, 1.0f);
-	glm::vec4 skyBottom = glm::vec4(0.83f, 0.84f, 0.85f, 1.0f);
-
-	ClearBackground(skyTop, skyBottom);
+	ClearBackground();
 	ResetDepthBuffer();
 
-	if (scene.entities.empty())
+	if (activeScene.entities.empty())
 		return;
 
 	camera.NavigateCamera(deltaTime, projectionType);
@@ -54,7 +158,7 @@ void Renderer::Render(float width, float height, float delta)
 	static ExponentialFog* atmFog = nullptr;
 	static float fogFactor = 0.0f;
 
-	for (Entity* entity : scene.entities)
+	for (Entity* entity : activeScene.entities)
 	{
 		if (entity->mobility == Movable)
 		{
@@ -179,7 +283,7 @@ void Renderer::Render(float width, float height, float delta)
 
 								if (viewMode == LIT)
 								{								
-									for (Entity* light : scene.entities)
+									for (Entity* light : activeScene.entities)
 									{
 										if (DirectionalLight* direcLight = dynamic_cast<DirectionalLight*>(light))
 										{
@@ -191,7 +295,7 @@ void Renderer::Render(float width, float height, float delta)
 									if (atmFog)
 									{
 										fogFactor = atmFog->CalculateFogFactor(nearClip, farClip, pixelDepth);
-										finalColor = glm::mix(finalColor, skyTop, fogFactor);
+										finalColor = glm::mix(finalColor, skyColor.topSky, fogFactor);
 									}
 								}
 
@@ -201,7 +305,6 @@ void Renderer::Render(float width, float height, float delta)
 					}
 				}
 			}
-
 		}
 	}
 
@@ -309,12 +412,12 @@ glm::mat4 Renderer::ModelToWorld(Transform& objectTransform)
 	return model;
 }
 
-void Renderer::ClearBackground(glm::vec4& topColor, glm::vec4& bottomColor)
+void Renderer::ClearBackground()
 {
 	for (int y = 0; y < screenResolution.y; y++)
 	{
 		float gradient = float(y) / (screenResolution.y - 1);
-		glm::vec4 rowColor = glm::mix(bottomColor, topColor, gradient);
+		glm::vec4 rowColor = glm::mix(skyColor.bottomSky, skyColor.topSky, gradient);
 
 		for (int x = 0; x < screenResolution.x; x++)
 		{
@@ -341,7 +444,7 @@ glm::vec4 Renderer::GetColorBasedOnViewMode(Mesh* mesh, Triangle& tri, glm::vec2
 			return mesh->mat.texture.SampleTexture(texCoords);
 		case UNLIT:
 			return mesh->mat.texture.SampleTexture(texCoords);
-		case TRIAGULATE:
+		case TRIANGULATE:
 		{
 			size_t memoryHash = reinterpret_cast<size_t>(&tri) * 9973;
 

@@ -6,7 +6,8 @@
 
 struct Windmill : public Scene
 {
-	Windmill(Scene& activeScene)
+	Windmill() { sceneName = "Windmill"; }
+	void LoadIntoScene(Scene& activeScene) override
 	{
 		Mesh* island = new Mesh(Static);
 		island->LoadObjectFile("Assets/island.obj", "Assets/island.png");
@@ -33,25 +34,102 @@ struct Windmill : public Scene
 		ExponentialFog* atmFog = new ExponentialFog();
 		activeScene.entities.push_back(atmFog);
 
-		//ParticleSystem* fire = new ParticleSystem();
-		//fire->transform.location = glm::vec3(0.0f, 2.85f, -10.97f);
-		//fire->speedComp.angularSpeed = glm::vec3(0.0f, 0.0f, 5.0f);
-		//fire->mat.tex = false;
-		//fire->mat.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-		//fire->particlesProps.particleCount = 10;
-		//fire->particlesProps.rate = 10.0f;
-		//fire->particlesProps.transformBegin = {glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f)};
-		//fire->particlesProps.transformEnd = {glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)};
-		//fire->particlesProps.speedCompBegin = {glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.0f)};
-		//fire->particlesProps.speedCompEnd = {glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f)};
-		//fire->particlesProps.colorBegin = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-		//fire->particlesProps.colorEnd = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
-		//fire->particlesProps.lifetime = 2.0f;
-		//activeScene.entities.push_back(fire);
-
 		DirectionalLight* dirLight = new DirectionalLight();
 		dirLight->direction = glm::vec3(-20.0f, 20.f, 0.0f);
 		dirLight->intensity = 2.0f;
 		activeScene.entities.push_back(dirLight);
+
+		activeScene.sceneSkyColor = { glm::vec4(0.22f, 0.71f, 1.0f, 1.0f), glm::vec4(0.83f, 0.84f, 0.85f, 1.0f) };
+	}
+};
+
+struct Space : public Scene
+{
+	Space() { sceneName = "Space"; }
+	void LoadIntoScene(Scene& activeScene) override
+	{
+		Mesh* Earth = new Mesh(Movable);
+		Earth->LoadObjectFile("Assets/Earth.obj", "Assets/Earth.png");
+		Earth->transform.scale = glm::vec3(0.25f);
+		Earth->transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+		Earth->transform.location = glm::vec3(0.0f, 0.0f, -28.0f);
+		Earth->speedComp.angularSpeed = glm::vec3(0.2f, 0.1f, 0.14f);
+		activeScene.entities.push_back(Earth);
+
+		Mesh* Satellite = new Mesh(Movable);
+		Satellite->LoadObjectFile("Assets/Satellite.obj", "Assets/Satellite.png");
+		Satellite->transform.scale = glm::vec3(1.0f);
+		Satellite->transform.rotation = glm::vec3(0.0f, 180.0f, 0.0f);
+		Satellite->transform.location = glm::vec3(0.0f, 2.2f, -28.0f);
+		Satellite->speedComp.angularSpeed = glm::vec3(0.2f, 0.1f, 0.14f);
+		activeScene.entities.push_back(Satellite);
+
+		DirectionalLight* dirLight = new DirectionalLight();
+		dirLight->direction = glm::vec3(30.0f, 20.f, 0.0f);
+		dirLight->intensity = 2.0f;
+		activeScene.entities.push_back(dirLight);
+
+		activeScene.sceneSkyColor = { glm::vec4(0.0f), glm::vec4(0.0f) };
+	}
+};
+
+struct RetroKeyboard : public Scene
+{
+	RetroKeyboard() { sceneName = "Retro Keyboard"; }
+	void LoadIntoScene(Scene& activeScene) override
+	{
+		Mesh* RetroKeyboard = new Mesh(Movable);
+		RetroKeyboard->LoadObjectFile("Assets/RetroKeyboard.obj", "Assets/RetroKeyboard.png");
+		RetroKeyboard->transform.scale = glm::vec3(0.1f);
+		RetroKeyboard->transform.rotation = glm::vec3(60.0f, 180.0f, 0.0f);
+		RetroKeyboard->transform.location = glm::vec3(0.0f, 0.0f, -28.0f);
+		RetroKeyboard->speedComp.angularSpeed = glm::vec3(0.0f, 0.1f, 0.0f);
+		activeScene.entities.push_back(RetroKeyboard);
+
+		activeScene.sceneSkyColor = { glm::vec4(0.17f, 0.74f, 0.58, 1.0f), glm::vec4(0.09f, 0.32f, 0.41f, 1.0f) };
+	}
+};
+
+struct Chestnut : public Scene
+{
+	Chestnut() { sceneName = "Chestnut"; }
+	void LoadIntoScene(Scene& activeScene) override
+	{
+		Mesh* Chestnut = new Mesh(Movable);
+		Chestnut->LoadObjectFile("Assets/Chestnut.obj", "Assets/Chestnut.png");
+		Chestnut->transform.scale = glm::vec3(1.0f);
+		Chestnut->transform.rotation = glm::vec3(0.0f, 180.0f, 0.0f);
+		Chestnut->transform.location = glm::vec3(0.0f, 0.0f, -2.0f);
+		Chestnut->speedComp.angularSpeed = glm::vec3(0.0f, 0.1f, 0.0f);
+		activeScene.entities.push_back(Chestnut);
+
+		DirectionalLight* dirLight = new DirectionalLight();
+		dirLight->direction = glm::vec3(30.0f, 20.f, 0.0f);
+		dirLight->intensity = 2.0f;
+		activeScene.entities.push_back(dirLight);
+
+		activeScene.sceneSkyColor = { glm::vec4(0.9f, 0.85f, 0.95, 1.0f), glm::vec4(0.7f, 0.84f, 0.41f, 1.0f) };
+	}
+};
+
+struct StylizedGuitar : public Scene
+{
+	StylizedGuitar() { sceneName = "Stylized Guitar"; }
+	void LoadIntoScene(Scene& activeScene) override
+	{
+		Mesh* StylizedGuitar = new Mesh(Movable);
+		StylizedGuitar->LoadObjectFile("Assets/StylizedGuitar.obj", "Assets/StylizedGuitar.png");
+		StylizedGuitar->transform.scale = glm::vec3(10.0f);
+		StylizedGuitar->transform.rotation = glm::vec3(0.0f, 180.0f, 0.0f);
+		StylizedGuitar->transform.location = glm::vec3(0.0f, 0.0f, -2.0f);
+		StylizedGuitar->speedComp.angularSpeed = glm::vec3(0.0f, 0.1f, 0.0f);
+		activeScene.entities.push_back(StylizedGuitar);
+
+		DirectionalLight* dirLight = new DirectionalLight();
+		dirLight->direction = glm::vec3(30.0f, 20.f, 0.0f);
+		dirLight->intensity = 2.0f;
+		activeScene.entities.push_back(dirLight);
+
+		activeScene.sceneSkyColor = { glm::vec4(0.0f, 1.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.7f, 0.7f, 1.0f) };
 	}
 };
