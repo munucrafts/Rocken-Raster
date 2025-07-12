@@ -4,7 +4,7 @@
 
 * **Rocken Raster** is a **CPU-based Software Rasterizer** designed to render **3D scenes**.
 * I built the **Rasterizer** to learn more about various **Rasterizing** and **Graphics** concepts.
-* It supports many modern rendering techniques, including **Triangle Rasterization**, **Depth Testing**, **Culling**, **Projections**, **Basic Shading**, and more — all built from scratch.
+* It supports many modern rendering techniques, including **Triangle Rasterization**, **Depth Testing**, **Culling**, **Projections**, **Basic Shading**, and more all built from scratch.
 * The **Walnut Framework** is used for basic operations such as **Window Creation**, **UI**, and the **GLM Math Library**.
 
 <br>
