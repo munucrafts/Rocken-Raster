@@ -51,7 +51,7 @@ struct Windmill : public Scene
 
 		DirectionalLight* dirLight = new DirectionalLight();
 		dirLight->direction = glm::vec3(-20.0f, 20.f, 0.0f);
-		dirLight->intensity = 1.0f;
+		dirLight->intensity = 2.0f;
 		activeScene.entities.push_back(dirLight);
 	}
 };

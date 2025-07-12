@@ -107,9 +107,6 @@ public:
 struct Material
 {
 	Texture texture;
-	float metallic = 0.0f;
-	float roughness = 1.0f;
-	float emissiveness = 0.0f;
 };
 
 struct Mesh : public Entity
@@ -123,7 +120,6 @@ struct Mesh : public Entity
 	virtual ~Mesh() = default;
 
 	std::vector<Triangle> triangles;
-	std::vector<Triangle> newTrianglesNDC;
 	Transform transform;
 	SpeedComponent speedComp;
 	Material mat;
