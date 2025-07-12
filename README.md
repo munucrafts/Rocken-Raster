@@ -3,9 +3,8 @@
 <img align="right" alt="Coding" width="235" src="RockenRaster/Assets/logo.png">
 
 * **Rocken Raster** is a **CPU-based Software Rasterizer** designed to render **3D scenes**.
-
-* It supports modern rendering techniques, including **Triangle Rasterization**, **Depth Testing**, **Culling**, **Projections**, **Basic Shading**, and more — all built from scratch.
-
+* I built the **Rasterizer** to learn more about various **Rasterizing** and **Graphics** concepts.
+* It supports many modern rendering techniques, including **Triangle Rasterization**, **Depth Testing**, **Culling**, **Projections**, **Basic Shading**, and more — all built from scratch.
 * The **Walnut Framework** is used for basic operations such as **Window Creation**, **UI**, and the **GLM Math Library**.
 
 <br>
@@ -23,17 +22,14 @@
 - Automatic **View & Transform Baking** for **Camera** and **Entities** for **Optimisations**  
 - **Exponential Fog** entity that blends with the **Sky Color** based on **Distance** and **Fog Falloff** value
 
-## 🛩️ **Currently Working On**
+## 👽 **Things I Might Work on in the Future**
 
+- **Multi-threading** and general **Performance Optimization**
+- **DLSS-like Super-resolution** system  
 - **Physically Based Rendering (PBR)** material system  
 - **Ray-traced Shadows**  
-- **DLSS-like Super-resolution** system  
-
-## 👽 **Future Plans**
-
 - Improved **Clip Space Culling** with **Retriangulation** instead of full triangle discard  
 - **CPU based Particle System**  
-- General **Performance Optimization**
 
 ## 🖼️ **Rendering Pipeline**
 
