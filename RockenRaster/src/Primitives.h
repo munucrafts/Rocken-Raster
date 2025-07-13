@@ -223,8 +223,8 @@ struct Mesh : public Entity
 
 struct SkyColor
 {
-	glm::vec4 topSky;
-	glm::vec4 bottomSky;
+	glm::vec4 topSky = glm::vec4(0.22f, 0.71f, 1.0f, 1.0f);
+	glm::vec4 bottomSky = glm::vec4(0.83f, 0.84f, 0.85f, 1.0f);
 };
 
 struct Scene

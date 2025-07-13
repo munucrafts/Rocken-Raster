@@ -13,21 +13,26 @@ Renderer::Renderer()
 	projectionType = PERSPECTIVE;
 	viewMode = LIT;
 	camera.transform.location = glm::vec3(0.0f, 0.0f, 13.0f);
+	atmFog = nullptr;
+	fogFactor = 0.0f;
 
-	StylizedGuitar stylizedGuitar;
-	Windmill windmill;
-	Space space;
-	RetroKeyboard retroKeyboard;
-	Chestnut chestnut;
+	StylizedGuitar* stylizedGuitar = new StylizedGuitar();
+	Windmill* windmill = new Windmill();
+	Space* space = new Space();
+	RetroKeyboard* retroKeyboard = new RetroKeyboard();
+	Chestnut* chestnut = new Chestnut();
 
 	allSceneRefs = {stylizedGuitar, windmill, space, retroKeyboard, chestnut};
-
-	chestnut.LoadIntoScene(activeScene);
-	skyColor = activeScene.sceneSkyColor;
+	allSceneRefs[1]->LoadIntoScene(activeScene);
 }
 
 void Renderer::HandleUI()
 {
+	float buttonWidth = 150.0f;
+	float buttonHeight = 40.0f;
+	float spacing = 10.0f;
+	int buttonsPerRow = 2;
+
 	ImGui::Begin("Renderer Settings");
 	ImGui::Spacing();
 
@@ -35,12 +40,12 @@ void Renderer::HandleUI()
 		ImGui::Text("  Projection Mode");
 		ImGui::Spacing();
 
-		if (ImGui::Button("Perspective", ImVec2(120, 40)))
+		if (ImGui::Button("Perspective", ImVec2(buttonWidth, buttonHeight)))
 			projectionType = PERSPECTIVE;
 
 		ImGui::SameLine();
 
-		if (ImGui::Button("Orthographic", ImVec2(120, 40)))
+		if (ImGui::Button("Orthographic", ImVec2(buttonWidth, buttonHeight)))
 			projectionType = ORTHOGRAPHIC;
 
 		ImGui::Spacing();
@@ -54,25 +59,24 @@ void Renderer::HandleUI()
 		ImGui::Text("  View Mode");
 		ImGui::Spacing();
 
-		if (ImGui::Button("LIT", ImVec2(120, 40)))
+		if (ImGui::Button("LIT", ImVec2(buttonWidth, buttonHeight)))
 			viewMode = LIT;
 
 		ImGui::SameLine();
 
-		if (ImGui::Button("UNLIT", ImVec2(120, 40)))
+		if (ImGui::Button("UNLIT", ImVec2(buttonWidth, buttonHeight)))
 			viewMode = UNLIT;
 
-		ImGui::SameLine();
-
-		if (ImGui::Button("TRIANGULATE", ImVec2(120, 40)))
+		if (ImGui::Button("TRIANGULATE", ImVec2(buttonWidth, buttonHeight)))
 			viewMode = TRIANGULATE;
 
-		if (ImGui::Button("DEPTH", ImVec2(120, 40)))
-			viewMode = DEPTH;
-
 		ImGui::SameLine();
 
-		if (ImGui::Button("NORMAL", ImVec2(120, 40)))
+		if (ImGui::Button("DEPTH", ImVec2(buttonWidth, buttonHeight)))
+			viewMode = DEPTH;
+
+
+		if (ImGui::Button("NORMAL", ImVec2(buttonWidth, buttonHeight)))
 			viewMode = NORMAL;
 
 		ImGui::Spacing();
@@ -86,14 +90,14 @@ void Renderer::HandleUI()
 		ImGui::Text("  Sky Color");
 		ImGui::Spacing();
 
-		float top[4] = { skyColor.topSky.r, skyColor.topSky.g, skyColor.topSky.b, skyColor.topSky.a };
-		float bottom[4] = { skyColor.bottomSky.r, skyColor.bottomSky.g, skyColor.bottomSky.b, skyColor.bottomSky.a };
+		float top[4] = { activeScene.sceneSkyColor.topSky.r, activeScene.sceneSkyColor.topSky.g, activeScene.sceneSkyColor.topSky.b, activeScene.sceneSkyColor.topSky.a };
+		float bottom[4] = { activeScene.sceneSkyColor.bottomSky.r, activeScene.sceneSkyColor.bottomSky.g, activeScene.sceneSkyColor.bottomSky.b, activeScene.sceneSkyColor.bottomSky.a };
 
 		if (ImGui::ColorEdit4("Top Sky", top))
-			skyColor.topSky = glm::vec4(top[0], top[1], top[2], top[3]);
+			activeScene.sceneSkyColor.topSky = glm::vec4(top[0], top[1], top[2], top[3]);
 
 		if (ImGui::ColorEdit4("Bottom Sky", bottom))
-			skyColor.bottomSky = glm::vec4(bottom[0], bottom[1], bottom[2], bottom[3]);
+			activeScene.sceneSkyColor.bottomSky = glm::vec4(bottom[0], bottom[1], bottom[2], bottom[3]);
 
 		ImGui::Spacing();
 		ImGui::Spacing();
@@ -103,21 +107,30 @@ void Renderer::HandleUI()
 	}
 
 	{
-		/*ImGui::Text("  Scenes");
-		ImGui::Spacing();*/
+		ImGui::Text("Scenes");
+		ImGui::Spacing();
 
-		//activeScene.UnloadScene();
-		//allSceneRefs[2].LoadIntoScene(activeScene);
-		
-		// Write Scene Load Unload Code Here
+		for (int i = 0; i < allSceneRefs.size(); ++i)
+		{
+			Scene* scene = allSceneRefs[i];
 
+			if (ImGui::Button(scene->sceneName.c_str(), ImVec2(buttonWidth, buttonHeight)))
+			{
+				activeScene.UnloadScene();
+				scene->LoadIntoScene(activeScene);
+				atmFog = nullptr;
+				fogFactor = 0.0f;
+			}
 
-		/*ImGui::Spacing();
+			if ((i + 1) % buttonsPerRow != 0)
+				ImGui::SameLine(0.0f, spacing);
+		}
+
+		ImGui::Spacing();
 		ImGui::Spacing();
 		ImGui::Separator();
 		ImGui::Spacing();
-		ImGui::Spacing();*/
-
+		ImGui::Spacing();
 	}
 
 	ImGui::End();
@@ -143,20 +156,16 @@ void Renderer::Render(float width, float height, float delta)
 		screenResolution = glm::vec2(width, height);
 	}
 
-	HandleUI();
-
 	deltaTime = delta / 10.0f;
 
 	ClearBackground();
 	ResetDepthBuffer();
+	HandleUI();
 
 	if (activeScene.entities.empty())
 		return;
 
 	camera.NavigateCamera(deltaTime, projectionType);
-
-	static ExponentialFog* atmFog = nullptr;
-	static float fogFactor = 0.0f;
 
 	for (Entity* entity : activeScene.entities)
 	{
@@ -295,7 +304,7 @@ void Renderer::Render(float width, float height, float delta)
 									if (atmFog)
 									{
 										fogFactor = atmFog->CalculateFogFactor(nearClip, farClip, pixelDepth);
-										finalColor = glm::mix(finalColor, skyColor.topSky, fogFactor);
+										finalColor = glm::mix(finalColor, activeScene.sceneSkyColor.topSky, fogFactor);
 									}
 								}
 
@@ -417,7 +426,7 @@ void Renderer::ClearBackground()
 	for (int y = 0; y < screenResolution.y; y++)
 	{
 		float gradient = float(y) / (screenResolution.y - 1);
-		glm::vec4 rowColor = glm::mix(skyColor.bottomSky, skyColor.topSky, gradient);
+		glm::vec4 rowColor = glm::mix(activeScene.sceneSkyColor.bottomSky, activeScene.sceneSkyColor.topSky, gradient);
 
 		for (int x = 0; x < screenResolution.x; x++)
 		{

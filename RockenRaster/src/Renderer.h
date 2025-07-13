@@ -36,7 +36,7 @@ private:
 	std::shared_ptr<Walnut::Image> image;
 	glm::vec2 screenResolution;
 	Scene activeScene;
-	std::vector<Scene> allSceneRefs;
+	std::vector<Scene*> allSceneRefs;
 	Camera camera;
 	Projection projectionType;
 	ViewMode viewMode;
@@ -44,6 +44,7 @@ private:
 	float nearClip;
 	float farClip;
 	bool firstFrame;
-	SkyColor skyColor;
+	ExponentialFog* atmFog;
+	float fogFactor;
 };
 
