@@ -23,7 +23,7 @@ Renderer::Renderer()
 	Chestnut* chestnut = new Chestnut();
 
 	allSceneRefs = {stylizedGuitar, windmill, space, retroKeyboard, chestnut};
-	allSceneRefs[1]->LoadIntoScene(activeScene);
+	allSceneRefs[4]->LoadIntoScene(activeScene);
 }
 
 void Renderer::HandleUI()
@@ -107,14 +107,14 @@ void Renderer::HandleUI()
 	}
 
 	{
-		ImGui::Text("Scenes");
+		ImGui::Text("  Scenes");
 		ImGui::Spacing();
 
 		for (int i = 0; i < allSceneRefs.size(); ++i)
 		{
 			Scene* scene = allSceneRefs[i];
 
-			if (ImGui::Button(scene->sceneName.c_str(), ImVec2(buttonWidth, buttonHeight)))
+			if (ImGui::Button(scene->sceneName.c_str(), ImVec2(buttonWidth, buttonHeight)) && scene->sceneName != activeScene.sceneName)
 			{
 				activeScene.UnloadScene();
 				scene->LoadIntoScene(activeScene);

@@ -40,6 +40,7 @@ struct Windmill : public Scene
 		activeScene.entities.push_back(dirLight);
 
 		activeScene.sceneSkyColor = { glm::vec4(0.22f, 0.71f, 1.0f, 1.0f), glm::vec4(0.83f, 0.84f, 0.85f, 1.0f) };
+		activeScene.sceneName = sceneName;
 	}
 };
 
@@ -70,6 +71,7 @@ struct Space : public Scene
 		activeScene.entities.push_back(dirLight);
 
 		activeScene.sceneSkyColor = { glm::vec4(0.0f), glm::vec4(0.0f) };
+		activeScene.sceneName = sceneName;
 	}
 };
 
@@ -86,7 +88,13 @@ struct RetroKeyboard : public Scene
 		RetroKeyboard->speedComp.angularSpeed = glm::vec3(0.0f, 0.1f, 0.0f);
 		activeScene.entities.push_back(RetroKeyboard);
 
+		DirectionalLight* dirLight = new DirectionalLight();
+		dirLight->direction = glm::vec3(0.0f, -20.f, -10.0f);
+		dirLight->intensity = 0.5f;
+		activeScene.entities.push_back(dirLight);
+
 		activeScene.sceneSkyColor = { glm::vec4(0.17f, 0.74f, 0.58, 1.0f), glm::vec4(0.09f, 0.32f, 0.41f, 1.0f) };
+		activeScene.sceneName = sceneName;
 	}
 };
 
@@ -97,7 +105,7 @@ struct Chestnut : public Scene
 	{
 		Mesh* Chestnut = new Mesh(Movable);
 		Chestnut->LoadObjectFile("Assets/Chestnut.obj", "Assets/Chestnut.png");
-		Chestnut->transform.scale = glm::vec3(1.0f);
+		Chestnut->transform.scale = glm::vec3(1.5f);
 		Chestnut->transform.rotation = glm::vec3(0.0f, 180.0f, 0.0f);
 		Chestnut->transform.location = glm::vec3(0.0f, 0.0f, -2.0f);
 		Chestnut->speedComp.angularSpeed = glm::vec3(0.0f, 0.1f, 0.0f);
@@ -109,6 +117,7 @@ struct Chestnut : public Scene
 		activeScene.entities.push_back(dirLight);
 
 		activeScene.sceneSkyColor = { glm::vec4(0.9f, 0.85f, 0.95, 1.0f), glm::vec4(0.7f, 0.84f, 0.41f, 1.0f) };
+		activeScene.sceneName = sceneName;
 	}
 };
 
@@ -130,6 +139,7 @@ struct StylizedGuitar : public Scene
 		dirLight->intensity = 2.0f;
 		activeScene.entities.push_back(dirLight);
 
-		activeScene.sceneSkyColor = { glm::vec4(0.0f, 1.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.7f, 0.7f, 1.0f) };
+		activeScene.sceneSkyColor = { glm::vec4(0.0f, 1.0f, 1.0f, 1.0f), glm::vec4(0.15f, 0.0f, 1.0f, 1.0f) };
+		activeScene.sceneName = sceneName;
 	}
 };
