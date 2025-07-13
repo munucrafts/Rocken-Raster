@@ -232,6 +232,9 @@ struct Scene
 	virtual void LoadIntoScene(Scene& activeScene) {};
 	virtual void UnloadScene()
 	{
+		for (Entity* entity : entities)
+			delete entity;
+
 		entities.clear();
 	};
 	std::vector<Entity*> entities;
