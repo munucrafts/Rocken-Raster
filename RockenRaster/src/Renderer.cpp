@@ -6,6 +6,7 @@
 Renderer::Renderer()
 {
 	firstFrame = true;
+	sceneJustUpdated = true;
 	nearClip = 0.01f;
 	farClip = 100.0f;
 	deltaTime = 0.0f;
@@ -120,6 +121,7 @@ void Renderer::HandleUI()
 				scene->LoadIntoScene(activeScene);
 				atmFog = nullptr;
 				fogFactor = 0.0f;
+				sceneJustUpdated = true;
 			}
 
 			if ((i + 1) % buttonsPerRow != 0)
@@ -186,7 +188,7 @@ void Renderer::Render(float width, float height, float delta)
 
 			if (mesh->mobility == Static)
 			{
-				if (firstFrame)
+				if (firstFrame || sceneJustUpdated)
 				{
 					modelWorld = ModelToWorld(mesh->transform);
 					mesh->bakedTransform = modelWorld;
@@ -198,7 +200,7 @@ void Renderer::Render(float width, float height, float delta)
 			}
 			else if (mesh->mobility == Movable)
 			{
-				if (firstFrame || mesh->isMoving)
+				if (firstFrame || mesh->isMoving || sceneJustUpdated)
 				{
 					modelWorld = ModelToWorld(mesh->transform);
 					mesh->bakedTransform = modelWorld;
@@ -319,6 +321,7 @@ void Renderer::Render(float width, float height, float delta)
 
 	image->SetData(imageData.data());
 	firstFrame = false;
+	sceneJustUpdated = false;
 }
 
 uint32_t Renderer::ColorToRGBA(glm::vec4& color)

@@ -10,7 +10,7 @@ struct Windmill : public Scene
 	void LoadIntoScene(Scene& activeScene) override
 	{
 		Mesh* island = new Mesh(Static);
-		island->LoadObjectFile("Assets/island.obj", "Assets/island.png");
+		island->LoadObjectFile("Assets/Island.obj", "Assets/Island.png");
 		island->transform.scale = glm::vec3(0.15f);
 		island->transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 		island->transform.location = glm::vec3(-2.0f, -3.3f, -14.0f);

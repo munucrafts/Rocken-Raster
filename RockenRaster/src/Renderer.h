@@ -44,6 +44,7 @@ private:
 	float nearClip;
 	float farClip;
 	bool firstFrame;
+	bool sceneJustUpdated;
 	ExponentialFog* atmFog;
 	float fogFactor;
 };
