@@ -4,6 +4,8 @@
 #include <memory>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <mutex>
+#include <thread>
 #include "Primitives.h"
 #include "Camera.h"
 #include "Fog.h"
@@ -29,6 +31,7 @@ private:
 	void DrawPixel(glm::vec2& pixelLoc, glm::vec4& color);
 	glm::vec4 GetColorBasedOnViewMode(Mesh* mesh, Triangle& tri, glm::vec2& texCoords, float depthAtPixel, glm::vec3& interpNormal);
 	void HandleUI();
+	void RenderChunk(int threadId, float width, float height, float delta);
 
 private:
 	std::vector<uint32_t> imageData;
@@ -47,5 +50,8 @@ private:
 	bool sceneJustUpdated;
 	ExponentialFog* atmFog;
 	float fogFactor;
+	std::mutex mtx;
+	std::vector<std::thread> allThreads;
+	int totalNumThreads;
 };
 

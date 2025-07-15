@@ -3,6 +3,11 @@
 #include "Scenes.h"
 #include "Light.h"
 
+void ThreadRender(int threadId)
+{
+	std::cout << threadId << std::endl;
+}
+
 Renderer::Renderer()
 {
 	firstFrame = true;
@@ -25,13 +30,16 @@ Renderer::Renderer()
 
 	allSceneRefs = {stylizedGuitar, windmill, space, retroKeyboard, chestnut};
 	allSceneRefs[4]->LoadIntoScene(activeScene);
+
+	totalNumThreads = std::thread::hardware_concurrency();
+	allThreads.resize(totalNumThreads);
 }
 
 void Renderer::HandleUI()
 {
 	float buttonWidth = 150.0f;
 	float buttonHeight = 40.0f;
-	float spacing = 10.0f;
+	float spacing = 8.0f;
 	int buttonsPerRow = 2;
 
 	ImGui::Begin("Renderer Settings");
@@ -138,36 +146,10 @@ void Renderer::HandleUI()
 	ImGui::End();
 }
 
-void Renderer::Render(float width, float height, float delta)
+void Renderer::RenderChunk(int threadId, float width, float height, float delta)
 {
-	if (image)
-	{
-		if (width != image->GetWidth() || height != image->GetHeight())
-		{
-			image->Resize(width, height);
-			imageData.resize(width * height);
-			depthBuffer.resize(width * height);
-			screenResolution = glm::vec2(width, height);
-		}
-	}
-	else
-	{
-		image = std::make_shared<Walnut::Image>(width, height, Walnut::ImageFormat::RGBA);
-		imageData.resize(width * height);
-		depthBuffer.resize(width * height);
-		screenResolution = glm::vec2(width, height);
-	}
-
-	deltaTime = delta / 10.0f;
-
-	ClearBackground();
-	ResetDepthBuffer();
-	HandleUI();
-
-	if (activeScene.entities.empty())
-		return;
-
-	camera.NavigateCamera(deltaTime, projectionType);
+	int startY = (height * threadId) / totalNumThreads;
+	int endY = (height * (threadId + 1)) / totalNumThreads;
 
 	for (Entity* entity : activeScene.entities)
 	{
@@ -236,8 +218,8 @@ void Renderer::Render(float width, float height, float delta)
 
 				int minPixelX = (int)box.minMaxX.x;
 				int maxPixelX = (int)box.minMaxX.y;
-				int minPixelY = (int)box.minMaxY.x;
-				int maxPixelY = (int)box.minMaxY.y;
+				int minPixelY = std::max((int)box.minMaxY.x, startY);
+				int maxPixelY = std::min((int)box.minMaxY.y, endY - 1);
 
 				for (int y = minPixelY; y <= maxPixelY; y++)
 				{
@@ -280,12 +262,12 @@ void Renderer::Render(float width, float height, float delta)
 								else if (projectionType == ORTHOGRAPHIC)
 								{
 									texCoords = tri.vertices[0].uv * weights.x +
-												tri.vertices[1].uv * weights.y +
-												tri.vertices[2].uv * weights.z;
+										tri.vertices[1].uv * weights.y +
+										tri.vertices[2].uv * weights.z;
 
 									normal = tri.vertices[0].normal * weights.x +
-											 tri.vertices[1].normal * weights.y +
-											 tri.vertices[2].normal * weights.z;
+										tri.vertices[1].normal * weights.y +
+										tri.vertices[2].normal * weights.z;
 								}
 
 								normal = glm::normalize(normal);
@@ -293,7 +275,7 @@ void Renderer::Render(float width, float height, float delta)
 								glm::vec4 finalColor = GetColorBasedOnViewMode(mesh, tri, texCoords, pixelDepth, normal);
 
 								if (viewMode == LIT)
-								{								
+								{
 									for (Entity* light : activeScene.entities)
 									{
 										if (DirectionalLight* direcLight = dynamic_cast<DirectionalLight*>(light))
@@ -317,6 +299,52 @@ void Renderer::Render(float width, float height, float delta)
 				}
 			}
 		}
+	}
+}
+
+void Renderer::Render(float width, float height, float delta)
+{
+	if (image)
+	{
+		if (width != image->GetWidth() || height != image->GetHeight())
+		{
+			image->Resize(width, height);
+			imageData.resize(width * height);
+			depthBuffer.resize(width * height);
+			screenResolution = glm::vec2(width, height);
+		}
+	}
+	else
+	{
+		image = std::make_shared<Walnut::Image>(width, height, Walnut::ImageFormat::RGBA);
+		imageData.resize(width * height);
+		depthBuffer.resize(width * height);
+		screenResolution = glm::vec2(width, height);
+	}
+
+	deltaTime = delta / 100.0f;
+
+	ClearBackground();
+	ResetDepthBuffer();
+	HandleUI();
+
+	if (activeScene.entities.empty())
+		return;
+
+	camera.NavigateCamera(deltaTime, projectionType);
+
+	allThreads.clear();
+	for (int i = 0; i < totalNumThreads; i++)
+	{
+		{
+			std::lock_guard<std::mutex> lockGuard(mtx);
+			allThreads.emplace_back(&Renderer::RenderChunk, this, i, width, height, delta);
+		}
+	}
+
+	for (std::thread& thread : allThreads)
+	{
+		thread.join();
 	}
 
 	image->SetData(imageData.data());
@@ -364,7 +392,6 @@ glm::vec3 Renderer::NDCToPixel(glm::vec3& q)
 {
 	glm::vec3 p = q * 0.5f + 0.5f;
 	p = p * glm::vec3(screenResolution, 1.0f);
-
 	return p;
 }
 
