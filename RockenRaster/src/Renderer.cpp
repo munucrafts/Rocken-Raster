@@ -146,10 +146,10 @@ void Renderer::HandleUI()
 	ImGui::End();
 }
 
-void Renderer::RenderChunk(int threadId, float width, float height, float delta)
+void Renderer::RenderChunk(int threadId)
 {
-	int startY = (height * threadId) / totalNumThreads;
-	int endY = (height * (threadId + 1)) / totalNumThreads;
+	int startY = (screenResolution.y * threadId) / totalNumThreads;
+	int endY = (screenResolution.y * (threadId + 1)) / totalNumThreads;
 
 	for (Entity* entity : activeScene.entities)
 	{
@@ -322,7 +322,7 @@ void Renderer::Render(float width, float height, float delta)
 		screenResolution = glm::vec2(width, height);
 	}
 
-	deltaTime = delta / 100.0f;
+	deltaTime = delta / 25.0f;
 
 	ClearBackground();
 	ResetDepthBuffer();
@@ -338,7 +338,7 @@ void Renderer::Render(float width, float height, float delta)
 	{
 		{
 			std::lock_guard<std::mutex> lockGuard(mtx);
-			allThreads.emplace_back(&Renderer::RenderChunk, this, i, width, height, delta);
+			allThreads.emplace_back(&Renderer::RenderChunk, this, i);
 		}
 	}
 

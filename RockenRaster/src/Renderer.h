@@ -31,7 +31,7 @@ private:
 	void DrawPixel(glm::vec2& pixelLoc, glm::vec4& color);
 	glm::vec4 GetColorBasedOnViewMode(Mesh* mesh, Triangle& tri, glm::vec2& texCoords, float depthAtPixel, glm::vec3& interpNormal);
 	void HandleUI();
-	void RenderChunk(int threadId, float width, float height, float delta);
+	void RenderChunk(int threadId);
 
 private:
 	std::vector<uint32_t> imageData;
