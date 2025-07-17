@@ -31,7 +31,7 @@ public:
 		MS = timer.ElapsedMillis();
 		FPS = 1000.0f / MS;
 
-		std::shared_ptr<Walnut::Image> image = renderer.GetImage();
+		std::shared_ptr<Walnut::Image> image = renderer.GetFinalImage();
 		if (image)
 		{
 			ImGui::Image(image->GetDescriptorSet(),

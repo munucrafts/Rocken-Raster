@@ -304,20 +304,20 @@ void Renderer::RenderChunk(int threadId)
 
 void Renderer::Render(float width, float height, float delta)
 {
-	if (image)
+	if (finalImage)
 	{
-		if (width != image->GetWidth() || height != image->GetHeight())
+		if (width != finalImage->GetWidth() || height != finalImage->GetHeight())
 		{
-			image->Resize(width, height);
-			imageData.resize(width * height);
+			finalImage->Resize(width, height);
+			frameBuffer.resize(width * height);
 			depthBuffer.resize(width * height);
 			screenResolution = glm::vec2(width, height);
 		}
 	}
 	else
 	{
-		image = std::make_shared<Walnut::Image>(width, height, Walnut::ImageFormat::RGBA);
-		imageData.resize(width * height);
+		finalImage = std::make_shared<Walnut::Image>(width, height, Walnut::ImageFormat::RGBA);
+		frameBuffer.resize(width * height);
 		depthBuffer.resize(width * height);
 		screenResolution = glm::vec2(width, height);
 	}
@@ -347,7 +347,7 @@ void Renderer::Render(float width, float height, float delta)
 		thread.join();
 	}
 
-	image->SetData(imageData.data());
+	finalImage->SetData(frameBuffer.data());
 	firstFrame = false;
 	sceneJustUpdated = false;
 }
@@ -461,7 +461,7 @@ void Renderer::ClearBackground()
 		for (int x = 0; x < screenResolution.x; x++)
 		{
 			int index = x + y * screenResolution.x;
-			imageData[index] = ColorToRGBA(rowColor);
+			frameBuffer[index] = ColorToRGBA(rowColor);
 		}
 	}
 }
@@ -472,7 +472,7 @@ void Renderer::DrawPixel(glm::vec2& pixelLoc, glm::vec4& color)
 	int y = (int)pixelLoc.y;
 
 	if (x >= 0 && x < (int)screenResolution.x && y >= 0 && y < (int)screenResolution.y)
-		imageData[x + y * (int)screenResolution.x] = ColorToRGBA(color);
+		frameBuffer[x + y * (int)screenResolution.x] = ColorToRGBA(color);
 }
 
 glm::vec4 Renderer::GetColorBasedOnViewMode(Mesh* mesh, Triangle& tri, glm::vec2& texCoords, float depthAtPixel, glm::vec3& interpNormal)
@@ -524,7 +524,7 @@ BoundingBox Renderer::GetTriangleBoundingBox(glm::vec3& a, glm::vec3& b, glm::ve
 	return { glm::vec2(minX, maxX), glm::vec2(minY, maxY)};
 }
 
-std::shared_ptr<Walnut::Image>& Renderer::GetImage()
+std::shared_ptr<Walnut::Image>& Renderer::GetFinalImage()
 {
-	return image;
+	return finalImage;
 }

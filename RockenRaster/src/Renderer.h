@@ -15,7 +15,7 @@ class Renderer
 public:
 	Renderer();
 	void Render(float width, float height, float delta);
-	std::shared_ptr<Walnut::Image>& GetImage();
+	std::shared_ptr<Walnut::Image>& GetFinalImage();
 
 private:
 	uint32_t ColorToRGBA(glm::vec4& color);
@@ -34,9 +34,9 @@ private:
 	void RenderChunk(int threadId);
 
 private:
-	std::vector<uint32_t> imageData;
+	std::vector<uint32_t> frameBuffer;
 	std::vector<float> depthBuffer;
-	std::shared_ptr<Walnut::Image> image;
+	std::shared_ptr<Walnut::Image> finalImage;
 	glm::vec2 screenResolution;
 	Scene activeScene;
 	std::vector<Scene*> allSceneRefs;
