@@ -2,7 +2,7 @@
 
 ParticleSystem::ParticleSystem()
 {
-    mobility = Movable;
+    mobility = MOVABLE;
     isMoving = true;
 }
 

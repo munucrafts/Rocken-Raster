@@ -22,7 +22,7 @@ private:
 	float GetSignedTriangleArea(glm::vec2& a, glm::vec2& b, glm::vec2& p);
 	bool InsideTriangle(glm::vec2& a, glm::vec2& b, glm::vec2& c, glm::vec2& p, glm::vec3& weights);
 	glm::vec3 NDCToPixel(glm::vec3& q);
-	glm::vec4 WorldToClip(glm::vec3& point, glm::mat4& model);
+	glm::vec4 WorldToClip(glm::vec3& point, glm::mat4& model, Mesh* currentMesh);
 	bool PointOutsideClipSpace(glm::vec4& point);
 	glm::mat4 ModelToWorld(Transform& objectTransform);
 	void ClearBackground();
@@ -47,6 +47,7 @@ private:
 	float nearClip;
 	float farClip;
 	bool firstFrame;
+	int frameCount;
 	bool sceneJustUpdated;
 	ExponentialFog* atmFog;
 	float fogFactor;

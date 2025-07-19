@@ -4,7 +4,7 @@ ExponentialFog::ExponentialFog()
 {
 	falloffDistance = 50.0f;
 	fogDensity = 0.001f;
-	mobility = Static;
+	mobility = STATIC;
 }
 
 float ExponentialFog::CalculateFogFactor(float nearClip, float farClip, float pixelDepth)

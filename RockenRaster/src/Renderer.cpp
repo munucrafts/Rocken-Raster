@@ -6,6 +6,7 @@
 Renderer::Renderer()
 {
 	firstFrame = true;
+	frameCount = 0;
 	sceneJustUpdated = true;
 	nearClip = 0.01f;
 	farClip = 100.0f;
@@ -24,9 +25,9 @@ Renderer::Renderer()
 	Chestnut* chestnut = new Chestnut();
 
 	allSceneRefs = {stylizedGuitar, windmill, space, retroKeyboard, chestnut};
-	allSceneRefs[4]->LoadIntoScene(activeScene);
+	allSceneRefs[1]->LoadIntoScene(activeScene);
 
-	totalNumThreads = std::thread::hardware_concurrency();
+	totalNumThreads = 1;
 	allThreads.resize(totalNumThreads);
 }
 
@@ -78,7 +79,6 @@ void Renderer::HandleUI()
 
 		if (ImGui::Button("DEPTH", ImVec2(buttonWidth, buttonHeight)))
 			viewMode = DEPTH;
-
 
 		if (ImGui::Button("NORMAL", ImVec2(buttonWidth, buttonHeight)))
 			viewMode = NORMAL;
@@ -148,7 +148,7 @@ void Renderer::RenderChunk(int threadId)
 
 	for (Entity* entity : activeScene.entities)
 	{
-		if (entity->mobility == Movable)
+		if (entity->mobility == MOVABLE)
 		{
 			entity->RotateEntity(deltaTime);
 
@@ -163,7 +163,7 @@ void Renderer::RenderChunk(int threadId)
 		{
 			glm::mat4 modelWorld;
 
-			if (mesh->mobility == Static)
+			if (mesh->mobility == STATIC)
 			{
 				if (firstFrame || sceneJustUpdated)
 				{
@@ -175,7 +175,7 @@ void Renderer::RenderChunk(int threadId)
 					modelWorld = mesh->bakedTransform;
 				}
 			}
-			else if (mesh->mobility == Movable)
+			else if (mesh->mobility == MOVABLE)
 			{
 				if (firstFrame || mesh->isMoving || sceneJustUpdated)
 				{
@@ -190,9 +190,9 @@ void Renderer::RenderChunk(int threadId)
 
 			for (Triangle& tri : mesh->triangles)
 			{
-				glm::vec4 clipA = WorldToClip(tri.vertices[0].vert, modelWorld);
-				glm::vec4 clipB = WorldToClip(tri.vertices[1].vert, modelWorld);
-				glm::vec4 clipC = WorldToClip(tri.vertices[2].vert, modelWorld);
+				glm::vec4 clipA = WorldToClip(tri.vertices[0].vert, modelWorld, mesh);
+				glm::vec4 clipB = WorldToClip(tri.vertices[1].vert, modelWorld, mesh);
+				glm::vec4 clipC = WorldToClip(tri.vertices[2].vert, modelWorld, mesh);
 
 				bool outA = PointOutsideClipSpace(clipA);
 				bool outB = PointOutsideClipSpace(clipB);
@@ -343,8 +343,13 @@ void Renderer::Render(float width, float height, float delta)
 	}
 
 	finalImage->SetData(frameBuffer.data());
-	firstFrame = false;
-	sceneJustUpdated = false;
+
+	if (frameCount < 1) frameCount++;
+	else
+	{
+		sceneJustUpdated = false;
+		firstFrame = false;
+	}
 }
 
 uint32_t Renderer::ColorToRGBA(glm::vec4& color)
@@ -390,25 +395,28 @@ glm::vec3 Renderer::NDCToPixel(glm::vec3& q)
 	return p;
 }
 
-glm::vec4 Renderer::WorldToClip(glm::vec3& point, glm::mat4& model)
+glm::vec4 Renderer::WorldToClip(glm::vec3& point, glm::mat4& model, Mesh* currentMesh)
 {
 	static glm::mat4 cachedViewProj;
 	static glm::vec2 cachedResolution;
 	static Projection cachedProjectionType;
 	static bool firstRun = true;
 
-	glm::vec4 clip;
+	bool recomputeViewProj = camera.isMoving || projectionType != cachedProjectionType || screenResolution != cachedResolution || firstRun || sceneJustUpdated || firstFrame;
 
-	if (camera.isMoving || projectionType != cachedProjectionType || screenResolution != cachedResolution || firstRun)
+	if (recomputeViewProj)
 	{
+		if (frameCount != 1) frameCount = 0;
+
 		float aspectRatio = (float)screenResolution.x / (float)screenResolution.y;
-		glm::mat4 view = camera.GetViewMatrix(firstFrame);
+		glm::mat4 view = camera.GetViewMatrix(recomputeViewProj);
 		glm::mat4 proj;
 
 		switch (projectionType)
 		{
 		case ORTHOGRAPHIC:
-			proj = glm::ortho(-camera.orthoValue * aspectRatio, camera.orthoValue * aspectRatio,
+			proj = glm::ortho(-camera.orthoValue * aspectRatio, 
+							   camera.orthoValue * aspectRatio,
 							  -camera.orthoValue, camera.orthoValue, -50.0f, 50.0f);
 			break;
 		case PERSPECTIVE:
@@ -420,9 +428,15 @@ glm::vec4 Renderer::WorldToClip(glm::vec3& point, glm::mat4& model)
 		cachedProjectionType = projectionType;
 		cachedResolution = screenResolution;
 		firstRun = false;
+		std::cout << "Hellow" << std::endl;
 	}
 
-	clip = cachedViewProj * model * glm::vec4(point, 1.0f);
+	if (currentMesh->isMoving || (currentMesh->mobility == STATIC && recomputeViewProj))
+	{
+		currentMesh->bakedProjection = cachedViewProj * model;
+	}
+
+	glm::vec4 clip = currentMesh->bakedProjection * glm::vec4(point, 1.0f);
 	return clip;
 }
 

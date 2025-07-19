@@ -91,9 +91,9 @@ private:
 	};
 
 public:
-	glm::mat4 GetViewMatrix(bool firstFrame)
+	glm::mat4 GetViewMatrix(bool recomputeView)
 	{
-		if (isMoving || firstFrame)
+		if (isMoving || recomputeView)
 			viewMatrix = glm::lookAt(transform.location, transform.location + forward, up);
 
 		return viewMatrix;

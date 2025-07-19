@@ -27,7 +27,7 @@ enum ViewMode
 
 enum Mobility
 {
-	Static, Movable
+	STATIC, MOVABLE
 };
 
 struct Vertex
@@ -71,7 +71,7 @@ struct Entity
 	virtual void MoveEntity(float deltaTime) {};
 	virtual void ScaleEntity(float deltaTime) {};
 
-	Mobility mobility = Static;
+	Mobility mobility = STATIC;
 };
 
 struct Texture
@@ -115,7 +115,7 @@ struct Mesh : public Entity
 	Mesh(Mobility mob)
 	{
 		mobility = mob;
-		isMoving = mobility == Movable;
+		isMoving = mobility == MOVABLE;
 	};
 	virtual ~Mesh() = default;
 
@@ -125,6 +125,8 @@ struct Mesh : public Entity
 	Material mat;
 
 	glm::mat4 bakedTransform = glm::mat4(0.0f);
+	glm::mat4 bakedProjection = glm::mat4(0.0f);
+
 	bool isMoving = false;
 
 	void RotateEntity(float deltaTime) override
