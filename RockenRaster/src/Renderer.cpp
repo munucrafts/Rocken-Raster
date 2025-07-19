@@ -3,11 +3,6 @@
 #include "Scenes.h"
 #include "Light.h"
 
-void ThreadRender(int threadId)
-{
-	std::cout << threadId << std::endl;
-}
-
 Renderer::Renderer()
 {
 	firstFrame = true;
