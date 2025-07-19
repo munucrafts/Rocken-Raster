@@ -27,7 +27,7 @@ Renderer::Renderer()
 	allSceneRefs = {stylizedGuitar, windmill, space, retroKeyboard, chestnut};
 	allSceneRefs[1]->LoadIntoScene(activeScene);
 
-	totalNumThreads = 1;
+	totalNumThreads = std::thread::hardware_concurrency() - 1;
 	allThreads.resize(totalNumThreads);
 }
 
@@ -46,12 +46,18 @@ void Renderer::HandleUI()
 		ImGui::Spacing();
 
 		if (ImGui::Button("Perspective", ImVec2(buttonWidth, buttonHeight)))
+		{
 			projectionType = PERSPECTIVE;
+			FlagSceneUpdate();
+		}
 
 		ImGui::SameLine();
 
 		if (ImGui::Button("Orthographic", ImVec2(buttonWidth, buttonHeight)))
+		{
 			projectionType = ORTHOGRAPHIC;
+			FlagSceneUpdate();
+		}
 
 		ImGui::Spacing();
 		ImGui::Spacing();
@@ -122,9 +128,9 @@ void Renderer::HandleUI()
 			{
 				activeScene.UnloadScene();
 				scene->LoadIntoScene(activeScene);
+				FlagSceneUpdate();
 				atmFog = nullptr;
 				fogFactor = 0.0f;
-				sceneJustUpdated = true;
 			}
 
 			if ((i + 1) % buttonsPerRow != 0)
@@ -297,6 +303,12 @@ void Renderer::RenderChunk(int threadId)
 	}
 }
 
+void Renderer::FlagSceneUpdate()
+{
+	frameCount = 0;
+	sceneJustUpdated = true;
+}
+
 void Renderer::Render(float width, float height, float delta)
 {
 	if (finalImage)
@@ -307,6 +319,8 @@ void Renderer::Render(float width, float height, float delta)
 			frameBuffer.resize(width * height);
 			depthBuffer.resize(width * height);
 			screenResolution = glm::vec2(width, height);
+			frameCount = 0;
+			sceneJustUpdated = true;
 		}
 	}
 	else
@@ -315,16 +329,17 @@ void Renderer::Render(float width, float height, float delta)
 		frameBuffer.resize(width * height);
 		depthBuffer.resize(width * height);
 		screenResolution = glm::vec2(width, height);
+		FlagSceneUpdate();
 	}
+
+	if (activeScene.entities.empty())
+		return;
 
 	deltaTime = delta / 25.0f;
 
 	ClearBackground();
 	ResetDepthBuffer();
 	HandleUI();
-
-	if (activeScene.entities.empty())
-		return;
 
 	camera.NavigateCamera(deltaTime, projectionType);
 
@@ -406,18 +421,14 @@ glm::vec4 Renderer::WorldToClip(glm::vec3& point, glm::mat4& model, Mesh* curren
 
 	if (recomputeViewProj)
 	{
-		if (frameCount != 1) frameCount = 0;
-
 		float aspectRatio = (float)screenResolution.x / (float)screenResolution.y;
-		glm::mat4 view = camera.GetViewMatrix(recomputeViewProj);
+		glm::mat4 view = camera.GetViewMatrix(firstFrame);
 		glm::mat4 proj;
 
 		switch (projectionType)
 		{
 		case ORTHOGRAPHIC:
-			proj = glm::ortho(-camera.orthoValue * aspectRatio, 
-							   camera.orthoValue * aspectRatio,
-							  -camera.orthoValue, camera.orthoValue, -50.0f, 50.0f);
+			proj = glm::ortho(-camera.orthoValue * aspectRatio, camera.orthoValue * aspectRatio, -camera.orthoValue, camera.orthoValue, -50.0f, 50.0f);
 			break;
 		case PERSPECTIVE:
 			proj = glm::perspective(camera.fov, aspectRatio, nearClip, farClip);
@@ -428,7 +439,6 @@ glm::vec4 Renderer::WorldToClip(glm::vec3& point, glm::mat4& model, Mesh* curren
 		cachedProjectionType = projectionType;
 		cachedResolution = screenResolution;
 		firstRun = false;
-		std::cout << "Hellow" << std::endl;
 	}
 
 	if (currentMesh->isMoving || (currentMesh->mobility == STATIC && recomputeViewProj))

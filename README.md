@@ -19,7 +19,7 @@
 - Different **View Modes** such as **Lit**, **Unlit**, **Triangulate**, **Depth**, and **Normal**  
 - **Material System** supporting both **Texture-based** and **Color-based** rendering  
 - Concept of **Static** and **Movable** objects  
-- Automatic **View & Transform Baking** for **Camera** and **Entities** for **Optimisations**  
+- Automatic **View, Projection, & Transform Baking** for **Camera** and **Entities** for **Optimisations**  
 - **Exponential Fog** entity that blends with the **Sky Color** based on **Distance** and **Fog Falloff** value
 - A very basic **Directional Light** that illuminates meshes from the the direction of light
 - **User Interface** tabs and buttons to **Load** and **Configure** different scenes in **Run-time**

@@ -32,6 +32,7 @@ private:
 	glm::vec4 GetColorBasedOnViewMode(Mesh* mesh, Triangle& tri, glm::vec2& texCoords, float depthAtPixel, glm::vec3& interpNormal);
 	void HandleUI();
 	void RenderChunk(int threadId);
+	void FlagSceneUpdate();
 
 private:
 	std::vector<uint32_t> frameBuffer;
