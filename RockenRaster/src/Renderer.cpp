@@ -303,12 +303,6 @@ void Renderer::RenderChunk(int threadId)
 	}
 }
 
-void Renderer::FlagSceneUpdate()
-{
-	frameCount = 0;
-	sceneJustUpdated = true;
-}
-
 void Renderer::Render(float width, float height, float delta)
 {
 	if (finalImage)
@@ -367,6 +361,12 @@ void Renderer::Render(float width, float height, float delta)
 	}
 }
 
+void Renderer::FlagSceneUpdate()
+{
+	frameCount = 0;
+	sceneJustUpdated = true;
+}
+
 uint32_t Renderer::ColorToRGBA(glm::vec4& color)
 {
 	glm::vec4 clampedColor = 255.0f * glm::clamp(color, glm::vec4(0.0f), glm::vec4(1.0f));
@@ -413,11 +413,8 @@ glm::vec3 Renderer::NDCToPixel(glm::vec3& q)
 glm::vec4 Renderer::WorldToClip(glm::vec3& point, glm::mat4& model, Mesh* currentMesh)
 {
 	static glm::mat4 cachedViewProj;
-	static glm::vec2 cachedResolution;
-	static Projection cachedProjectionType;
-	static bool firstRun = true;
 
-	bool recomputeViewProj = camera.isMoving || projectionType != cachedProjectionType || screenResolution != cachedResolution || firstRun || sceneJustUpdated || firstFrame;
+	bool recomputeViewProj = camera.isMoving || sceneJustUpdated || firstFrame;
 
 	if (recomputeViewProj)
 	{
@@ -436,9 +433,6 @@ glm::vec4 Renderer::WorldToClip(glm::vec3& point, glm::mat4& model, Mesh* curren
 		}
 
 		cachedViewProj = proj * view;
-		cachedProjectionType = projectionType;
-		cachedResolution = screenResolution;
-		firstRun = false;
 	}
 
 	if (currentMesh->isMoving || (currentMesh->mobility == STATIC && recomputeViewProj))
