@@ -9,18 +9,6 @@
 
 <br>
 
-## 🧭 **Conventions**
-
-- **Rendering Pipeline**
-   - **Model → World → View → Clip → NDC → UV → Pixel**
- 
-- **Coordinate Convention** (**Right-Handed**)  
-   - Left → Right = **+X**  
-   - Bottom → Top = **+Y**  
-   - Camera → Screen = **–Z**
-
-- **Triangle Winding Convention**: **Counter Clockwise (CCW)**
-
 ## 🐉 **Available Features**
 
 - Custom **OBJ Mesh** and **Texture Loading**  
@@ -33,7 +21,7 @@
 - Concept of **Static** and **Movable** objects  
 - Automatic **View, Projection, & Transform Baking** for **Camera** and **Entities** for **Optimisations**  
 - **Exponential Fog** entity that blends with the **Sky Color** based on **Distance** and **Fog Falloff** value
-- A very basic **Directional Light** that illuminates meshes from the the direction of light
+- A very basic **Directional Light** that illuminates meshes from the direction of light
 - **User Interface** tabs and buttons to **Load** and **Configure** different scenes in **Run-time**
 
 ## 👽 **Things I Might Work on in the Future**
@@ -43,4 +31,16 @@
 - **Physically Based Rendering (PBR)** material system  
 - **Ray-traced Shadows**  
 - Improved **Clip Space Culling** with **Retriangulation** instead of full triangle discard  
-- **CPU based Particle System**  
+- **CPU-based Particle System**
+
+## 🖼️ **Rendering Pipeline**
+   - **Model → World → View → Clip → NDC → UV → Pixel**
+ 
+## 🧭 **Conventions**
+
+- **Coordinate Convention** (**Right-Handed**)  
+   - Left → Right = **+X**  
+   - Bottom → Top = **+Y**  
+   - Camera → Screen = **–Z**
+
+- **Triangle Winding Convention**: **Counter Clockwise (CCW)**
