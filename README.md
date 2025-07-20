@@ -6,8 +6,7 @@
 * I built the **Rasterizer** to learn more about various **Rasterizing** and **Graphics** concepts.
 * It supports many modern rendering techniques, including **Triangle Rasterization**, **Depth Testing**, **Culling**, **Projections**, **Basic Shading**, and more all built from scratch.
 * The **Walnut Framework** is used for basic operations such as **Window Creation**, **UI**, and the **GLM Math Library**.
-
-<br>
+* I have listed additional relevant details below.
 
 ## 🐉 **Available Features**
 
@@ -24,14 +23,16 @@
 - A very basic **Directional Light** that illuminates meshes from the direction of light
 - **User Interface** tabs and buttons to **Load** and **Configure** different scenes in **Run-time**
 
-## 👽 **Things I Might Work on in the Future**
+## 🚧 Planned Features
 
-- **Multi-threading** and general **Performance Optimization**
-- **DLSS-like Super-resolution** system  
-- **Physically Based Rendering (PBR)** material system  
-- **Ray-traced Shadows**  
-- Improved **Clip Space Culling** with **Retriangulation** instead of full triangle discard  
-- **CPU-based Particle System**
+- Integrate **Audio System**
+- **Skeletal Animation** and **Skinning**
+- **Multi-threading** for faster rendering
+- **DLSS-like Super-Resolution**
+- **Physically Based Rendering (PBR)**
+- **Ray-Traced Shadows**
+- Improved **Clip Space Culling** with **retriangulation**
+- **Particle System** (bonfire, smoke, etc.)
 
 ## 🖼️ **Rendering Pipeline**
    - **Model → World → View → Clip → NDC → UV → Pixel**
