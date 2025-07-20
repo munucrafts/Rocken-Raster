@@ -266,6 +266,8 @@ void Renderer::Render(float width, float height, float delta)
 		if (entity->mobility == MOVABLE)
 		{
 			entity->RotateEntity(deltaTime);
+			entity->MoveEntity(deltaTime);
+			entity->ScaleEntity(deltaTime);
 
 			if (ParticleSystem* ps = dynamic_cast<ParticleSystem*>(entity))
 				ps->EmitParticles(deltaTime * 0.01f);
@@ -291,6 +293,8 @@ void Renderer::Render(float width, float height, float delta)
 			}
 			else if (mesh->mobility == MOVABLE)
 			{
+				mesh->isMoving = glm::length(mesh->speedComp.linearSpeed) + glm::length(mesh->speedComp.angularSpeed) + glm::length(mesh->speedComp.scalingSpeed) > 0;
+
 				if (firstFrame || mesh->isMoving || sceneJustUpdated)
 				{
 					modelWorld = ModelToWorld(mesh->transform);

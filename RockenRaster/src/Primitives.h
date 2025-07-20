@@ -132,17 +132,14 @@ struct Mesh : public Entity
 	void RotateEntity(float deltaTime) override
 	{
 		transform.rotation += speedComp.angularSpeed * deltaTime;
-		isMoving = true;
 	};
 	void MoveEntity(float deltaTime) override
 	{
 		transform.location += speedComp.linearSpeed * deltaTime;
-		isMoving = true;
 	};
 	void ScaleEntity(float deltaTime) override
 	{
 		transform.scale += speedComp.scalingSpeed * deltaTime;
-		isMoving = true;
 	};
 	void LoadObjectFile(std::string objPath, std::string texPath)
 	{
