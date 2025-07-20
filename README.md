@@ -9,6 +9,18 @@
 
 <br>
 
+## 🧭 **Conventions**
+
+- **Rendering Pipeline**
+   - **Model → World → View → Clip → NDC → UV → Pixel**
+ 
+- **Coordinate Convention** (**Right-Handed**)  
+   - Left → Right = **+X**  
+   - Bottom → Top = **+Y**  
+   - Camera → Screen = **–Z**
+
+- **Triangle Winding Convention**: **Counter Clockwise (CCW)**
+
 ## 🐉 **Available Features**
 
 - Custom **OBJ Mesh** and **Texture Loading**  
@@ -32,16 +44,3 @@
 - **Ray-traced Shadows**  
 - Improved **Clip Space Culling** with **Retriangulation** instead of full triangle discard  
 - **CPU based Particle System**  
-
-## 🖼️ **Rendering Pipeline**
-
-**Model → World → View → Clip → NDC → UV → Pixel**
-
-## 🧭 **Conventions**
-
-- **Coordinate Convention**: **Right-Handed**  
-   - Left → Right = **+X**  
-   - Bottom → Top = **+Y**  
-   - Camera → Screen = **–Z**
-
-- **Triangle Winding Convention**: **Counter Clockwise (CCW)**
