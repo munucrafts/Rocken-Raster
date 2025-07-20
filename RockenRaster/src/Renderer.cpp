@@ -147,10 +147,119 @@ void Renderer::HandleUI()
 	ImGui::End();
 }
 
-void Renderer::RenderChunk(int threadId)
+void Renderer::RenderChunk(Mesh* mesh, Triangle& tri, glm::vec3& pixelA, glm::vec3& pixelB, glm::vec3& pixelC, int minX, int minY, int maxX, int maxY)
 {
-	int startY = (screenResolution.y * threadId) / totalNumThreads;
-	int endY = (screenResolution.y * (threadId + 1)) / totalNumThreads;
+	for (int y = minY; y <= maxY; y++)
+	{
+		for (int x = minX; x <= maxX; x++)
+		{
+			glm::vec3 weights;
+
+			if (InsideTriangle((glm::vec2)pixelA, (glm::vec2)pixelB, (glm::vec2)pixelC, glm::vec2(x, y), weights))
+			{
+				glm::vec3 abcDepths = glm::vec3(pixelA.z, pixelB.z, pixelC.z);
+				float pixelDepth = 1.0f / glm::dot(1.0f / abcDepths, weights);
+				int pixelIndex = x + y * (int)screenResolution.x;
+
+				if (pixelIndex < 0 || pixelIndex >= depthBuffer.size())
+					continue;
+
+				if (pixelDepth <= depthBuffer[pixelIndex])
+				{
+					depthBuffer[pixelIndex] = pixelDepth;
+					glm::vec2 texCoords;
+					glm::vec3 normal;
+
+					if (projectionType == PERSPECTIVE)
+					{
+						glm::vec2 uv0 = tri.vertices[0].uv / pixelA.z;
+						glm::vec2 uv1 = tri.vertices[1].uv / pixelB.z;
+						glm::vec2 uv2 = tri.vertices[2].uv / pixelC.z;
+						glm::vec2 uvInterp = uv0 * weights.x + uv1 * weights.y + uv2 * weights.z;
+
+						glm::vec3 nor0 = tri.vertices[0].normal / pixelA.z;
+						glm::vec3 nor1 = tri.vertices[1].normal / pixelB.z;
+						glm::vec3 nor2 = tri.vertices[2].normal / pixelC.z;
+						glm::vec3 norInterp = nor0 * weights.x + nor1 * weights.y + nor2 * weights.z;
+
+						float invZ = weights.x / pixelA.z + weights.y / pixelB.z + weights.z / pixelC.z;
+
+						texCoords = uvInterp / invZ;
+						normal = norInterp / invZ;
+					}
+					else if (projectionType == ORTHOGRAPHIC)
+					{
+						texCoords = tri.vertices[0].uv * weights.x +
+							tri.vertices[1].uv * weights.y +
+							tri.vertices[2].uv * weights.z;
+
+						normal = tri.vertices[0].normal * weights.x +
+							tri.vertices[1].normal * weights.y +
+							tri.vertices[2].normal * weights.z;
+					}
+
+					normal = glm::normalize(normal);
+					float accLightIntensity = 1.0f;
+					glm::vec4 finalColor = GetColorBasedOnViewMode(mesh, tri, texCoords, pixelDepth, normal);
+
+					if (viewMode == LIT)
+					{
+						for (Entity* light : activeScene.entities)
+						{
+							if (DirectionalLight* direcLight = dynamic_cast<DirectionalLight*>(light))
+							{
+								glm::vec3 lightDir = glm::normalize(direcLight->direction);
+								accLightIntensity += glm::clamp(glm::dot(normal, -lightDir), 0.0f, 1.0f) * direcLight->intensity;
+							}
+						}
+
+						if (atmFog)
+						{
+							fogFactor = atmFog->CalculateFogFactor(nearClip, farClip, pixelDepth);
+							finalColor = glm::mix(finalColor, activeScene.sceneSkyColor.topSky, fogFactor);
+						}
+					}
+
+					DrawPixel(glm::vec2(x, y), accLightIntensity * finalColor);
+				}
+			}
+		}
+	}
+}
+
+void Renderer::Render(float width, float height, float delta)
+{
+	if (finalImage)
+	{
+		if (width != finalImage->GetWidth() || height != finalImage->GetHeight())
+		{
+			finalImage->Resize(width, height);
+			frameBuffer.resize(width * height);
+			depthBuffer.resize(width * height);
+			screenResolution = glm::vec2(width, height);
+			frameCount = 0;
+			sceneJustUpdated = true;
+		}
+	}
+	else
+	{
+		finalImage = std::make_shared<Walnut::Image>(width, height, Walnut::ImageFormat::RGBA);
+		frameBuffer.resize(width * height);
+		depthBuffer.resize(width * height);
+		screenResolution = glm::vec2(width, height);
+		FlagSceneUpdate();
+	}
+
+	if (activeScene.entities.empty())
+		return;
+
+	deltaTime = delta / 25.0f;
+
+	ClearBackground();
+	ResetDepthBuffer();
+	HandleUI();
+
+	camera.NavigateCamera(deltaTime, projectionType);
 
 	for (Entity* entity : activeScene.entities)
 	{
@@ -162,8 +271,7 @@ void Renderer::RenderChunk(int threadId)
 				ps->EmitParticles(deltaTime * 0.01f);
 		}
 
-		if (!atmFog)
-			atmFog = dynamic_cast<ExponentialFog*>(entity);
+		if (!atmFog) atmFog = dynamic_cast<ExponentialFog*>(entity);
 
 		if (Mesh* mesh = dynamic_cast<Mesh*>(entity))
 		{
@@ -219,136 +327,12 @@ void Renderer::RenderChunk(int threadId)
 
 				int minPixelX = (int)box.minMaxX.x;
 				int maxPixelX = (int)box.minMaxX.y;
-				int minPixelY = std::max((int)box.minMaxY.x, startY);
-				int maxPixelY = std::min((int)box.minMaxY.y, endY - 1);
+				int minPixelY = (int)box.minMaxY.x;
+				int maxPixelY = (int)box.minMaxY.y;
 
-				for (int y = minPixelY; y <= maxPixelY; y++)
-				{
-					for (int x = minPixelX; x <= maxPixelX; x++)
-					{
-						glm::vec3 weights;
-
-						if (InsideTriangle((glm::vec2)pixelA, (glm::vec2)pixelB, (glm::vec2)pixelC, glm::vec2(x, y), weights))
-						{
-							glm::vec3 abcDepths = glm::vec3(pixelA.z, pixelB.z, pixelC.z);
-							float pixelDepth = 1.0f / glm::dot(1.0f / abcDepths, weights);
-							int pixelIndex = x + y * (int)screenResolution.x;
-
-							if (pixelIndex < 0 || pixelIndex >= depthBuffer.size())
-								continue;
-
-							if (pixelDepth <= depthBuffer[pixelIndex])
-							{
-								depthBuffer[pixelIndex] = pixelDepth;
-								glm::vec2 texCoords;
-								glm::vec3 normal;
-
-								if (projectionType == PERSPECTIVE)
-								{
-									glm::vec2 uv0 = tri.vertices[0].uv / pixelA.z;
-									glm::vec2 uv1 = tri.vertices[1].uv / pixelB.z;
-									glm::vec2 uv2 = tri.vertices[2].uv / pixelC.z;
-									glm::vec2 uvInterp = uv0 * weights.x + uv1 * weights.y + uv2 * weights.z;
-
-									glm::vec3 nor0 = tri.vertices[0].normal / pixelA.z;
-									glm::vec3 nor1 = tri.vertices[1].normal / pixelB.z;
-									glm::vec3 nor2 = tri.vertices[2].normal / pixelC.z;
-									glm::vec3 norInterp = nor0 * weights.x + nor1 * weights.y + nor2 * weights.z;
-
-									float invZ = weights.x / pixelA.z + weights.y / pixelB.z + weights.z / pixelC.z;
-
-									texCoords = uvInterp / invZ;
-									normal = norInterp / invZ;
-								}
-								else if (projectionType == ORTHOGRAPHIC)
-								{
-									texCoords = tri.vertices[0].uv * weights.x +
-										tri.vertices[1].uv * weights.y +
-										tri.vertices[2].uv * weights.z;
-
-									normal = tri.vertices[0].normal * weights.x +
-										tri.vertices[1].normal * weights.y +
-										tri.vertices[2].normal * weights.z;
-								}
-
-								normal = glm::normalize(normal);
-								float accLightIntensity = 1.0f;
-								glm::vec4 finalColor = GetColorBasedOnViewMode(mesh, tri, texCoords, pixelDepth, normal);
-
-								if (viewMode == LIT)
-								{
-									for (Entity* light : activeScene.entities)
-									{
-										if (DirectionalLight* direcLight = dynamic_cast<DirectionalLight*>(light))
-										{
-											glm::vec3 lightDir = glm::normalize(direcLight->direction);
-											accLightIntensity += glm::clamp(glm::dot(normal, -lightDir), 0.0f, 1.0f) * direcLight->intensity;
-										}
-									}
-
-									if (atmFog)
-									{
-										fogFactor = atmFog->CalculateFogFactor(nearClip, farClip, pixelDepth);
-										finalColor = glm::mix(finalColor, activeScene.sceneSkyColor.topSky, fogFactor);
-									}
-								}
-
-								DrawPixel(glm::vec2(x, y), accLightIntensity * finalColor);
-							}
-						}
-					}
-				}
+				RenderChunk(mesh, tri, pixelA, pixelB, pixelC, minPixelX, minPixelY, maxPixelX, maxPixelY);
 			}
 		}
-	}
-}
-
-void Renderer::Render(float width, float height, float delta)
-{
-	if (finalImage)
-	{
-		if (width != finalImage->GetWidth() || height != finalImage->GetHeight())
-		{
-			finalImage->Resize(width, height);
-			frameBuffer.resize(width * height);
-			depthBuffer.resize(width * height);
-			screenResolution = glm::vec2(width, height);
-			frameCount = 0;
-			sceneJustUpdated = true;
-		}
-	}
-	else
-	{
-		finalImage = std::make_shared<Walnut::Image>(width, height, Walnut::ImageFormat::RGBA);
-		frameBuffer.resize(width * height);
-		depthBuffer.resize(width * height);
-		screenResolution = glm::vec2(width, height);
-		FlagSceneUpdate();
-	}
-
-	if (activeScene.entities.empty())
-		return;
-
-	deltaTime = delta / 25.0f;
-
-	ClearBackground();
-	ResetDepthBuffer();
-	HandleUI();
-
-	camera.NavigateCamera(deltaTime, projectionType);
-
-	allThreads.clear();
-	for (int i = 0; i < totalNumThreads; i++)
-	{
-		{
-			std::lock_guard<std::mutex> lockGuard(mtx);
-			allThreads.emplace_back(&Renderer::RenderChunk, this, i);
-		}
-	}
-
-	for (std::thread& thread : allThreads)
-	{
-		thread.join();
 	}
 
 	finalImage->SetData(frameBuffer.data());

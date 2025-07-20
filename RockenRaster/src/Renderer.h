@@ -31,7 +31,7 @@ private:
 	void DrawPixel(glm::vec2& pixelLoc, glm::vec4& color);
 	glm::vec4 GetColorBasedOnViewMode(Mesh* mesh, Triangle& tri, glm::vec2& texCoords, float depthAtPixel, glm::vec3& interpNormal);
 	void HandleUI();
-	void RenderChunk(int threadId);
+	void RenderChunk(Mesh* mesh, Triangle& tri, glm::vec3& pixelA, glm::vec3& pixelB, glm::vec3& pixelC, int minX, int minY, int maxX, int maxY);
 	void FlagSceneUpdate();
 
 private:
