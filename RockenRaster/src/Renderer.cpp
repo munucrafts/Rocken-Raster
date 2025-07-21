@@ -148,7 +148,7 @@ void Renderer::HandleUI()
 	ImGui::End();
 }
 
-void Renderer::RenderChunk(Mesh* mesh, Triangle& tri, glm::vec3& pixelA, glm::vec3& pixelB, glm::vec3& pixelC, int minX, int minY, int maxX, int maxY)
+void Renderer::RenderPixels(Mesh* mesh, Triangle& tri, glm::vec3& pixelA, glm::vec3& pixelB, glm::vec3& pixelC, int minX, int minY, int maxX, int maxY)
 {
 	for (int y = minY; y <= maxY; y++)
 	{
@@ -337,7 +337,7 @@ void Renderer::Render(float width, float height, float delta)
 				int minPixelY = (int)box.minMaxY.x;
 				int maxPixelY = (int)box.minMaxY.y;
 
-				RenderChunk(mesh, tri, pixelA, pixelB, pixelC, minPixelX, minPixelY, maxPixelX, maxPixelY);
+				RenderPixels(mesh, tri, pixelA, pixelB, pixelC, minPixelX, minPixelY, maxPixelX, maxPixelY);
 			}
 		}
 	}

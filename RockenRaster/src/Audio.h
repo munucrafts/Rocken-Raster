@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <unordered_map>
+#include <glm/ext/vector_float3.hpp>
 
 struct AudioLibrary
 {
@@ -27,6 +28,7 @@ public:
 public:
 	float attenuation;
 	float pitch;
+	glm::vec3 origin;
 
 private:
 	int audioBuffer;
