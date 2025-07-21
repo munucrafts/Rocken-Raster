@@ -8,6 +8,7 @@ ParticleSystem::ParticleSystem()
 
 void ParticleSystem::EmitParticles(float deltaTime)
 {
+    // Note for Sarthak - Will write emit fucntionality later.
     if (particles.size() != particlesProps.particleCount)
     {
         particles.resize(particlesProps.particleCount);

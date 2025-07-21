@@ -52,8 +52,10 @@ private:
 	bool sceneJustUpdated;
 	ExponentialFog* atmFog;
 	float fogFactor;
-	std::mutex mtx;
-	std::vector<std::thread> allThreads;
-	int totalNumThreads;
+
+	//Currently Not Doing Multithreading
+	//std::mutex mtx;
+	//std::vector<std::thread> allThreads;
+	//int totalNumThreads;
 };
 

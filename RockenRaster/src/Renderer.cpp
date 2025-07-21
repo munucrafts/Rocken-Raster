@@ -27,8 +27,9 @@ Renderer::Renderer()
 	allSceneRefs = {stylizedGuitar, windmill, space, retroKeyboard, chestnut};
 	allSceneRefs[1]->LoadIntoScene(activeScene);
 
-	totalNumThreads = std::thread::hardware_concurrency() - 1;
-	allThreads.resize(totalNumThreads);
+	//Currently Not Doing Multithreading
+	//totalNumThreads = std::thread::hardware_concurrency() - 1;
+	//allThreads.resize(totalNumThreads);
 }
 
 void Renderer::HandleUI()
@@ -263,6 +264,8 @@ void Renderer::Render(float width, float height, float delta)
 
 	for (Entity* entity : activeScene.entities)
 	{
+		if (entity->audioComp) entity->audioComp->PlayAudio();
+
 		if (entity->mobility == MOVABLE)
 		{
 			entity->RotateEntity(deltaTime);

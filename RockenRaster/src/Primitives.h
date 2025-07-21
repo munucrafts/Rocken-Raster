@@ -7,6 +7,7 @@
 #include <random>
 #include <Walnut/Input/Input.h>
 #include "../../Walnut/vendor/stb_image/stb_image.h"
+#include "Audio.h"
 
 static glm::vec4 RandomColor()
 {
@@ -72,6 +73,7 @@ struct Entity
 	virtual void ScaleEntity(float deltaTime) {};
 
 	Mobility mobility = STATIC;
+	AudioComponent* audioComp = nullptr;
 };
 
 struct Texture
@@ -232,8 +234,10 @@ struct Scene
 	virtual void UnloadScene()
 	{
 		for (Entity* entity : entities)
+		{
+			delete entity->audioComp;
 			delete entity;
-
+		}
 		entities.clear();
 	};
 	std::vector<Entity*> entities;
