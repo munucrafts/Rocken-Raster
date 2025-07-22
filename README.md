@@ -1,6 +1,6 @@
 # **Rocken Raster - A CPU Rasterizer**
 
-<img align="right" alt="Coding" width="235" src="RockenRaster/Assets/logo.png">
+<img align="right" alt="Coding" width="235" src="RockenRaster/Assets/Others/logo.png">
 
 * **Rocken Raster** is a **CPU-based Software Rasterizer** designed to render **3D scenes**.
 * I built the **Rasterizer** to learn more about various **Rasterizing** and **Graphics** concepts.
