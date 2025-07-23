@@ -2,6 +2,8 @@
 #include <Walnut/EntryPoint.h>
 #include <Walnut/Timer.h>
 #include <Walnut/Image.h>
+#include <AL/al.h>
+#include <AL/alc.h>
 #include "Renderer.h"
 
 class RockenRaster : public Walnut::Layer
@@ -11,7 +13,22 @@ private:
 	float MS = 0.0f;
 	float FPS = 0.0f;
 
+	ALCdevice* alcDevice;
+	ALCcontext* alcContext;
+
+private:
+	void InitOpenAlAudio()
+	{
+		alcDevice = alcOpenDevice(nullptr);
+		alcContext = alcCreateContext(alcDevice, nullptr);
+		alcMakeContextCurrent(alcContext);
+	}
+
 public:
+	RockenRaster()
+	{
+		InitOpenAlAudio();
+	}
 	virtual void OnUIRender() override
 	{
 		ImGui::Begin("Statistics");

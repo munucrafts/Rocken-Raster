@@ -1,4 +1,8 @@
 project "RockenRaster"
+
+IncludeDir = IncludeDir or {}
+IncludeDir["OpenAL"] = "%{wks.location}/Walnut/vendor/OpenAL/include"
+
    kind "ConsoleApp"
    language "C++"
    cppdialect "C++17"
@@ -16,11 +20,21 @@ project "RockenRaster"
       "../Walnut/Walnut/src",
 
       "%{IncludeDir.VulkanSDK}",
+      "%{IncludeDir.OpenAL}"
+   }
+
+   libdirs {
+      "../Walnut/vendor/OpenAL/lib"
    }
 
    links
    {
-       "Walnut"
+       "Walnut",
+       "OpenAL32"
+   }
+
+   postbuildcommands {
+      "{COPY} ../Walnut/vendor/OpenAL/bin/soft_oal.dll %{cfg.targetdir}"
    }
 
    targetdir ("../bin/" .. outputdir .. "/%{prj.name}")

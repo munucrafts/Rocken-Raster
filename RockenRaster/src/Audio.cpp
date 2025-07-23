@@ -1,43 +1,61 @@
+#define DR_WAV_IMPLEMENTATION
 #include "Audio.h"
+#include "dr_wav.h"
 #include <iostream>
 
-AudioComponent::AudioComponent()
+void AudioSource::Play()
 {
-	attenuation = 10.0f;
-	pitch = 1.0f;
-	origin = glm::vec3(0.0f);
-	audioBuffer = NULL;
+    alSourcei(sourceId, AL_BUFFER, buffer);
+    alSourcePlay(sourceId);
+    std::cout << "Playing - " << sourceId << std::endl;
+}
+
+void AudioSource::InitSource()
+{
+    alGenSources(1, &sourceId);
+    alSourcef(sourceId, AL_PITCH, pitch);
+    alSourcef(sourceId, AL_GAIN, volume);
+    alSource3f(sourceId, AL_POSITION, origin.x, origin.y, origin.z);
+}
+
+AudioSource::AudioSource()
+{
+
+}
+
+AudioSource::~AudioSource()
+{
+    alDeleteSources(1, &sourceId);
+}
+
+AudioListener::AudioListener()
+{
+    alListener3f(AL_POSITION, 0, 0, 0);
+    alListener3f(AL_VELOCITY, 0, 0, 0);
+}
+
+void AudioComponent::LoadAudioFile(std::string audioPath)
+{
+    unsigned int channels;
+    unsigned int sampleRate;
+    drwav_uint64 totalPCMFrameCount;
+
+    int16_t* pSampleData = drwav_open_file_and_read_pcm_frames_s16(audioPath.c_str(), &channels, &sampleRate, &totalPCMFrameCount, nullptr);
+
+    if (!pSampleData) return;
+  
+    ALenum format;
+    if (channels == 1) format = AL_FORMAT_MONO16;
+    else if (channels == 2) format = AL_FORMAT_STEREO16;
+    else {drwav_free(pSampleData, nullptr); return;}
+
+    alGenBuffers(1, &(audioSource.buffer));
+    alBufferData(audioSource.buffer, format, pSampleData, totalPCMFrameCount * channels * sizeof(int16_t), sampleRate);
+
+    drwav_free(pSampleData, nullptr);
 }
 
 void AudioComponent::PlayAudio()
 {
-	// Play Audio from Buffer
-	std::cout << "Playing " << audioBuffer << std::endl;
+    audioSource.Play();
 }
-
-void AudioComponent::LoadAudioFile(std::string audioName)
-{
-	AudioLibrary& audioLib = AudioLibrary::GetAudioLib();
-	auto iter = audioLib.audios.find(audioName);
-
-	if (iter != audioLib.audios.end())
-	{
-		std::string& path = iter->second;
-		
-		// Load Audio from File to Buffer
-		audioBuffer = 10;
-	}
-}
-
-AudioLibrary& AudioLibrary::GetAudioLib()
-{
-	static AudioLibrary instance;
-	return instance;
-}
-
-AudioLibrary::AudioLibrary()
-{
-	audios = {{"fan", "Assets/Fan.wav"}};
-}
-
-

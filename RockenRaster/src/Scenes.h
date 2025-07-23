@@ -31,7 +31,7 @@ struct Windmill : public Scene
 		fan->transform.location = glm::vec3(0.0f, 2.85f, -13.97f);
 		fan->speedComp.angularSpeed = glm::vec3(0.0f, 0.0f, -0.2f);
 		fan->audioComp = new AudioComponent();
-		fan->audioComp->LoadAudioFile("fan");
+		fan->audioComp->LoadAudioFile("Assets/Audio/bounce.wav");
 		activeScene.entities.push_back(fan);
 
 		ExponentialFog* atmFog = new ExponentialFog();

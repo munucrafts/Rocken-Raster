@@ -42,12 +42,12 @@ private:
 		if (io.MouseWheel > 0.0f)
 		{
 			speedMultiplier += step;
-			speedMultiplier = glm::clamp(speedMultiplier, 0.01f, 0.6f);
+			speedMultiplier = glm::clamp(speedMultiplier, 0.01f, 2.0f);
 		}
 		else if (io.MouseWheel < 0.0f)
 		{
 			speedMultiplier -= step;
-			speedMultiplier = glm::clamp(speedMultiplier, 0.01f, 0.6f);
+			speedMultiplier = glm::clamp(speedMultiplier, 0.01f, 2.0f);
 		}
 	}
 	void UpdateDirectionVectors()
@@ -79,12 +79,12 @@ private:
 		if (io.MouseWheel > 0.0f)
 		{
 			orthoValue -= step;
-			orthoValue = glm::clamp(orthoValue, 10.0f, 100.0f);
+			orthoValue = glm::clamp(orthoValue, 10.0f, 200.0f);
 		}
 		else if (io.MouseWheel < 0.0f)
 		{
 			orthoValue += step;
-			orthoValue = glm::clamp(orthoValue, 10.0f, 100.0f);
+			orthoValue = glm::clamp(orthoValue, 10.0f, 200.0f);
 		}
 
 		isMoving = true;
@@ -140,7 +140,7 @@ public:
 				MoveCamera(deltaTime);
 			}
 
-			UpdateCameraSpeed(0.1f);
+			UpdateCameraSpeed(0.25f);
 
 			glm::vec2 mousePos = Walnut::Input::GetMousePosition();
 
@@ -162,7 +162,7 @@ public:
 		}
 		else if (projType == ORTHOGRAPHIC) 
 		{
-			OrthographicZoom(1.0f);
+			OrthographicZoom(3.0f);
 
 			if (Walnut::Input::IsKeyDown(Walnut::Key::A))
 			{

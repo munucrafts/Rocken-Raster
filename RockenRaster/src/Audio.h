@@ -2,34 +2,39 @@
 #include <string>
 #include <unordered_map>
 #include <glm/ext/vector_float3.hpp>
+#include <AL/al.h>
+#include <AL/alc.h>
 
-struct AudioLibrary
+struct AudioSource
 {
-public:
-	std::unordered_map<std::string, std::string> audios;
+    ALuint sourceId = 0;
+    ALuint buffer = 0;
+    float attenuation = 10.0f;
+    float pitch = 1.0f;
+    float volume = 1.0f;
+    glm::vec3 origin = glm::vec3(0.0f);
+    glm::vec3 velocity = glm::vec3(0.0f);
 
-public:
-	static AudioLibrary& GetAudioLib();
+    AudioSource();
+    ~AudioSource();
+    void Play();
+    void InitSource();
+};
 
-private:
-	AudioLibrary();
-	~AudioLibrary() = default;
-	AudioLibrary(const AudioLibrary&) = delete;
-	AudioLibrary& operator= (const AudioLibrary&) = delete;
+struct AudioListener
+{
+    AudioListener();
 };
 
 struct AudioComponent
 {
 public:
-	AudioComponent();
-	void PlayAudio();
-	void LoadAudioFile(std::string audioName);
-
-public:
-	float attenuation;
-	float pitch;
-	glm::vec3 origin;
+	AudioComponent() = default;
+	~AudioComponent() = default;
+	void LoadAudioFile(std::string audioPath);
+    void PlayAudio();
 
 private:
-	int audioBuffer;
+	AudioSource audioSource;
+    AudioListener audioListener;
 };
