@@ -2,39 +2,25 @@
 #include "Audio.h"
 #include "dr_wav.h"
 #include <iostream>
+#include "Primitives.h"
 
-void AudioSource::Play()
+
+// Audio Source Class --------------------------------------------------------------------
+
+
+void AudioSource::PlayAudioSource()
 {
-    alSourcei(sourceId, AL_BUFFER, buffer);
-    alSourcePlay(sourceId);
-    std::cout << "Playing - " << sourceId << std::endl;
+    ALint state;
+    alGetSourcei(sourceId, AL_SOURCE_STATE, &state);
+
+    if (state != AL_PLAYING)
+    {
+        alSourcei(sourceId, AL_BUFFER, buffer);
+        alSourcePlay(sourceId);
+    }
 }
 
-void AudioSource::InitSource()
-{
-    alGenSources(1, &sourceId);
-    alSourcef(sourceId, AL_PITCH, pitch);
-    alSourcef(sourceId, AL_GAIN, volume);
-    alSource3f(sourceId, AL_POSITION, origin.x, origin.y, origin.z);
-}
-
-AudioSource::AudioSource()
-{
-
-}
-
-AudioSource::~AudioSource()
-{
-    alDeleteSources(1, &sourceId);
-}
-
-AudioListener::AudioListener()
-{
-    alListener3f(AL_POSITION, 0, 0, 0);
-    alListener3f(AL_VELOCITY, 0, 0, 0);
-}
-
-void AudioComponent::LoadAudioFile(std::string audioPath)
+void AudioSource::LoadAudioFile(std::string audioPath, glm::vec3& origin)
 {
     unsigned int channels;
     unsigned int sampleRate;
@@ -43,19 +29,105 @@ void AudioComponent::LoadAudioFile(std::string audioPath)
     int16_t* pSampleData = drwav_open_file_and_read_pcm_frames_s16(audioPath.c_str(), &channels, &sampleRate, &totalPCMFrameCount, nullptr);
 
     if (!pSampleData) return;
-  
+
     ALenum format;
     if (channels == 1) format = AL_FORMAT_MONO16;
     else if (channels == 2) format = AL_FORMAT_STEREO16;
-    else {drwav_free(pSampleData, nullptr); return;}
+    else { drwav_free(pSampleData, nullptr); return; }
 
-    alGenBuffers(1, &(audioSource.buffer));
-    alBufferData(audioSource.buffer, format, pSampleData, totalPCMFrameCount * channels * sizeof(int16_t), sampleRate);
+    alGenBuffers(1, &buffer);
+    alBufferData(buffer, format, pSampleData, totalPCMFrameCount * channels * sizeof(int16_t), sampleRate);
 
     drwav_free(pSampleData, nullptr);
+
+    audioOrigin = origin;
+    InitAudioSource();
 }
 
-void AudioComponent::PlayAudio()
+void AudioSource::SetAudioPitch(float pitch)
 {
-    audioSource.Play();
+    audioPitch = pitch;
+    alSourcef(sourceId, AL_PITCH, audioPitch);
+}
+
+void AudioSource::SetAudioVolume(float volume)
+{
+    audioVolume = volume;
+    alSourcef(sourceId, AL_GAIN, audioVolume);
+}
+
+void AudioSource::SetAudioAttenuation(float attenuation)
+{
+    audioAttenuation = attenuation;
+    //alSourcef(sourceId, AL_)
+}
+
+void AudioSource::SetAudioOrigin(glm::vec3& origin)
+{
+    audioOrigin = origin;
+    alSource3f(sourceId, AL_POSITION, audioOrigin.x, audioOrigin.y, audioOrigin.z);
+}
+
+void AudioSource::SetAudioVelocity(glm::vec3& velocity)
+{
+    audioVelocity = velocity;
+    alSource3f(sourceId, AL_VELOCITY, audioVelocity.x, audioVelocity.y, audioVelocity.z);
+}
+
+void AudioSource::InitAudioSource()
+{
+    alGenSources(1, &sourceId);
+    alSourcef(sourceId, AL_GAIN, audioVolume);
+    alSourcef(sourceId, AL_PITCH, audioPitch);
+    alSource3f(sourceId, AL_POSITION, audioOrigin.x, audioOrigin.y, audioOrigin.z);
+    alSource3f(sourceId, AL_VELOCITY, audioVelocity.x, audioVelocity.y, audioVelocity.z);
+}
+
+void AudioSource::DeleteAudioSource()
+{
+    alDeleteSources(1, &sourceId);
+}
+
+AudioSource::~AudioSource()
+{
+    DeleteAudioSource();
+}
+
+
+// Audio Listener Class ------------------------------------------------------------------
+
+
+AudioListener::AudioListener()
+{
+    alListener3f(AL_POSITION, 10, 0, 0);
+    alListener3f(AL_VELOCITY, 0, 0, 0);
+}
+
+
+// Audio Master Class --------------------------------------------------------------------
+
+
+ALCdevice* AudioMaster::alcDevice = nullptr;
+ALCcontext* AudioMaster::alcContext = nullptr;
+
+void AudioMaster::InitAudioMaster()
+{
+    alcDevice = alcOpenDevice(nullptr);
+    alcContext = alcCreateContext(alcDevice, nullptr);
+    alcMakeContextCurrent(alcContext);
+}
+
+void AudioMaster::ShutdownAudioMaster()
+{
+    alcMakeContextCurrent(nullptr);
+    if (alcContext) alcDestroyContext(alcContext);
+    if (alcDevice) alcCloseDevice(alcDevice);
+
+    alcContext = nullptr;
+    alcDevice = nullptr;
+}
+
+AudioMaster::~AudioMaster()
+{
+    ShutdownAudioMaster();
 }

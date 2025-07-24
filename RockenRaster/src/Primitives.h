@@ -72,8 +72,10 @@ struct Entity
 	virtual void MoveEntity(float deltaTime) {};
 	virtual void ScaleEntity(float deltaTime) {};
 
+	Transform transform;
+	SpeedComponent speedComp;
 	Mobility mobility = STATIC;
-	AudioComponent* audioComp = nullptr;
+	AudioSource* audioSource = nullptr;
 };
 
 struct Texture
@@ -121,9 +123,7 @@ struct Mesh : public Entity
 	};
 	virtual ~Mesh() = default;
 
-	std::vector<Triangle> triangles;
-	Transform transform;
-	SpeedComponent speedComp;
+	std::vector<Triangle> triangles;	
 	Material mat;
 
 	glm::mat4 bakedTransform = glm::mat4(0.0f);
@@ -235,7 +235,7 @@ struct Scene
 	{
 		for (Entity* entity : entities)
 		{
-			delete entity->audioComp;
+			delete entity->audioSource;
 			delete entity;
 		}
 		entities.clear();

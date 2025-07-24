@@ -13,9 +13,10 @@
 class Renderer
 {
 public:
-	Renderer();
+	Renderer() = default;
 	void Render(float width, float height, float delta);
 	std::shared_ptr<Walnut::Image>& GetFinalImage();
+	void InitRenderer();
 
 private:
 	uint32_t ColorToRGBA(glm::vec4& color);
@@ -52,10 +53,5 @@ private:
 	bool sceneJustUpdated;
 	ExponentialFog* atmFog;
 	float fogFactor;
-
-	//Currently Not Doing Multithreading
-	//std::mutex mtx;
-	//std::vector<std::thread> allThreads;
-	//int totalNumThreads;
 };
 

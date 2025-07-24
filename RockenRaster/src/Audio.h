@@ -5,36 +5,64 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 
+
+// Audio Source Class --------------------------------------------------------------------
+
 struct AudioSource
 {
+private:
     ALuint sourceId = 0;
     ALuint buffer = 0;
-    float attenuation = 10.0f;
-    float pitch = 1.0f;
-    float volume = 1.0f;
-    glm::vec3 origin = glm::vec3(0.0f);
-    glm::vec3 velocity = glm::vec3(0.0f);
 
-    AudioSource();
+    float audioAttenuation = 10.0f;
+    float audioPitch = 1.0f;
+    float audioVolume = 1.0f;
+
+    glm::vec3 audioOrigin = glm::vec3(0.0f);
+    glm::vec3 audioVelocity = glm::vec3(0.0f);
+
+private:
+    void InitAudioSource();
+    void DeleteAudioSource();
+
+public:
+    AudioSource() = default;
     ~AudioSource();
-    void Play();
-    void InitSource();
+
+    void PlayAudioSource();
+    void LoadAudioFile(std::string audioPath, glm::vec3& origin);
+
+    void SetAudioPitch(float pitch);
+    void SetAudioVolume(float volume);
+    void SetAudioAttenuation(float attenuation);
+    void SetAudioOrigin(glm::vec3& origin);
+    void SetAudioVelocity(glm::vec3& velocity);
 };
+
+
+// Audio Listener Class ------------------------------------------------------------------
+
 
 struct AudioListener
 {
     AudioListener();
 };
 
-struct AudioComponent
+
+// Audio Master Class --------------------------------------------------------------------
+
+
+class AudioMaster
 {
 public:
-	AudioComponent() = default;
-	~AudioComponent() = default;
-	void LoadAudioFile(std::string audioPath);
-    void PlayAudio();
+    static void InitAudioMaster();
+    static void ShutdownAudioMaster();
 
 private:
-	AudioSource audioSource;
-    AudioListener audioListener;
+    AudioMaster() = default;
+    ~AudioMaster();
+
+private:
+    static ALCdevice* alcDevice;
+    static ALCcontext* alcContext;
 };

@@ -3,7 +3,7 @@
 #include "Scenes.h"
 #include "Light.h"
 
-Renderer::Renderer()
+void Renderer::InitRenderer()
 {
 	firstFrame = true;
 	frameCount = 0;
@@ -24,12 +24,8 @@ Renderer::Renderer()
 	RetroKeyboard* retroKeyboard = new RetroKeyboard();
 	Chestnut* chestnut = new Chestnut();
 
-	allSceneRefs = {stylizedGuitar, windmill, space, retroKeyboard, chestnut};
+	allSceneRefs = { stylizedGuitar, windmill, space, retroKeyboard, chestnut };
 	allSceneRefs[1]->LoadIntoScene(activeScene);
-
-	//Currently Not Doing Multithreading
-	//totalNumThreads = std::thread::hardware_concurrency() - 1;
-	//allThreads.resize(totalNumThreads);
 }
 
 void Renderer::HandleUI()
@@ -264,16 +260,25 @@ void Renderer::Render(float width, float height, float delta)
 
 	for (Entity* entity : activeScene.entities)
 	{
-		if (entity->audioComp) entity->audioComp->PlayAudio();
-
 		if (entity->mobility == MOVABLE)
 		{
 			entity->RotateEntity(deltaTime);
 			entity->MoveEntity(deltaTime);
 			entity->ScaleEntity(deltaTime);
 
+			if (entity->audioSource)
+			{
+				entity->audioSource->SetAudioOrigin(entity->transform.location);
+				entity->audioSource->SetAudioVelocity(entity->speedComp.linearSpeed);
+				entity->audioSource->PlayAudioSource();
+			}
+
 			if (ParticleSystem* ps = dynamic_cast<ParticleSystem*>(entity))
 				ps->EmitParticles(deltaTime * 0.01f);
+		}
+		else
+		{
+			if (entity->audioSource) entity->audioSource->PlayAudioSource();
 		}
 
 		if (!atmFog) atmFog = dynamic_cast<ExponentialFog*>(entity);
