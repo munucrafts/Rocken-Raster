@@ -14,13 +14,6 @@ private:
     ALuint sourceId = 0;
     ALuint buffer = 0;
 
-    float audioAttenuation = 10.0f;
-    float audioPitch = 1.0f;
-    float audioVolume = 1.0f;
-
-    glm::vec3 audioOrigin = glm::vec3(0.0f);
-    glm::vec3 audioVelocity = glm::vec3(0.0f);
-
 private:
     void InitAudioSource();
     void DeleteAudioSource();
@@ -37,6 +30,8 @@ public:
     void SetAudioAttenuation(float attenuation);
     void SetAudioOrigin(glm::vec3& origin);
     void SetAudioVelocity(glm::vec3& velocity);
+    void PauseAudio();
+    void ResumeAudio();
 };
 
 
@@ -45,7 +40,11 @@ public:
 
 struct AudioListener
 {
-    AudioListener();
+public:
+    AudioListener() = default;
+    ~AudioListener() = default;
+    void SetListenerLocation(glm::vec3& location);
+    void SetListenerVelocity(glm::vec3& velocity);
 };
 
 
