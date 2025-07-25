@@ -4,9 +4,9 @@
 
 * **Rocken Raster** is a **CPU-based Software Rasterizer** designed to render **3D scenes**.
 * I built the **Rasterizer** to learn more about various **Rasterizing** and **Graphics** concepts.
-* It supports many modern rendering techniques, including **Triangle Rasterization**, **Depth Testing**, **Culling**, **Projections**, **Basic Shading**, and more all built from scratch.
+* It supports many modern rendering techniques, including **Triangle Rasterization**, **Depth Testing**, **Culling**, **Projections**, **Baking**, and more all built from scratch.
+* **Rocken** has a basic **Audio System Implementation** as well.
 * The **Walnut Framework** is used for basic operations such as **Window Creation**, **UI**, and the **GLM Math Library**.
-* I have listed additional relevant details below.
 
 ## 🐉 **Available Features**
 
@@ -20,12 +20,12 @@
 - Concept of **Static** and **Movable** objects  
 - Automatic **View, Projection, & Transform Baking** for **Camera** and **Entities** for **Optimisations**  
 - **Exponential Fog** entity that blends with the **Sky Color** based on **Distance** and **Fog Falloff** value
-- A very basic **Directional Light** that illuminates meshes from the direction of light
+- A basic **Directional Light** that illuminates meshes from the direction of light
 - **User Interface** tabs and buttons to **Load** and **Configure** different scenes in **Run-time**
+- **OpenAL** based **Audio System** with **Source** and **Listener** components
 
 ## 🚧 Planned Features
 
-- Integrate **Audio System**
 - **Skeletal Animation** and **Skinning**
 - **Multi-threading** for faster rendering
 - **DLSS-like Super-Resolution**
