@@ -17,7 +17,7 @@ private:
 public:
 	RockenRaster()
 	{
-		AudioMaster::InitAudioMaster();
+		AudioMaster::GetAudioMaster().InitAudioMaster();
 		renderer.InitRenderer();
 	}
 	virtual void OnUIRender() override

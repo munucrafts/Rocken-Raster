@@ -100,8 +100,8 @@ public:
 	}; 
 	void NavigateCamera(float deltaTime, Projection& projType)
 	{
-		AudioListener::SetListenerLocation(transform.location);
-		AudioListener::SetListenerVelocity(speedComp.linearSpeed);
+		AudioListener::GetListener().SetListenerLocation(transform.location);
+		AudioListener::GetListener().SetListenerVelocity(speedComp.linearSpeed);
 
 		isMoving = false;
 

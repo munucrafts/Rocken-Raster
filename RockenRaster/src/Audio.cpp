@@ -101,6 +101,12 @@ AudioSource::~AudioSource()
 // Audio Listener Class ------------------------------------------------------------------
 
 
+AudioListener& AudioListener::GetListener()
+{
+    static AudioListener audioListener;
+    return audioListener;
+}
+
 void AudioListener::SetListenerLocation(glm::vec3& location)
 {
     alListener3f(AL_POSITION, location.x, location.y, location.z);
@@ -114,9 +120,11 @@ void AudioListener::SetListenerVelocity(glm::vec3& velocity)
 
 // Audio Master Class --------------------------------------------------------------------
 
-
-ALCdevice* AudioMaster::alcDevice = nullptr;
-ALCcontext* AudioMaster::alcContext = nullptr;
+AudioMaster& AudioMaster::GetAudioMaster()
+{
+    static AudioMaster audioMaster;
+    return audioMaster;
+}
 
 void AudioMaster::InitAudioMaster()
 {

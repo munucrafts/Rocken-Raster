@@ -37,8 +37,13 @@ public:
 struct AudioListener
 {
 public:
-    static void SetListenerLocation(glm::vec3& location);
-    static void SetListenerVelocity(glm::vec3& velocity);
+    static AudioListener& GetListener();
+    void SetListenerLocation(glm::vec3& location);
+    void SetListenerVelocity(glm::vec3& velocity);
+
+private:
+    AudioListener() = default;
+    ~AudioListener() = default;
 };
 
 
@@ -48,10 +53,15 @@ public:
 class AudioMaster
 {
 public:
-    static void InitAudioMaster();
-    static void ShutdownAudioMaster();
+    static AudioMaster& GetAudioMaster();
+    void InitAudioMaster();
+    void ShutdownAudioMaster();
 
 private:
-    static ALCdevice* alcDevice;
-    static ALCcontext* alcContext;
+    ALCdevice* alcDevice;
+    ALCcontext* alcContext;
+
+private:
+    AudioMaster() = default;
+    ~AudioMaster() = default;
 };
