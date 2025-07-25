@@ -14,20 +14,16 @@ private:
     ALuint sourceId = 0;
     ALuint buffer = 0;
 
-private:
-    void InitAudioSource();
-    void DeleteAudioSource();
-
 public:
     AudioSource() = default;
     ~AudioSource();
-
+    void InitAudioSource();
+    void DeleteAudioSource();
     void PlayAudioSource();
     void LoadAudioFile(std::string audioPath, glm::vec3& origin);
-
     void SetAudioPitch(float pitch);
     void SetAudioVolume(float volume);
-    void SetAudioAttenuation(float attenuation);
+    void SetAudioAttenuation(float rollOffFactor, float referenceDistance, float maxDistance);
     void SetAudioOrigin(glm::vec3& origin);
     void SetAudioVelocity(glm::vec3& velocity);
     void PauseAudio();
@@ -56,10 +52,6 @@ class AudioMaster
 public:
     static void InitAudioMaster();
     static void ShutdownAudioMaster();
-
-private:
-    AudioMaster() = default;
-    ~AudioMaster();
 
 private:
     static ALCdevice* alcDevice;

@@ -53,9 +53,11 @@ void AudioSource::SetAudioVolume(float volume)
     alSourcef(sourceId, AL_GAIN, volume);
 }
 
-void AudioSource::SetAudioAttenuation(float attenuation)
+void AudioSource::SetAudioAttenuation(float rollOffFactor, float referenceDistance, float maxDistance)
 {
-    alSourcef(sourceId, AL_ROLLOFF_FACTOR, attenuation);
+    alSourcef(sourceId, AL_ROLLOFF_FACTOR, rollOffFactor);
+    alSourcef(sourceId, AL_REFERENCE_DISTANCE, referenceDistance);
+    alSourcef(sourceId, AL_MAX_DISTANCE, maxDistance);
 }
 
 void AudioSource::SetAudioOrigin(glm::vec3& origin)
@@ -81,6 +83,8 @@ void AudioSource::ResumeAudio()
 void AudioSource::InitAudioSource()
 {
     alGenSources(1, &sourceId);
+    alSourcei(sourceId, AL_LOOPING, AL_TRUE);
+    SetAudioAttenuation(1.0f, 2.0f, 200.0f);
 }
 
 void AudioSource::DeleteAudioSource()
@@ -119,19 +123,16 @@ void AudioMaster::InitAudioMaster()
     alcDevice = alcOpenDevice(nullptr);
     alcContext = alcCreateContext(alcDevice, nullptr);
     alcMakeContextCurrent(alcContext);
+    alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
 }
 
 void AudioMaster::ShutdownAudioMaster()
 {
     alcMakeContextCurrent(nullptr);
+
     if (alcContext) alcDestroyContext(alcContext);
     if (alcDevice) alcCloseDevice(alcDevice);
 
     alcContext = nullptr;
     alcDevice = nullptr;
-}
-
-AudioMaster::~AudioMaster()
-{
-    ShutdownAudioMaster();
 }

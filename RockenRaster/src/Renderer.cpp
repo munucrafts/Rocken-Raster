@@ -9,7 +9,7 @@ void Renderer::InitRenderer()
 	frameCount = 0;
 	sceneJustUpdated = true;
 	nearClip = 0.01f;
-	farClip = 100.0f;
+	farClip = 250.0f;
 	deltaTime = 0.0f;
 	screenResolution = glm::vec2(0.0f);
 	projectionType = PERSPECTIVE;
@@ -23,8 +23,9 @@ void Renderer::InitRenderer()
 	Space* space = new Space();
 	RetroKeyboard* retroKeyboard = new RetroKeyboard();
 	Chestnut* chestnut = new Chestnut();
+	Speaker* speaker = new Speaker();
 
-	allSceneRefs = { stylizedGuitar, windmill, space, retroKeyboard, chestnut };
+	allSceneRefs = { stylizedGuitar, windmill, space, retroKeyboard, chestnut, speaker };
 	allSceneRefs[1]->LoadIntoScene(activeScene);
 }
 
@@ -139,6 +140,41 @@ void Renderer::HandleUI()
 		ImGui::Separator();
 		ImGui::Spacing();
 		ImGui::Spacing();
+	}
+
+	{
+		if (activeScene.sceneName == "Speaker")
+		{
+			ImGui::Text("  Sounds");
+			ImGui::Spacing();
+
+			std::string sounds[3] = { "Adventure", "Hopeful", "Guitar" };
+
+			for (int i = 0; i < sizeof(sounds) / sizeof(std::string); i++)
+			{
+				if (ImGui::Button(sounds[i].c_str(), ImVec2(buttonWidth, buttonHeight)))
+				{
+					for (Entity* ent : activeScene.entities)
+					{
+						if (ent->audioSource)
+						{
+							ent->audioSource->DeleteAudioSource();
+							ent->audioSource->LoadAudioFile("Assets/Audio/" + sounds[i] + ".wav", ent->transform.location);
+							ent->audioSource->PlayAudioSource();
+						}
+					}
+				}
+
+				if ((i + 1) % buttonsPerRow != 0)
+					ImGui::SameLine(0.0f, spacing);
+			}
+
+			ImGui::Spacing();
+			ImGui::Spacing();
+			ImGui::Separator();
+			ImGui::Spacing();
+			ImGui::Spacing();
+		}
 	}
 
 	ImGui::End();
@@ -270,15 +306,10 @@ void Renderer::Render(float width, float height, float delta)
 			{
 				entity->audioSource->SetAudioOrigin(entity->transform.location);
 				entity->audioSource->SetAudioVelocity(entity->speedComp.linearSpeed);
-				entity->audioSource->PlayAudioSource();
 			}
 
 			if (ParticleSystem* ps = dynamic_cast<ParticleSystem*>(entity))
 				ps->EmitParticles(deltaTime * 0.01f);
-		}
-		else
-		{
-			if (entity->audioSource) entity->audioSource->PlayAudioSource();
 		}
 
 		if (!atmFog) atmFog = dynamic_cast<ExponentialFog*>(entity);

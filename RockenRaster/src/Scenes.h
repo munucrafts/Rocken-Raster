@@ -30,8 +30,6 @@ struct Windmill : public Scene
 		fan->transform.rotation = glm::vec3(0.0f, 180.0f, 0.0f);
 		fan->transform.location = glm::vec3(0.0f, 2.85f, -13.97f);
 		fan->speedComp.angularSpeed = glm::vec3(0.0f, 0.0f, -0.2f);
-		fan->audioSource = new AudioSource();
-		fan->audioSource->LoadAudioFile("Assets/Audio/bounce.wav", fan->transform.location);
 		activeScene.entities.push_back(fan);
 
 		ExponentialFog* atmFog = new ExponentialFog();
@@ -144,5 +142,31 @@ struct StylizedGuitar : public Scene
 
 		activeScene.sceneSkyColor = { glm::vec4(0.0f, 1.0f, 1.0f, 1.0f), glm::vec4(0.15f, 0.0f, 1.0f, 1.0f) };
 		activeScene.sceneName = sceneName;
+	}
+};
+
+struct Speaker : public Scene
+{
+	Speaker() { sceneName = "Speaker"; }
+	void LoadIntoScene(Scene& activeScene) override
+	{
+		Mesh* Speaker = new Mesh(STATIC);
+		Speaker->LoadObjectFile("Assets/Meshes/Speaker.obj", "Assets/Textures/Speaker.png");
+		Speaker->transform.scale = glm::vec3(0.1f);
+		Speaker->transform.rotation = glm::vec3(0.0f, 180.0f, 0.0f);
+		Speaker->transform.location = glm::vec3(0.0f, -10.0f, -28.0f);
+		Speaker->audioSource = new AudioSource();
+		Speaker->audioSource->LoadAudioFile("Assets/Audio/Hopeful.wav", Speaker->transform.location);
+		Speaker->audioSource->PlayAudioSource();
+		activeScene.entities.push_back(Speaker);
+
+		DirectionalLight* dirLight = new DirectionalLight();
+		dirLight->direction = glm::vec3(0.0f, -20.f, -10.0f);
+		dirLight->intensity = 0.5f;
+		activeScene.entities.push_back(dirLight);
+
+		activeScene.sceneSkyColor = { glm::vec4(1.0f), glm::vec4(0.5f, 1.0f, 0.25f, 1.0f) };
+		activeScene.sceneName = sceneName;
+
 	}
 };
