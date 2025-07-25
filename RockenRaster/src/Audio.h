@@ -37,10 +37,8 @@ public:
 struct AudioListener
 {
 public:
-    AudioListener() = default;
-    ~AudioListener() = default;
-    void SetListenerLocation(glm::vec3& location);
-    void SetListenerVelocity(glm::vec3& velocity);
+    static void SetListenerLocation(glm::vec3& location);
+    static void SetListenerVelocity(glm::vec3& velocity);
 };
 
 

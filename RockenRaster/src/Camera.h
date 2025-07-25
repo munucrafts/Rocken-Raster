@@ -14,8 +14,6 @@ private:
 	float mouseSensitivity = 0.1f;
 	glm::vec2 lastMousePos = glm::vec2(0.0f);
 
-	AudioListener audioListener;
-
 public:
 	float fov = glm::radians(60.0f);
 	Transform transform;
@@ -102,8 +100,8 @@ public:
 	}; 
 	void NavigateCamera(float deltaTime, Projection& projType)
 	{
-		audioListener.SetListenerLocation(transform.location);
-		audioListener.SetListenerVelocity(speedComp.linearSpeed);
+		AudioListener::SetListenerLocation(transform.location);
+		AudioListener::SetListenerVelocity(speedComp.linearSpeed);
 
 		isMoving = false;
 
