@@ -1,0 +1,5 @@
+# Exclude vendor and third-party files from GitHub language statistics.
+
+* linguist-vendored
+RockenRaster/** !linguist-vendored
+RockenRaster/src/dr_wav.h linguist-vendored
