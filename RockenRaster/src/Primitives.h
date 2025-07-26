@@ -113,15 +113,15 @@ struct Material
 	Texture texture;
 };
 
-struct Mesh : public Entity
+struct StaticMesh : public Entity
 {
-	Mesh() = default;
-	Mesh(Mobility mob)
+	StaticMesh() = default;
+	StaticMesh(Mobility mob)
 	{
 		mobility = mob;
 		isMoving = mobility == MOVABLE;
 	};
-	virtual ~Mesh() = default;
+	virtual ~StaticMesh() = default;
 
 	std::vector<Triangle> triangles;	
 	Material mat;
@@ -131,19 +131,7 @@ struct Mesh : public Entity
 
 	bool isMoving = false;
 
-	void RotateEntity(float deltaTime) override
-	{
-		transform.rotation += speedComp.angularSpeed * deltaTime;
-	};
-	void MoveEntity(float deltaTime) override
-	{
-		transform.location += speedComp.linearSpeed * deltaTime;
-	};
-	void ScaleEntity(float deltaTime) override
-	{
-		transform.scale += speedComp.scalingSpeed * deltaTime;
-	};
-	void LoadObjectFile(std::string objPath, std::string texPath)
+	virtual void LoadObjectFile(std::string objPath, std::string texPath)
 	{
 		std::ifstream input(objPath);
 		if (!input.is_open())
@@ -214,6 +202,18 @@ struct Mesh : public Entity
 		}
 
 		mat.texture.LoadTextureFile(texPath);
+	};
+	void RotateEntity(float deltaTime) override
+	{
+		transform.rotation += speedComp.angularSpeed * deltaTime;
+	};
+	void MoveEntity(float deltaTime) override
+	{
+		transform.location += speedComp.linearSpeed * deltaTime;
+	};
+	void ScaleEntity(float deltaTime) override
+	{
+		transform.scale += speedComp.scalingSpeed * deltaTime;
 	};
 	bool Retriangulate(int clipCount)
 	{

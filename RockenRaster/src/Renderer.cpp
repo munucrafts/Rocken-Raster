@@ -180,7 +180,7 @@ void Renderer::HandleUI()
 	ImGui::End();
 }
 
-void Renderer::RenderPixels(Mesh* mesh, Triangle& tri, glm::vec3& pixelA, glm::vec3& pixelB, glm::vec3& pixelC, int minX, int minY, int maxX, int maxY)
+void Renderer::RenderPixels(StaticMesh* mesh, Triangle& tri, glm::vec3& pixelA, glm::vec3& pixelB, glm::vec3& pixelC, int minX, int minY, int maxX, int maxY)
 {
 	for (int y = minY; y <= maxY; y++)
 	{
@@ -314,7 +314,7 @@ void Renderer::Render(float width, float height, float delta)
 
 		if (!atmFog) atmFog = dynamic_cast<ExponentialFog*>(entity);
 
-		if (Mesh* mesh = dynamic_cast<Mesh*>(entity))
+		if (StaticMesh* mesh = dynamic_cast<StaticMesh*>(entity))
 		{
 			glm::mat4 modelWorld;
 
@@ -437,7 +437,7 @@ glm::vec3 Renderer::NDCToPixel(glm::vec3& q)
 	return p;
 }
 
-glm::vec4 Renderer::WorldToClip(glm::vec3& point, glm::mat4& model, Mesh* currentMesh)
+glm::vec4 Renderer::WorldToClip(glm::vec3& point, glm::mat4& model, StaticMesh* currentMesh)
 {
 	static glm::mat4 cachedViewProj;
 
@@ -515,7 +515,7 @@ void Renderer::DrawPixel(glm::vec2& pixelLoc, glm::vec4& color)
 		frameBuffer[x + y * (int)screenResolution.x] = ColorToRGBA(color);
 }
 
-glm::vec4 Renderer::GetColorBasedOnViewMode(Mesh* mesh, Triangle& tri, glm::vec2& texCoords, float depthAtPixel, glm::vec3& interpNormal)
+glm::vec4 Renderer::GetColorBasedOnViewMode(StaticMesh* mesh, Triangle& tri, glm::vec2& texCoords, float depthAtPixel, glm::vec3& interpNormal)
 {
 	switch (viewMode)
 	{

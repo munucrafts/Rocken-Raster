@@ -28,7 +28,7 @@ struct Particle
 	void ResetParticle(ParticleProperties& particleProps);
 };
 
-class ParticleSystem : public Mesh
+class ParticleSystem : public StaticMesh
 {
 public:
 	ParticleSystem();

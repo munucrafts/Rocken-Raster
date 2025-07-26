@@ -10,21 +10,21 @@ struct Windmill : public Scene
 	Windmill() { sceneName = "Windmill"; }
 	void LoadIntoScene(Scene& activeScene) override
 	{
-		Mesh* island = new Mesh(STATIC);
+		StaticMesh* island = new StaticMesh(STATIC);
 		island->LoadObjectFile("Assets/Meshes/Island.obj", "Assets/Textures/Island.png");
 		island->transform.scale = glm::vec3(0.15f);
 		island->transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 		island->transform.location = glm::vec3(-2.0f, -3.3f, -14.0f);
 		activeScene.entities.push_back(island);
 
-		Mesh* windmill = new Mesh(STATIC);
+		StaticMesh* windmill = new StaticMesh(STATIC);
 		windmill->LoadObjectFile("Assets/Meshes/Windmill.obj", "Assets/Textures/Windmill.png");
 		windmill->transform.scale = glm::vec3(2.5f);
 		windmill->transform.rotation = glm::vec3(0.0f, 180.0f, 0.0f);
 		windmill->transform.location = glm::vec3(0.0f, -1.2f, -14.0f);
 		activeScene.entities.push_back(windmill);
 
-		Mesh* fan = new Mesh(MOVABLE);
+		StaticMesh* fan = new StaticMesh(MOVABLE);
 		fan->LoadObjectFile("Assets/Meshes/Fan.obj", "Assets/Textures/Fan.png");
 		fan->transform.scale = glm::vec3(2.5f);
 		fan->transform.rotation = glm::vec3(0.0f, 180.0f, 0.0f);
@@ -50,7 +50,7 @@ struct Space : public Scene
 	Space() { sceneName = "Space"; }
 	void LoadIntoScene(Scene& activeScene) override
 	{
-		Mesh* Earth = new Mesh(MOVABLE);
+		StaticMesh* Earth = new StaticMesh(MOVABLE);
 		Earth->LoadObjectFile("Assets/Meshes/Earth.obj", "Assets/Textures/Earth.png");
 		Earth->transform.scale = glm::vec3(0.25f);
 		Earth->transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -58,7 +58,7 @@ struct Space : public Scene
 		Earth->speedComp.angularSpeed = glm::vec3(0.2f, 0.1f, 0.14f);
 		activeScene.entities.push_back(Earth);
 
-		Mesh* Satellite = new Mesh(MOVABLE);
+		StaticMesh* Satellite = new StaticMesh(MOVABLE);
 		Satellite->LoadObjectFile("Assets/Meshes/Satellite.obj", "Assets/Textures/Satellite.png");
 		Satellite->transform.scale = glm::vec3(1.0f);
 		Satellite->transform.rotation = glm::vec3(0.0f, 180.0f, 0.0f);
@@ -81,7 +81,7 @@ struct RetroKeyboard : public Scene
 	RetroKeyboard() { sceneName = "Retro Keyboard"; }
 	void LoadIntoScene(Scene& activeScene) override
 	{
-		Mesh* RetroKeyboard = new Mesh(MOVABLE);
+		StaticMesh* RetroKeyboard = new StaticMesh(MOVABLE);
 		RetroKeyboard->LoadObjectFile("Assets/Meshes/RetroKeyboard.obj", "Assets/Textures/RetroKeyboard.png");
 		RetroKeyboard->transform.scale = glm::vec3(0.1f);
 		RetroKeyboard->transform.rotation = glm::vec3(60.0f, 180.0f, 0.0f);
@@ -104,7 +104,7 @@ struct Chestnut : public Scene
 	Chestnut() { sceneName = "Chestnut"; }
 	void LoadIntoScene(Scene& activeScene) override
 	{
-		Mesh* Chestnut = new Mesh(MOVABLE);
+		StaticMesh* Chestnut = new StaticMesh(MOVABLE);
 		Chestnut->LoadObjectFile("Assets/Meshes/Chestnut.obj", "Assets/Textures/Chestnut.png");
 		Chestnut->transform.scale = glm::vec3(1.5f);
 		Chestnut->transform.rotation = glm::vec3(0.0f, 180.0f, 0.0f);
@@ -127,7 +127,7 @@ struct StylizedGuitar : public Scene
 	StylizedGuitar() { sceneName = "Stylized Guitar"; }
 	void LoadIntoScene(Scene& activeScene) override
 	{
-		Mesh* StylizedGuitar = new Mesh(MOVABLE);
+		StaticMesh* StylizedGuitar = new StaticMesh(MOVABLE);
 		StylizedGuitar->LoadObjectFile("Assets/Meshes/StylizedGuitar.obj", "Assets/Textures/StylizedGuitar.png");
 		StylizedGuitar->transform.scale = glm::vec3(10.0f);
 		StylizedGuitar->transform.rotation = glm::vec3(0.0f, 180.0f, 0.0f);
@@ -150,7 +150,7 @@ struct Speaker : public Scene
 	Speaker() { sceneName = "Speaker"; }
 	void LoadIntoScene(Scene& activeScene) override
 	{
-		Mesh* Speaker = new Mesh(STATIC);
+		StaticMesh* Speaker = new StaticMesh(STATIC);
 		Speaker->LoadObjectFile("Assets/Meshes/Speaker.obj", "Assets/Textures/Speaker.png");
 		Speaker->transform.scale = glm::vec3(0.1f);
 		Speaker->transform.rotation = glm::vec3(0.0f, 180.0f, 0.0f);
