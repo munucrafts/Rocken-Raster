@@ -41,6 +41,7 @@ void AudioSource::LoadAudioFile(std::string audioPath, glm::vec3& origin)
     drwav_free(pSampleData, nullptr);
 
     InitAudioSource();
+    PlayAudioSource();
 }
 
 void AudioSource::SetAudioPitch(float pitch)
@@ -132,6 +133,8 @@ void AudioMaster::InitAudioMaster()
     alcContext = alcCreateContext(alcDevice, nullptr);
     alcMakeContextCurrent(alcContext);
     alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
+
+    sounds = { "Adventure", "Hopeful", "Guitar" };
 }
 
 void AudioMaster::ShutdownAudioMaster()

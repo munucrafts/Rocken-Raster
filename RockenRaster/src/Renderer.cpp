@@ -148,9 +148,9 @@ void Renderer::HandleUI()
 			ImGui::Text("  Sounds");
 			ImGui::Spacing();
 
-			std::string sounds[3] = { "Adventure", "Hopeful", "Guitar" };
+			std::vector<std::string>& sounds = AudioMaster::GetAudioMaster().sounds;
 
-			for (int i = 0; i < sizeof(sounds) / sizeof(std::string); i++)
+			for (int i = 0; i < sounds.size(); i++)
 			{
 				if (ImGui::Button(sounds[i].c_str(), ImVec2(buttonWidth, buttonHeight)))
 				{
@@ -286,7 +286,7 @@ void Renderer::Render(float width, float height, float delta)
 	if (activeScene.entities.empty())
 		return;
 
-	deltaTime = delta / 25.0f;
+	deltaTime = delta / 5.0f;
 
 	ClearBackground();
 	ResetDepthBuffer();

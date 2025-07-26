@@ -157,7 +157,6 @@ struct Speaker : public Scene
 		Speaker->transform.location = glm::vec3(0.0f, -10.0f, -28.0f);
 		Speaker->audioSource = new AudioSource();
 		Speaker->audioSource->LoadAudioFile("Assets/Audio/Hopeful.wav", Speaker->transform.location);
-		Speaker->audioSource->PlayAudioSource();
 		activeScene.entities.push_back(Speaker);
 
 		DirectionalLight* dirLight = new DirectionalLight();

@@ -57,6 +57,9 @@ public:
     void InitAudioMaster();
     void ShutdownAudioMaster();
 
+public:
+    std::vector<std::string> sounds;
+
 private:
     ALCdevice* alcDevice;
     ALCcontext* alcContext;
