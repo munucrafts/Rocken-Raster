@@ -21,9 +21,9 @@ public:
     void DeleteAudioSource();
     void PlayAudioSource() const;
     void LoadAudioFile(const std::string& audioPath, const glm::vec3& origin);
-    void SetAudioPitch(float pitch) const;
-    void SetAudioVolume(float volume) const;
-    void SetAudioAttenuation(float rollOffFactor, float referenceDistance, float maxDistance) const;
+    void SetAudioPitch(const float pitch) const;
+    void SetAudioVolume(const float volume) const;
+    void SetAudioAttenuation(const float rollOffFactor, const float referenceDistance, const float maxDistance) const;
     void SetAudioOrigin(const glm::vec3& origin) const;
     void SetAudioVelocity(const glm::vec3& velocity) const;
     void PauseAudio() const;
@@ -61,10 +61,10 @@ public:
     std::vector<std::string> sounds;
 
 private:
-    ALCdevice* alcDevice = nullptr;
-    ALCcontext* alcContext = nullptr;
+    ALCdevice* alcDevice;
+    ALCcontext* alcContext;
 
 private:
-    AudioMaster() = default;
+    AudioMaster();
     ~AudioMaster() = default;
 };

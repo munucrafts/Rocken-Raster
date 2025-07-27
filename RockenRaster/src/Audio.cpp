@@ -44,17 +44,17 @@ void AudioSource::LoadAudioFile(const std::string& audioPath, const glm::vec3& o
     PlayAudioSource();
 }
 
-void AudioSource::SetAudioPitch(float pitch) const
+void AudioSource::SetAudioPitch(const float pitch) const
 {
     alSourcef(sourceId, AL_PITCH, pitch);
 }
 
-void AudioSource::SetAudioVolume(float volume) const
+void AudioSource::SetAudioVolume(const float volume) const
 {
     alSourcef(sourceId, AL_GAIN, volume);
 }
 
-void AudioSource::SetAudioAttenuation (float rollOffFactor, float referenceDistance, float maxDistance) const
+void AudioSource::SetAudioAttenuation (const float rollOffFactor, const float referenceDistance, const float maxDistance) const
 {
     alSourcef(sourceId, AL_ROLLOFF_FACTOR, rollOffFactor);
     alSourcef(sourceId, AL_REFERENCE_DISTANCE, referenceDistance);
@@ -146,4 +146,10 @@ void AudioMaster::ShutdownAudioMaster()
 
     alcContext = nullptr;
     alcDevice = nullptr;
+}
+
+AudioMaster::AudioMaster()
+{
+    alcDevice = nullptr;
+    alcContext = nullptr;
 }
