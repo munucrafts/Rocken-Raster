@@ -392,7 +392,7 @@ void Renderer::FlagSceneUpdate()
 	sceneJustUpdated = true;
 }
 
-uint32_t Renderer::ColorToRGBA(const glm::vec4& color)
+uint32_t Renderer::ColorToRGBA(const glm::vec4& color) const
 {
 	glm::vec4 clampedColor = 255.0f * glm::clamp(color, glm::vec4(0.0f), glm::vec4(1.0f));
 	uint8_t r = (uint8_t)clampedColor.x;
@@ -403,7 +403,7 @@ uint32_t Renderer::ColorToRGBA(const glm::vec4& color)
 	return result;
 }
 
-float Renderer::GetSignedTriangleArea(const glm::vec2& a, const glm::vec2& b, const glm::vec2& p)
+float Renderer::GetSignedTriangleArea(const glm::vec2& a, const glm::vec2& b, const glm::vec2& p) const
 {
 	glm::vec2 ab = b - a;
 	glm::vec2 ap = p - a;
@@ -411,7 +411,7 @@ float Renderer::GetSignedTriangleArea(const glm::vec2& a, const glm::vec2& b, co
 	return glm::dot(ap, abPerp) / 2.0f;
 }
 
-bool Renderer::InsideTriangle(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c, const glm::vec2& p, glm::vec3& weights)
+bool Renderer::InsideTriangle(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c, const glm::vec2& p, glm::vec3& weights) const
 {
 	float areaABP = GetSignedTriangleArea(a, b, p);
 	float areaBCP = GetSignedTriangleArea(b, c, p);
@@ -428,7 +428,7 @@ bool Renderer::InsideTriangle(const glm::vec2& a, const glm::vec2& b, const glm:
 	return areaABP >= 0.0f && areaBCP >= 0.0f && areaCAP >= 0.0f && sumArea > 0.0f;
 }
 
-glm::vec3 Renderer::NDCToPixel(const glm::vec3& q)
+glm::vec3 Renderer::NDCToPixel(const glm::vec3& q) const
 {
 	glm::vec3 p = q * 0.5f + 0.5f;
 	p = p * glm::vec3(screenResolution, 1.0f);
@@ -469,14 +469,14 @@ glm::vec4 Renderer::WorldToClip(const glm::vec3& point, const glm::mat4& model, 
 	return clip;
 }
 
-bool Renderer::PointOutsideClipSpace(const glm::vec4& point)
+bool Renderer::PointOutsideClipSpace(const glm::vec4& point) const
 {
 	return ( point.x < -point.w || point.x > point.w ||
 			 point.y < -point.w || point.y > point.w ||
 			 point.z < -point.w || point.z > point.w );
 }
 
-glm::mat4 Renderer::ModelToWorld(const Transform& objectTransform)
+glm::mat4 Renderer::ModelToWorld(const Transform& objectTransform) const
 {
 	glm::mat4 model = glm::mat4(1.0f);
 
@@ -513,7 +513,7 @@ void Renderer::DrawPixel(const glm::vec2& pixelLoc, const glm::vec4& color)
 		frameBuffer[x + y * (int)screenResolution.x] = ColorToRGBA(color);
 }
 
-glm::vec4 Renderer::GetColorBasedOnViewMode(const StaticMesh* mesh, const Triangle& tri, const glm::vec2& texCoords, const float depthAtPixel, const glm::vec3& interpNormal)
+glm::vec4 Renderer::GetColorBasedOnViewMode(const StaticMesh* mesh, const Triangle& tri, const glm::vec2& texCoords, const float depthAtPixel, const glm::vec3& interpNormal) const
 {
 	switch (viewMode)
 	{
@@ -551,7 +551,7 @@ void Renderer::ResetDepthBuffer()
 	std::fill(depthBuffer.begin(), depthBuffer.end(), FLT_MAX);
 }
 
-BoundingBox Renderer::GetTriangleBoundingBox(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c)
+BoundingBox Renderer::GetTriangleBoundingBox(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c) const
 {
 	int minX = std::max(0, (int)std::floor(std::min({ a.x, b.x, c.x })));
 	int maxX = std::min((int)screenResolution.x, (int)std::ceil(std::max({ a.x, b.x, c.x })));
@@ -562,7 +562,7 @@ BoundingBox Renderer::GetTriangleBoundingBox(const glm::vec3& a, const glm::vec3
 	return { glm::vec2(minX, maxX), glm::vec2(minY, maxY)};
 }
 
-const std::shared_ptr<Walnut::Image>& Renderer::GetFinalImage()
+const std::shared_ptr<Walnut::Image>& Renderer::GetFinalImage() const
 {
 	return finalImage;
 }
