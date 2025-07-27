@@ -7,7 +7,7 @@ ExponentialFog::ExponentialFog()
 	mobility = STATIC;
 }
 
-float ExponentialFog::CalculateFogFactor(float nearClip, float farClip, float pixelDepth)
+float ExponentialFog::CalculateFogFactor(const float nearClip, const float farClip, const float pixelDepth)
 {
 	float linearDepth = (2.0f * nearClip * farClip) / (farClip + nearClip - pixelDepth * (farClip - nearClip));
 	float fogCoord = glm::clamp((linearDepth - falloffDistance) / (farClip - falloffDistance), 0.0f, 1.0f);

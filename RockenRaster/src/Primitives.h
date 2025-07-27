@@ -9,7 +9,7 @@
 #include "../../Walnut/vendor/stb_image/stb_image.h"
 #include "Audio.h"
 
-static glm::vec4 RandomColor()
+static const glm::vec4 RandomColor()
 {
 	static std::mt19937 rng(std::random_device{}());
 	static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
@@ -85,11 +85,11 @@ private:
 
 public:
 	uint8_t* texData = nullptr;
-	void LoadTextureFile(std::string& texPath)
+	void LoadTextureFile(const std::string& texPath)
 	{
 		texData = stbi_load(texPath.c_str(), &texWidth, &texHeight, &channels, 4);
 	}
-	glm::vec4 SampleTexture(glm::vec2& uv)
+	glm::vec4 SampleTexture(const glm::vec2& uv) const 
 	{
 		if (!texData) return glm::vec4(1.0f);
 
@@ -131,7 +131,7 @@ struct StaticMesh : public Entity
 
 	bool isMoving = false;
 
-	virtual void LoadObjectFile(std::string objPath, std::string texPath)
+	virtual void LoadObjectFile(const std::string& objPath, const std::string& texPath)
 	{
 		std::ifstream input(objPath);
 		if (!input.is_open())

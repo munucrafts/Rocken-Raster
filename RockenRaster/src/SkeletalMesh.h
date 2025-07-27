@@ -7,9 +7,10 @@ struct SkeletalMesh : public StaticMesh
 public:
 	SkeletalMesh();
 	~SkeletalMesh() = default;
-	void LoadObjectFile(std::string objPath, std::string texPath) override;
-	void LoadAnimationFile(std::string animPath);
-	void PlayAnimation();
+
+	void LoadObjectFile(const std::string& objPath, const std::string& texPath) override;
+	void LoadAnimationFile(const std::string& animPath);
+	void PlayAnimation(const float deltaTime);
 
 public:
 	bool animate;

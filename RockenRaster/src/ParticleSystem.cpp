@@ -6,7 +6,7 @@ ParticleSystem::ParticleSystem()
     isMoving = true;
 }
 
-void ParticleSystem::EmitParticles(float deltaTime)
+void ParticleSystem::EmitParticles(const float deltaTime)
 {
     // Note for Sarthak - Will write emit fucntionality later.
     if (particles.size() != particlesProps.particleCount)
@@ -16,7 +16,7 @@ void ParticleSystem::EmitParticles(float deltaTime)
     }
 }
 
-void Particle::ResetParticle(ParticleProperties& props)
+void Particle::ResetParticle(const ParticleProperties& props)
 {
     active = true;
 }

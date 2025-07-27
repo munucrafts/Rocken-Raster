@@ -8,7 +8,7 @@ public:
 	virtual ~Fog() = default;
 
 public:
-	float fogDensity;
+	float fogDensity = 0.0f;
 };
 
 class ExponentialFog : public Fog
@@ -16,8 +16,8 @@ class ExponentialFog : public Fog
 public:
 	ExponentialFog();
 	virtual ~ExponentialFog() = default;
-	float CalculateFogFactor(float nearClip, float farClip, float pixelDepth);
+	float CalculateFogFactor(const float nearClip, const float farClip, const float pixelDepth);
 
 public:
-	float falloffDistance;
+	float falloffDistance = 0.0f;
 };

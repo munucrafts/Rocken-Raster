@@ -3,7 +3,7 @@
 #include "Scenes.h"
 #include "Light.h"
 
-void Renderer::InitRenderer()
+Renderer::Renderer()
 {
 	firstFrame = true;
 	frameCount = 0;
@@ -17,7 +17,10 @@ void Renderer::InitRenderer()
 	camera.transform.location = glm::vec3(0.0f, 0.0f, 13.0f);
 	atmFog = nullptr;
 	fogFactor = 0.0f;
+}
 
+void Renderer::InitRenderer()
+{
 	StylizedGuitar* stylizedGuitar = new StylizedGuitar();
 	Windmill* windmill = new Windmill();
 	Space* space = new Space();
@@ -180,86 +183,6 @@ void Renderer::HandleUI()
 	ImGui::End();
 }
 
-void Renderer::RenderPixels(StaticMesh* mesh, Triangle& tri, glm::vec3& pixelA, glm::vec3& pixelB, glm::vec3& pixelC, int minX, int minY, int maxX, int maxY)
-{
-	for (int y = minY; y <= maxY; y++)
-	{
-		for (int x = minX; x <= maxX; x++)
-		{
-			glm::vec3 weights;
-
-			if (InsideTriangle((glm::vec2)pixelA, (glm::vec2)pixelB, (glm::vec2)pixelC, glm::vec2(x, y), weights))
-			{
-				glm::vec3 abcDepths = glm::vec3(pixelA.z, pixelB.z, pixelC.z);
-				float pixelDepth = 1.0f / glm::dot(1.0f / abcDepths, weights);
-				int pixelIndex = x + y * (int)screenResolution.x;
-
-				if (pixelIndex < 0 || pixelIndex >= depthBuffer.size())
-					continue;
-
-				if (pixelDepth <= depthBuffer[pixelIndex])
-				{
-					depthBuffer[pixelIndex] = pixelDepth;
-					glm::vec2 texCoords;
-					glm::vec3 normal;
-
-					if (projectionType == PERSPECTIVE)
-					{
-						glm::vec2 uv0 = tri.vertices[0].uv / pixelA.z;
-						glm::vec2 uv1 = tri.vertices[1].uv / pixelB.z;
-						glm::vec2 uv2 = tri.vertices[2].uv / pixelC.z;
-						glm::vec2 uvInterp = uv0 * weights.x + uv1 * weights.y + uv2 * weights.z;
-
-						glm::vec3 nor0 = tri.vertices[0].normal / pixelA.z;
-						glm::vec3 nor1 = tri.vertices[1].normal / pixelB.z;
-						glm::vec3 nor2 = tri.vertices[2].normal / pixelC.z;
-						glm::vec3 norInterp = nor0 * weights.x + nor1 * weights.y + nor2 * weights.z;
-
-						float invZ = weights.x / pixelA.z + weights.y / pixelB.z + weights.z / pixelC.z;
-
-						texCoords = uvInterp / invZ;
-						normal = norInterp / invZ;
-					}
-					else if (projectionType == ORTHOGRAPHIC)
-					{
-						texCoords = tri.vertices[0].uv * weights.x +
-							tri.vertices[1].uv * weights.y +
-							tri.vertices[2].uv * weights.z;
-
-						normal = tri.vertices[0].normal * weights.x +
-							tri.vertices[1].normal * weights.y +
-							tri.vertices[2].normal * weights.z;
-					}
-
-					normal = glm::normalize(normal);
-					float accLightIntensity = 1.0f;
-					glm::vec4 finalColor = GetColorBasedOnViewMode(mesh, tri, texCoords, pixelDepth, normal);
-
-					if (viewMode == LIT)
-					{
-						for (Entity* light : activeScene.entities)
-						{
-							if (DirectionalLight* direcLight = dynamic_cast<DirectionalLight*>(light))
-							{
-								glm::vec3 lightDir = glm::normalize(direcLight->direction);
-								accLightIntensity += glm::clamp(glm::dot(normal, -lightDir), 0.0f, 1.0f) * direcLight->intensity;
-							}
-						}
-
-						if (atmFog)
-						{
-							fogFactor = atmFog->CalculateFogFactor(nearClip, farClip, pixelDepth);
-							finalColor = glm::mix(finalColor, activeScene.sceneSkyColor.topSky, fogFactor);
-						}
-					}
-
-					DrawPixel(glm::vec2(x, y), accLightIntensity * finalColor);
-				}
-			}
-		}
-	}
-}
-
 void Renderer::Render(float width, float height, float delta)
 {
 	if (finalImage)
@@ -373,7 +296,82 @@ void Renderer::Render(float width, float height, float delta)
 				int minPixelY = (int)box.minMaxY.x;
 				int maxPixelY = (int)box.minMaxY.y;
 
-				RenderPixels(mesh, tri, pixelA, pixelB, pixelC, minPixelX, minPixelY, maxPixelX, maxPixelY);
+				for (int y = minPixelY; y <= maxPixelY; y++)
+				{
+					for (int x = minPixelX; x <= maxPixelX; x++)
+					{
+						glm::vec3 weights;
+
+						if (InsideTriangle((glm::vec2)pixelA, (glm::vec2)pixelB, (glm::vec2)pixelC, glm::vec2(x, y), weights))
+						{
+							glm::vec3 abcDepths = glm::vec3(pixelA.z, pixelB.z, pixelC.z);
+							float pixelDepth = 1.0f / glm::dot(1.0f / abcDepths, weights);
+							int pixelIndex = x + y * (int)screenResolution.x;
+
+							if (pixelIndex < 0 || pixelIndex >= depthBuffer.size())
+								continue;
+
+							if (pixelDepth <= depthBuffer[pixelIndex])
+							{
+								depthBuffer[pixelIndex] = pixelDepth;
+								glm::vec2 texCoords;
+								glm::vec3 normal;
+
+								if (projectionType == PERSPECTIVE)
+								{
+									glm::vec2 uv0 = tri.vertices[0].uv / pixelA.z;
+									glm::vec2 uv1 = tri.vertices[1].uv / pixelB.z;
+									glm::vec2 uv2 = tri.vertices[2].uv / pixelC.z;
+									glm::vec2 uvInterp = uv0 * weights.x + uv1 * weights.y + uv2 * weights.z;
+
+									glm::vec3 nor0 = tri.vertices[0].normal / pixelA.z;
+									glm::vec3 nor1 = tri.vertices[1].normal / pixelB.z;
+									glm::vec3 nor2 = tri.vertices[2].normal / pixelC.z;
+									glm::vec3 norInterp = nor0 * weights.x + nor1 * weights.y + nor2 * weights.z;
+
+									float invZ = weights.x / pixelA.z + weights.y / pixelB.z + weights.z / pixelC.z;
+
+									texCoords = uvInterp / invZ;
+									normal = norInterp / invZ;
+								}
+								else if (projectionType == ORTHOGRAPHIC)
+								{
+									texCoords = tri.vertices[0].uv * weights.x +
+										tri.vertices[1].uv * weights.y +
+										tri.vertices[2].uv * weights.z;
+
+									normal = tri.vertices[0].normal * weights.x +
+										tri.vertices[1].normal * weights.y +
+										tri.vertices[2].normal * weights.z;
+								}
+
+								normal = glm::normalize(normal);
+								float accLightIntensity = 1.0f;
+								glm::vec4 finalColor = GetColorBasedOnViewMode(mesh, tri, texCoords, pixelDepth, normal);
+
+								if (viewMode == LIT)
+								{
+									for (Entity* light : activeScene.entities)
+									{
+										if (DirectionalLight* direcLight = dynamic_cast<DirectionalLight*>(light))
+										{
+											glm::vec3 lightDir = glm::normalize(direcLight->direction);
+											accLightIntensity += glm::clamp(glm::dot(normal, -lightDir), 0.0f, 1.0f) * direcLight->intensity;
+										}
+									}
+
+									if (atmFog)
+									{
+										fogFactor = atmFog->CalculateFogFactor(nearClip, farClip, pixelDepth);
+										finalColor = glm::mix(finalColor, activeScene.sceneSkyColor.topSky, fogFactor);
+									}
+								}
+
+								DrawPixel(glm::vec2(x, y), accLightIntensity * finalColor);
+							}
+						}
+					}
+				}
 			}
 		}
 	}
@@ -394,7 +392,7 @@ void Renderer::FlagSceneUpdate()
 	sceneJustUpdated = true;
 }
 
-uint32_t Renderer::ColorToRGBA(glm::vec4& color)
+uint32_t Renderer::ColorToRGBA(const glm::vec4& color)
 {
 	glm::vec4 clampedColor = 255.0f * glm::clamp(color, glm::vec4(0.0f), glm::vec4(1.0f));
 	uint8_t r = (uint8_t)clampedColor.x;
@@ -405,7 +403,7 @@ uint32_t Renderer::ColorToRGBA(glm::vec4& color)
 	return result;
 }
 
-float Renderer::GetSignedTriangleArea(glm::vec2& a, glm::vec2& b, glm::vec2& p)
+float Renderer::GetSignedTriangleArea(const glm::vec2& a, const glm::vec2& b, const glm::vec2& p)
 {
 	glm::vec2 ab = b - a;
 	glm::vec2 ap = p - a;
@@ -413,7 +411,7 @@ float Renderer::GetSignedTriangleArea(glm::vec2& a, glm::vec2& b, glm::vec2& p)
 	return glm::dot(ap, abPerp) / 2.0f;
 }
 
-bool Renderer::InsideTriangle(glm::vec2& a, glm::vec2& b, glm::vec2& c, glm::vec2& p, glm::vec3& weights)
+bool Renderer::InsideTriangle(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c, const glm::vec2& p, glm::vec3& weights)
 {
 	float areaABP = GetSignedTriangleArea(a, b, p);
 	float areaBCP = GetSignedTriangleArea(b, c, p);
@@ -430,14 +428,14 @@ bool Renderer::InsideTriangle(glm::vec2& a, glm::vec2& b, glm::vec2& c, glm::vec
 	return areaABP >= 0.0f && areaBCP >= 0.0f && areaCAP >= 0.0f && sumArea > 0.0f;
 }
 
-glm::vec3 Renderer::NDCToPixel(glm::vec3& q)
+glm::vec3 Renderer::NDCToPixel(const glm::vec3& q)
 {
 	glm::vec3 p = q * 0.5f + 0.5f;
 	p = p * glm::vec3(screenResolution, 1.0f);
 	return p;
 }
 
-glm::vec4 Renderer::WorldToClip(glm::vec3& point, glm::mat4& model, StaticMesh* currentMesh)
+glm::vec4 Renderer::WorldToClip(const glm::vec3& point, const glm::mat4& model, StaticMesh* currentMesh)
 {
 	static glm::mat4 cachedViewProj;
 
@@ -471,14 +469,14 @@ glm::vec4 Renderer::WorldToClip(glm::vec3& point, glm::mat4& model, StaticMesh* 
 	return clip;
 }
 
-bool Renderer::PointOutsideClipSpace(glm::vec4& point)
+bool Renderer::PointOutsideClipSpace(const glm::vec4& point)
 {
 	return ( point.x < -point.w || point.x > point.w ||
 			 point.y < -point.w || point.y > point.w ||
 			 point.z < -point.w || point.z > point.w );
 }
 
-glm::mat4 Renderer::ModelToWorld(Transform& objectTransform)
+glm::mat4 Renderer::ModelToWorld(const Transform& objectTransform)
 {
 	glm::mat4 model = glm::mat4(1.0f);
 
@@ -506,7 +504,7 @@ void Renderer::ClearBackground()
 	}
 }
 
-void Renderer::DrawPixel(glm::vec2& pixelLoc, glm::vec4& color)
+void Renderer::DrawPixel(const glm::vec2& pixelLoc, const glm::vec4& color)
 {
 	int x = (int)pixelLoc.x;
 	int y = (int)pixelLoc.y;
@@ -515,7 +513,7 @@ void Renderer::DrawPixel(glm::vec2& pixelLoc, glm::vec4& color)
 		frameBuffer[x + y * (int)screenResolution.x] = ColorToRGBA(color);
 }
 
-glm::vec4 Renderer::GetColorBasedOnViewMode(StaticMesh* mesh, Triangle& tri, glm::vec2& texCoords, float depthAtPixel, glm::vec3& interpNormal)
+glm::vec4 Renderer::GetColorBasedOnViewMode(const StaticMesh* mesh, const Triangle& tri, const glm::vec2& texCoords, const float depthAtPixel, const glm::vec3& interpNormal)
 {
 	switch (viewMode)
 	{
@@ -553,7 +551,7 @@ void Renderer::ResetDepthBuffer()
 	std::fill(depthBuffer.begin(), depthBuffer.end(), FLT_MAX);
 }
 
-BoundingBox Renderer::GetTriangleBoundingBox(glm::vec3& a, glm::vec3& b, glm::vec3& c)
+BoundingBox Renderer::GetTriangleBoundingBox(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c)
 {
 	int minX = std::max(0, (int)std::floor(std::min({ a.x, b.x, c.x })));
 	int maxX = std::min((int)screenResolution.x, (int)std::ceil(std::max({ a.x, b.x, c.x })));
@@ -564,7 +562,7 @@ BoundingBox Renderer::GetTriangleBoundingBox(glm::vec3& a, glm::vec3& b, glm::ve
 	return { glm::vec2(minX, maxX), glm::vec2(minY, maxY)};
 }
 
-std::shared_ptr<Walnut::Image>& Renderer::GetFinalImage()
+const std::shared_ptr<Walnut::Image>& Renderer::GetFinalImage()
 {
 	return finalImage;
 }

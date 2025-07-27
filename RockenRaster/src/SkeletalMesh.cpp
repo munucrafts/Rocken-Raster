@@ -6,14 +6,14 @@ SkeletalMesh::SkeletalMesh()
 	animate = false;
 }
 
-void SkeletalMesh::LoadObjectFile(std::string objPath, std::string texPath)
+void SkeletalMesh::LoadObjectFile(const std::string& objPath, const std::string& texPath)
 {
 }
 
-void SkeletalMesh::LoadAnimationFile(std::string animPath)
+void SkeletalMesh::LoadAnimationFile(const std::string& animPath)
 {
 }
 
-void SkeletalMesh::PlayAnimation()
+void SkeletalMesh::PlayAnimation(const float deltaTime)
 {
 }

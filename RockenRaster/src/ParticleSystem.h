@@ -25,7 +25,7 @@ struct Particle
 	float lifeRemaining;
 	bool active;
 
-	void ResetParticle(ParticleProperties& particleProps);
+	void ResetParticle(const ParticleProperties& particleProps);
 };
 
 class ParticleSystem : public StaticMesh
@@ -33,7 +33,7 @@ class ParticleSystem : public StaticMesh
 public:
 	ParticleSystem();
 	~ParticleSystem() = default;
-	void EmitParticles(float deltaTime);
+	void EmitParticles(const float deltaTime);
 
 public:
 	ParticleProperties particlesProps;

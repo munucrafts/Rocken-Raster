@@ -22,19 +22,19 @@ public:
 	bool isMoving = false;
 
 private:
-	void RotateCamera(float deltaTime)
+	void RotateCamera(const float deltaTime)
 	{
 		transform.rotation += speedComp.angularSpeed * deltaTime;
 		transform.rotation.x = glm::clamp(transform.rotation.x, -89.0f, 89.0f);
 		UpdateDirectionVectors();
 		isMoving = true;
 	};
-	void MoveCamera(float deltaTime)
+	void MoveCamera(const float deltaTime)
 	{
 		transform.location += speedComp.linearSpeed * deltaTime;
 		isMoving = true;
 	};
-	void UpdateCameraSpeed(float step)
+	void UpdateCameraSpeed(const float step)
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		if (io.MouseWheel == 0.0f) return;
@@ -65,13 +65,13 @@ private:
 		right = glm::normalize(glm::cross(forward, glm::vec3(0.0f, 1.0f, 0.0f)));
 		up = glm::normalize(glm::cross(right, forward));
 	};
-	void PanCamera(float deltaTime)
+	void PanCamera(const float deltaTime)
 	{
 		transform.location.x += speedComp.linearSpeed.x * deltaTime;
 		transform.location.y += speedComp.linearSpeed.y * deltaTime;
 		isMoving = true;
 	};
-	void OrthographicZoom(float step) 
+	void OrthographicZoom(const float step)
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		if (io.MouseWheel == 0.0f) return;
@@ -91,14 +91,14 @@ private:
 	};
 
 public:
-	glm::mat4 GetViewMatrix(bool recomputeView)
+	glm::mat4 GetViewMatrix(const bool recomputeView)
 	{
 		if (isMoving || recomputeView)
 			viewMatrix = glm::lookAt(transform.location, transform.location + forward, up);
 
 		return viewMatrix;
 	}; 
-	void NavigateCamera(float deltaTime, Projection& projType)
+	void NavigateCamera(const float deltaTime, const Projection& projType)
 	{
 		AudioListener::GetListener().SetListenerLocation(transform.location);
 		AudioListener::GetListener().SetListenerVelocity(speedComp.linearSpeed);

@@ -8,7 +8,7 @@
 // Audio Source Class --------------------------------------------------------------------
 
 
-void AudioSource::PlayAudioSource()
+void AudioSource::PlayAudioSource() const
 {
     ALint state;
     alGetSourcei(sourceId, AL_SOURCE_STATE, &state);
@@ -20,7 +20,7 @@ void AudioSource::PlayAudioSource()
     }
 }
 
-void AudioSource::LoadAudioFile(std::string audioPath, glm::vec3& origin)
+void AudioSource::LoadAudioFile(const std::string& audioPath, const glm::vec3& origin)
 {
     unsigned int channels;
     unsigned int sampleRate;
@@ -44,39 +44,39 @@ void AudioSource::LoadAudioFile(std::string audioPath, glm::vec3& origin)
     PlayAudioSource();
 }
 
-void AudioSource::SetAudioPitch(float pitch)
+void AudioSource::SetAudioPitch(float pitch) const
 {
     alSourcef(sourceId, AL_PITCH, pitch);
 }
 
-void AudioSource::SetAudioVolume(float volume)
+void AudioSource::SetAudioVolume(float volume) const
 {
     alSourcef(sourceId, AL_GAIN, volume);
 }
 
-void AudioSource::SetAudioAttenuation(float rollOffFactor, float referenceDistance, float maxDistance)
+void AudioSource::SetAudioAttenuation (float rollOffFactor, float referenceDistance, float maxDistance) const
 {
     alSourcef(sourceId, AL_ROLLOFF_FACTOR, rollOffFactor);
     alSourcef(sourceId, AL_REFERENCE_DISTANCE, referenceDistance);
     alSourcef(sourceId, AL_MAX_DISTANCE, maxDistance);
 }
 
-void AudioSource::SetAudioOrigin(glm::vec3& origin)
+void AudioSource::SetAudioOrigin(const glm::vec3& origin) const
 {
     alSource3f(sourceId, AL_POSITION, origin.x, origin.y, origin.z);
 }
 
-void AudioSource::SetAudioVelocity(glm::vec3& velocity)
+void AudioSource::SetAudioVelocity(const glm::vec3& velocity) const
 {
     alSource3f(sourceId, AL_VELOCITY, velocity.x, velocity.y, velocity.z);
 }
 
-void AudioSource::PauseAudio()
+void AudioSource::PauseAudio() const
 {
     alSourcePause(sourceId);
 }
 
-void AudioSource::ResumeAudio()
+void AudioSource::ResumeAudio() const
 {
     alSourcePlay(sourceId);
 }
@@ -108,12 +108,12 @@ AudioListener& AudioListener::GetListener()
     return audioListener;
 }
 
-void AudioListener::SetListenerLocation(glm::vec3& location)
+void AudioListener::SetListenerLocation(const glm::vec3& location) const
 {
     alListener3f(AL_POSITION, location.x, location.y, location.z);
 }
 
-void AudioListener::SetListenerVelocity(glm::vec3& velocity)
+void AudioListener::SetListenerVelocity(const glm::vec3& velocity) const
 {
     alListener3f(AL_VELOCITY, velocity.x, velocity.y, velocity.z);
 }
