@@ -102,6 +102,7 @@ public:
 	{
 		AudioListener::GetListener().SetListenerLocation(transform.location);
 		AudioListener::GetListener().SetListenerVelocity(speedComp.linearSpeed);
+		AudioListener::GetListener().SetListenerOrientation(forward, up);
 
 		isMoving = false;
 
