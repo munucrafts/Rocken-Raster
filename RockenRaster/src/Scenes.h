@@ -4,6 +4,7 @@
 #include "Light.h"
 #include "Fog.h"
 #include "Audio.h"
+#include "ClothMesh.h"
 
 struct Windmill : public Scene
 {
