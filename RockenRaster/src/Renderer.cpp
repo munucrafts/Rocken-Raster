@@ -257,13 +257,7 @@ void Renderer::Render(float width, float height, float delta)
 			{
 				mesh->isMoving = glm::length(mesh->speedComp.linearSpeed) + glm::length(mesh->speedComp.angularSpeed) + glm::length(mesh->speedComp.scalingSpeed) > 0;
 
-				if (ClothMesh* cloth = dynamic_cast<ClothMesh*>(mesh))
-				{
-					cloth->SimulateCloth(deltaTime);
-					modelWorld = ModelToWorld(cloth->transform);
-					cloth->bakedTransform = modelWorld;
-				}
-				else if (firstFrame || mesh->isMoving || sceneJustUpdated)
+				if (firstFrame || mesh->isMoving || sceneJustUpdated)
 				{
 					modelWorld = ModelToWorld(mesh->transform);
 					mesh->bakedTransform = modelWorld;
