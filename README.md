@@ -8,6 +8,10 @@
 * **Rocken** has a basic **Audio System Implementation** as well.
 * The **Walnut Framework** is used for basic operations such as **Window Creation**, **UI**, and the **GLM Math Library**.
 
+## 📺 **Demo**
+
+![Rocken Raster Demo](RockenRaster/Assets/Others/demogif.gif)
+
 ## 🐉 **Available Features**
 
 - Custom **OBJ Mesh** and **Texture Loading**  
@@ -24,7 +28,7 @@
 - **User Interface** tabs and buttons to **Load** and **Configure** different scenes in **Run-time**
 - **OpenAL** based **Audio System** with **Source** and **Listener** components
 
-## 🚧 Planned Features
+## 🚧 **Planned Features**
 
 - **Skeletal Animation** and **Skinning**
 - **Multi-threading** for faster rendering
