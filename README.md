@@ -49,3 +49,7 @@
    - Camera → Screen = **–Z**
 
 - **Triangle Winding Convention**: **Counter Clockwise (CCW)**
+
+## 🤖 **How to Build**
+
+- Project Directory → Scripts → Run Setup.bat
