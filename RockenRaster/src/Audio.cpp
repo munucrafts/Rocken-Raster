@@ -138,6 +138,7 @@ void AudioMaster::InitAudioMaster()
 {
     alcDevice = alcOpenDevice(nullptr);
     alcContext = alcCreateContext(alcDevice, nullptr);
+
     alcMakeContextCurrent(alcContext);
     alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
 
