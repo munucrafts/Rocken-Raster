@@ -8,10 +8,6 @@
 * **Rocken** has a basic **Audio System Implementation** as well.
 * The **Walnut Framework** is used for basic operations such as **Window Creation**, **UI**, and the **GLM Math Library**.
 
-## 📖 **Screenshot**
-
-![Rocken Raster Screenshot](RockenRaster/Assets/Others/Screenshot.png)
-
 ## 📺 **Demo**
 
 ![Rocken Raster Demo](RockenRaster/Assets/Others/demogif.gif)
@@ -32,10 +28,14 @@
 - **User Interface** tabs and buttons to **Load** and **Configure** different **Scenes** in **Run-time**
 - **OpenAL** based **Audio System** with **Source** and **Listener** components
 
+## 🛠️ **Currently Working On**
+
+- **Multi-threading** for faster rendering
+- Branch - [multi-threading](https://github.com/munucrafts/Rocken-Raster/tree/multi-threading)
+
 ## 🚧 **Planned Features**
 
 - **Skeletal Animation** and **Skinning**
-- **Multi-threading** for faster rendering
 - **DLSS-like Super-Resolution**
 - **Physically Based Rendering (PBR)**
 - **Ray-Traced Shadows**
