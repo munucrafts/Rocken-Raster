@@ -5,7 +5,7 @@ IncludeDir["OpenAL"] = "%{wks.location}/Walnut/vendor/OpenAL/include"
 
    kind "ConsoleApp"
    language "C++"
-   cppdialect "C++17"
+   cppdialect "C++20"
    targetdir "bin/%{cfg.buildcfg}"
    staticruntime "off"
 
@@ -33,9 +33,9 @@ IncludeDir["OpenAL"] = "%{wks.location}/Walnut/vendor/OpenAL/include"
        "OpenAL32"
    }
 
-   postbuildcommands {
-      "{COPY} ../Walnut/vendor/OpenAL/bin/soft_oal.dll %{cfg.targetdir}"
-   }
+   -- postbuildcommands {
+   --    "{COPY} ../Walnut/vendor/OpenAL/bin/soft_oal.dll %{cfg.targetdir}"
+   -- }
 
    targetdir ("../bin/" .. outputdir .. "/%{prj.name}")
    objdir ("../bin-int/" .. outputdir .. "/%{prj.name}")
