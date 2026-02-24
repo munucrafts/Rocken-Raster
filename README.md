@@ -31,7 +31,6 @@
 ## 🛠️ **Currently Working On**
 
 - **Multi-threading** for faster rendering
-- Branch - [multi-threading](https://github.com/munucrafts/Rocken-Raster/tree/multi-threading)
 
 ## 🚧 **Planned Features**
 
