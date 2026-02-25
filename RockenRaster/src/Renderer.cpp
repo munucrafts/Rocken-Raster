@@ -230,7 +230,6 @@ void Renderer::Render(int width, int height, float delta)
 				entity->audioSource->SetAudioOrigin(entity->transform.location);
 				entity->audioSource->SetAudioVelocity(entity->speedComp.linearSpeed);
 			}
-
 		}
 
 		if (!atmFog) atmFog = dynamic_cast<ExponentialFog*>(entity);
@@ -294,6 +293,18 @@ void Renderer::Render(int width, int height, float delta)
 				int minPixelY = (int)box.minMaxY.x;
 				int maxPixelY = (int)box.minMaxY.y;
 
+				float invZ0 = 1.0f / pixelA.z;
+				float invZ1 = 1.0f / pixelB.z;
+				float invZ2 = 1.0f / pixelC.z;
+
+				glm::vec2 uv0_Z = tri.vertices[0].uv * invZ0;
+				glm::vec2 uv1_Z = tri.vertices[1].uv * invZ1;
+				glm::vec2 uv2_Z = tri.vertices[2].uv * invZ2;
+
+				glm::vec3 nor0_Z = tri.vertices[0].normal * invZ0;
+				glm::vec3 nor1_Z = tri.vertices[1].normal * invZ1;
+				glm::vec3 nor2_Z = tri.vertices[2].normal * invZ2;
+
 				for (int y = minPixelY; y <= maxPixelY; y++)
 				{
 					for (int x = minPixelX; x <= maxPixelX; x++)
@@ -317,15 +328,8 @@ void Renderer::Render(int width, int height, float delta)
 
 								if (projectionType == PERSPECTIVE)
 								{
-									glm::vec2 uv0 = tri.vertices[0].uv / pixelA.z;
-									glm::vec2 uv1 = tri.vertices[1].uv / pixelB.z;
-									glm::vec2 uv2 = tri.vertices[2].uv / pixelC.z;
-									glm::vec2 uvInterp = uv0 * weights.x + uv1 * weights.y + uv2 * weights.z;
-
-									glm::vec3 nor0 = tri.vertices[0].normal / pixelA.z;
-									glm::vec3 nor1 = tri.vertices[1].normal / pixelB.z;
-									glm::vec3 nor2 = tri.vertices[2].normal / pixelC.z;
-									glm::vec3 norInterp = nor0 * weights.x + nor1 * weights.y + nor2 * weights.z;
+									glm::vec2 uvInterp = uv0_Z * weights.x + uv1_Z * weights.y + uv2_Z * weights.z;
+									glm::vec3 norInterp = nor0_Z * weights.x + nor1_Z * weights.y + nor2_Z * weights.z;
 
 									float invZ = weights.x / pixelA.z + weights.y / pixelB.z + weights.z / pixelC.z;
 
