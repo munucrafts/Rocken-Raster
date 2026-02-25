@@ -183,7 +183,7 @@ void Renderer::HandleUI()
 	ImGui::End();
 }
 
-void Renderer::Render(float width, float height, float delta)
+void Renderer::Render(int width, int height, float delta)
 {
 	if (finalImage)
 	{
@@ -231,8 +231,6 @@ void Renderer::Render(float width, float height, float delta)
 				entity->audioSource->SetAudioVelocity(entity->speedComp.linearSpeed);
 			}
 
-			if (ParticleSystem* ps = dynamic_cast<ParticleSystem*>(entity))
-				ps->EmitParticles(deltaTime * 0.01f);
 		}
 
 		if (!atmFog) atmFog = dynamic_cast<ExponentialFog*>(entity);
@@ -498,7 +496,7 @@ void Renderer::ClearBackground()
 
 		for (int x = 0; x < screenResolution.x; x++)
 		{
-			int index = x + y * screenResolution.x;
+			int index = x + y * (int)screenResolution.x;
 			frameBuffer[index] = ColorToRGBA(rowColor);
 		}
 	}

@@ -231,6 +231,7 @@ struct SkyColor
 struct Scene
 {
 	virtual void LoadIntoScene(Scene& activeScene) {};
+
 	virtual void UnloadScene()
 	{
 		for (Entity* entity : entities)

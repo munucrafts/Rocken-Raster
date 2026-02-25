@@ -14,7 +14,7 @@ class Renderer
 {
 public:
 	Renderer();
-	void Render(const float width, const float height, const float delta);
+	void Render(const int width, const int height, const float delta);
 	const std::shared_ptr<Walnut::Image>& GetFinalImage() const;
 	void InitRenderer();
 
