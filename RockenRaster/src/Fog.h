@@ -4,7 +4,10 @@
 class Fog : public Entity
 {
 public:
-	Fog() = default;
+	Fog()
+	{
+		entType = FOG;
+	};
 	virtual ~Fog() = default;
 
 public:

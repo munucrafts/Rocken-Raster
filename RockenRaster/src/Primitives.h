@@ -63,6 +63,11 @@ struct SpeedComponent
 	glm::vec3 scalingSpeed = glm::vec3(0.0f);
 };
 
+enum EntityType
+{
+	ENTITY, STATIC_MESH, LIGHT, DIRECTIONAL_LIGHT, FOG, EXPONENTIAL_FOG
+};
+
 struct Entity
 {
 	Entity() = default;
@@ -72,6 +77,7 @@ struct Entity
 	virtual void MoveEntity(float deltaTime) {};
 	virtual void ScaleEntity(float deltaTime) {};
 
+	EntityType entType = ENTITY;
 	Transform transform;
 	SpeedComponent speedComp;
 	Mobility mobility = STATIC;
@@ -115,7 +121,10 @@ struct Material
 
 struct StaticMesh : public Entity
 {
-	StaticMesh() = default;
+	StaticMesh() 
+	{
+		entType = STATIC_MESH;
+	};
 	StaticMesh(Mobility mob)
 	{
 		mobility = mob;
