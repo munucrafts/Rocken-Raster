@@ -1,6 +1,10 @@
-# **Rocken Raster - A CPU Rasterizer**
+<h1 align="center">Rocken Raster - A CPU Rasterizer</h1>
 
-<img align="right" alt="Coding" width="235" src="RockenRaster/Assets/Others/logo.png">
+<p align="center">
+  <img src="RockenRaster/Assets/Others/logo.png" width="260" alt="Rocken Raster Logo">
+</p>
+
+## 🖼️ **Introduction**
 
 * **Rocken Raster** is a **CPU-based Software Rasterizer** designed to render **3D scenes**.
 * I built the **Rasterizer** to learn more about various **Rasterizing** and **Graphics** concepts.
@@ -41,7 +45,7 @@
 - Improved **Clip Space Culling** with **Retriangulation**
 - **Particle System**
 
-## 🖼️ **Rendering Pipeline**
+## 🎨 **Rendering Pipeline**
    - **Model → World → View → Clip → NDC → UV → Pixel**
  
 ## 🧭 **Conventions**
