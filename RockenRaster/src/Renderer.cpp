@@ -225,10 +225,10 @@ void Renderer::Render(int width, int height, float delta)
 			entity->MoveEntity(deltaTime);
 			entity->ScaleEntity(deltaTime);
 
-			if (entity->audioSource)
+			if (AudioSource* as = entity->audioSource)
 			{
-				entity->audioSource->SetAudioOrigin(entity->transform.location);
-				entity->audioSource->SetAudioVelocity(entity->speedComp.linearSpeed);
+				as->SetAudioOrigin(entity->transform.location);
+				as->SetAudioVelocity(entity->speedComp.linearSpeed);
 			}
 		}
 
@@ -338,13 +338,8 @@ void Renderer::Render(int width, int height, float delta)
 								}
 								else if (projectionType == ORTHOGRAPHIC)
 								{
-									texCoords = tri.vertices[0].uv * weights.x +
-										tri.vertices[1].uv * weights.y +
-										tri.vertices[2].uv * weights.z;
-
-									normal = tri.vertices[0].normal * weights.x +
-										tri.vertices[1].normal * weights.y +
-										tri.vertices[2].normal * weights.z;
+									texCoords = tri.vertices[0].uv * weights.x + tri.vertices[1].uv * weights.y + tri.vertices[2].uv * weights.z;
+									normal = tri.vertices[0].normal * weights.x + tri.vertices[1].normal * weights.y + tri.vertices[2].normal * weights.z;
 								}
 
 								normal = glm::normalize(normal);
