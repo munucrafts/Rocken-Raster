@@ -20,33 +20,20 @@
 
 - Custom **OBJ Mesh** and **Texture Loading**  
 - **3D Rasterization** with support for both **Orthographic** and **Perspective projection**  
-- Multiple **Culling Techniques**: **Backface Culling**, **Depth Test Culling**, and **Clip Space Culling**  
+- Multiple **Culling Techniques**: **Back-face Culling**, **Depth Test Culling**, and **Clip Space Culling**  
 - **Scene Creation** with **Multiple Objects**  
 - **Camera Controls** like **Movement**, **Rotation**, **Panning**, **Zooming**, and **Camera Speed**
 - Different **View Modes** such as **Lit**, **Unlit**, **Triangulate**, **Depth**, and **Normal**  
 - **Material System** supporting both **Texture-based** and **Color-based** rendering  
 - Concept of **Static** and **Movable** objects  
-- Automatic **View, Projection, & Transform Baking** for **Camera** and **Entities** for **Optimisations**  
+- Automatic **View, Projection, & Transform Baking** for **Camera** and **Entities** for **Optimizations**  
 - **Exponential Fog** entity that blends with the **Sky Color** based on **Distance** and **Fog Falloff** value
 - A basic **Directional Light** that **Illuminates** meshes from the direction of **Light**
 - **User Interface** tabs and buttons to **Load** and **Configure** different **Scenes** in **Run-time**
 - **OpenAL** based **Audio System** with **Source** and **Listener** components
 
-## 🛠️ **Currently Working On**
-
-- **Multi-threading** for faster rendering
-
-## 🚧 **Planned Features**
-
-- **Skeletal Animation** and **Skinning**
-- **DLSS-like Super-Resolution**
-- **Physically Based Rendering (PBR)**
-- **Ray-Traced Shadows**
-- Improved **Clip Space Culling** with **Retriangulation**
-- **Particle System**
-
 ## 🎨 **Rendering Pipeline**
-   - **Model → World → View → Clip → NDC → UV → Pixel**
+- **Model → World → View → Clip → NDC → UV → Pixel**
  
 ## 🧭 **Conventions**
 
